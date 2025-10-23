@@ -1,0 +1,19 @@
+{
+    "name": "river",
+    "desc": "river_desc",
+    "img": "river.png",
+    "priority": 0,
+    "frame": {
+        "temperature": [0.0, 1.0],
+        "height": [0.0, 1.0],
+        "humidity": [0.0, 1.0],
+        "soil_fertility": [0.0, 1.0]
+    },
+    "frame_modification": {
+        "humidity": [1.0, 1.0],
+        "height": [0.1, 0.3]
+    },
+    "subdata":{
+        "difficulty": 5
+    }
+}

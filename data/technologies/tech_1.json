@@ -1,0 +1,15 @@
+{
+    "id": "base_tech_1",
+    "title": "base_tech_1_title",
+    "desc": "base_tech_1_desc",
+    "icon": "none.png",
+    "cost": {
+        "type_science_0": 5,
+        "type_science_1": 10
+    },
+    "era": "base_tech_1_era",
+    "x": 0,
+    "y": 1,
+    "prerequisites": [],
+    "unlocks": []
+}

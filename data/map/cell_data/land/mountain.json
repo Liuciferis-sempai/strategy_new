@@ -1,0 +1,18 @@
+{
+    "name": "mountain",
+    "desc": "mountain_desc",
+    "img": "mountain.png",
+    "priority": 1,
+    "frame": {
+        "temperature": [0.0, 1.0],
+        "height": [0.65, 1.0],
+        "humidity": [0.0, 1.0],
+        "soil_fertility": [0.0, 1.0]
+    },
+    "frame_modification": {
+        "temperature": [0.1, 0.5]
+    },
+    "subdata":{
+        "difficulty": 5
+    }
+}

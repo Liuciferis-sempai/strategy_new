@@ -1,0 +1,11 @@
+{
+    "id": "build",
+    "desc": "build_desc",
+    "type": "work",
+    "movement_points_cost": "all",
+    "pawn_types": ["any"],
+    "pawn_ids": ["any"],
+    "work_time": 1,
+    "trigger": [{"type": "stand_on_cell", "args": {"cell_has": "scheme"}}, {"type": "compare_inventory", "args": {"target": "target_building_str", "cost_inv": "cost", "pay_inv": "inventory"}}],
+    "result": {"type": "build_scheme", "args": {"target_building_str": "building", "building_coord": [0, 0], "building_fraction": -1}}
+}

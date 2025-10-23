@@ -1,0 +1,14 @@
+{
+    "id": "reciept_1",
+    "desc": "reciept_1_desc",
+    "img": "reciept_1_img.png",
+    "necessary": {
+        "resource_0": 3
+    },
+    "time": 1,
+    "production": {
+        "resource_1": 1,
+        "resource_2": 2
+    },
+    "workbench_types": [{"manufactory": 0}]
+}

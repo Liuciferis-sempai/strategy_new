@@ -1,0 +1,49 @@
+{
+    "name": "manufactory",
+    "desc": "manufactory_desc",
+    "img": "manufactory.png",
+    "level": 0,
+    "max_hp": 300,
+    "max_service": 100,
+    "repair_cost": {
+        "resource_0": 1
+    },
+    "service_cost": {
+        "resource_0": 1
+    },
+    "type": "workbench",
+    "spped_of_work_mod": 1,
+    "max_queue": 2,
+    "queue": [],
+    "storage_type": "dict",
+    "storage": {"input": [], "output": []},
+    "storage_size": {"input": 5, "output": 2},
+    "cost": {
+        "resource_0": 2
+    },
+    "upgrades": {
+        "1": {
+            "cost": {},
+            "effect": []
+        },
+        "2": {
+            "cost": {
+                "resource_0": 2
+            },
+            "effect": [
+                {"type": "change_text",
+                    "args": {
+                        "new_name": "manufactory_with_with_a_water_wheel",
+                        "new_desc": "manufactory_with_with_a_water_wheel_desc",
+                        "new_img": "manufactory_with_with_a_water_wheel.png"
+                    }
+                },
+                {"type": "change_numbers", "args": {"max_hp": 400, "max_service": 150}},
+                {"type": "change_cost", "args": {"repair": {"resource_0": 2}}, "service": {"resource_0": 2}},
+                {"type": "change_type", "args": {"new_type": "workbench_1"}},
+                {"type": "change_storage_type", "args": {"new_type": "list"}},
+                {"type": "change_storage_size", "args": {"new_size": 10}}
+            ]
+        }
+    }
+}

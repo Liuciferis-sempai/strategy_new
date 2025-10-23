@@ -1,0 +1,15 @@
+{
+    "name": "hills",
+    "desc": "hills_desc",
+    "img": "hills.png",
+    "priority": 1,
+    "frame": {
+        "temperature": [0.0, 1.0],
+        "height": [0.55, 0.75],
+        "humidity": [0.0, 1.0],
+        "soil_fertility": [0.0, 1.0]
+    },
+    "subdata":{
+        "difficulty": 1.25
+    }
+}

@@ -1,0 +1,47 @@
+import pygame as py
+
+py.init()
+py.font.init()
+
+import assets.root as root
+from assets.functions import update_gui
+
+def main():
+    clock = py.time.Clock()
+
+    running = True
+    while running:
+        for event in py.event.get():
+            if event.type == py.QUIT:
+                running = False
+            elif event.type == py.VIDEORESIZE:
+                root.window_size = event.w, event.h
+                root.screen = py.display.set_mode(root.window_size, py.RESIZABLE)
+                root.handler.update_positions()
+                update_gui()
+            elif event.type == py.MOUSEMOTION:
+                root.handler.input_processor.process_mousemotion(event)
+            elif event.type == py.MOUSEBUTTONDOWN:
+                root.handler.input_processor.process_mousebuttondown(event)
+            elif event.type == py.KEYDOWN:
+                root.handler.input_processor.process_keydown(event)
+            elif event.type == py.KEYUP:
+                root.handler.input_processor.process_keyup(event)
+            elif event.type == py.MOUSEBUTTONUP:
+                root.handler.input_processor.process_mousebuttonup(event)
+
+        if root.need_update_gui:
+            root.handler.gui.draw()
+        if root.handler.input_processor.is_move_button_pressed():
+            root.handler.input_processor.move()
+        py.display.update()
+
+        clock.tick(root.config["FPS"])
+        print(f"FPS: {clock.get_fps():.2f}\r", end="")
+        #fps = int(clock.get_fps())
+        #py.display.set_caption(f"FPS: {fps}")
+
+if __name__ == "__main__":
+    root.start_the_game("Test Game")
+    main()
+    py.quit()

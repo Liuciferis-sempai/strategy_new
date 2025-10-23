@@ -1,0 +1,15 @@
+{
+    "name": "forest",
+    "desc": "forest_desc",
+    "img": "forest.png",
+    "priority": 1,
+    "frame": {
+        "temperature": [0.0, 1.0],
+        "height": [0.0, 1.0],
+        "humidity": [0.45, 0.6],
+        "soil_fertility": [0.0, 1.0]
+    },
+    "subdata":{
+        "difficulty": 1.25
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "name": "resource_1",
+    "desc": "resource_1_desc",
+    "max_amout": 3,
+    "is_food": false
+}

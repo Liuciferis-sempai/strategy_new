@@ -1,0 +1,17 @@
+{
+    "id": "base_tech_0",
+    "desc": "base_tech_0_desc",
+    "icon": "none.png",
+    "cost": {
+        "type_science_0": 10,
+        "type_science_1": 5
+    },
+    "era": "base_tech_0_era",
+    "x": 0,
+    "y": 0,
+    "prerequisites": [],
+    "unlocks": [
+        "building_0",
+        "unit_0"
+    ]
+}

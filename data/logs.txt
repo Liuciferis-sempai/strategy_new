@@ -1,0 +1,86 @@
+2025-10-23 00:48:42.718215: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:42.731579: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:42.736995: WARNING [Pawn.__init__] -> created default pawn; id: -1, coord: (0, 0), data: {}
+2025-10-23 00:48:42.764248: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:43.960169: TIME [assets.world.worldmap.map_generate] -> function 'map_generate' executed in 1.177382 seconds.; 
+2025-10-23 00:48:43.968522: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:43.974936: WARNING [Handler.is_opened_pawn_default] -> opened pawn is default; self.opened_pawn: <Pawn unknown with id -1 on coord (0, 0). Is  default> ,self.opened_pawn.is_default: True
+2025-10-23 00:48:43.980689: WARNING created default fraction; 
+2025-10-23 00:48:43.989243: ERROR [ImageManager.get_image] -> Image 'data/buildings/img/manufactory.png' not found in ImageManager; 
+2025-10-23 00:48:43.994801: ERROR [ImageManager.get_image] -> Image 'data/pawns/img/pawn_0.png' not found in ImageManager; 
+2025-10-23 00:48:44.000193: INFO [PawnsManager._spawn] -> Spawned pawn id 0 of type pawn_type_0 at (1, 0); 
+2025-10-23 00:48:44.005481: ERROR [ImageManager.get_image] -> Image 'data/pawns/img/pawn_0.png' not found in ImageManager; 
+2025-10-23 00:48:44.010906: INFO [PawnsManager._spawn] -> Spawned pawn id 1 of type pawn_type_0 at (2, 2); 
+2025-10-23 00:48:45.470363: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:45.478425: WARNING [Handler.is_opened_pawn_default] -> opened pawn is default; self.opened_pawn: <Pawn unknown with id -1 on coord (0, 0). Is  default> ,self.opened_pawn.is_default: True
+2025-10-23 00:48:45.483754: ERROR [Handler.get_chosen_cell] -> query chosen cell before it is defined; 
+2025-10-23 00:48:45.489205: INFO [Handler.set_chosen_cell] -> chosen cell changed from <Cell on coord (0, 0) with args: field none none. Is  default> to <Cell on coord (2, 2) with args: forest grass none. Is not default>; 
+2025-10-23 00:48:45.495922: ERROR [Handler.get_opened_pawn] -> query opened pawn before it is defined; 
+2025-10-23 00:48:45.512570: INFO [Handler.set_opened_pawn] -> open pawn {'name': 'pawn_0', 'desc': 'pawn_0_desc', 'img': 'pawn_0.png', 'ico': 'pawn_0.png', 'type': 'pawn_type_0', 'movement_points': 2, 'movement_points_max': 2, 'inventory_size': 10, 'max_hp': 30, 'fraction_id': 1, 'id': 1, 'coord': (2, 2)}; 
+2025-10-23 00:48:45.518024: INFO [Handler.set_opened_pawn] -> new pawn was dict. now is <Pawn pawn_type_0 with id 1 on coord (2, 2). Is not default>; 
+2025-10-23 00:48:45.523367: INFO [Handler.set_opened_pawn] -> opened pawn changed from <Pawn unknown with id -1 on coord (0, 0). Is  default> to <Pawn pawn_type_0 with id 1 on coord (2, 2). Is not default>; 
+2025-10-23 00:48:50.817069: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:50.824920: INFO [Handler.get_opened_pawn_coord] -> query opened pawn: (2, 2); 
+2025-10-23 00:48:50.830285: INFO [Handler.get_opened_pawn] -> query opened pawn: <Pawn pawn_type_0 with id 1 on coord (2, 2). Is not default>; 
+2025-10-23 00:48:50.835754: ERROR [ImageManager.get_image] -> Image 'data/pawns/img/pawn_0.png' not found in ImageManager; 
+2025-10-23 00:48:50.843434: INFO [TurnManager.add_event_in_queue] -> event {'do': 'restore_movement_points', 'event_data': {'target': <Pawn pawn_type_0 with id 1 on coord (3, 1). Is not default>}} successfully added in qeue with time: 1 and will be executed on turn 1; 
+2025-10-23 00:48:50.848741: INFO [Handler.reset_opened_pawn] -> opened pawn reset; 
+2025-10-23 00:48:50.854026: WARNING [Pawn.__init__] -> created default pawn; id: -1, coord: (0, 0), data: {}
+2025-10-23 00:48:51.598772: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:51.606621: WARNING [Handler.is_opened_pawn_default] -> opened pawn is default; self.opened_pawn: <Pawn unknown with id -1 on coord (0, 0). Is  default> ,self.opened_pawn.is_default: True
+2025-10-23 00:48:51.611853: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (2, 2) with args: forest grass none. Is not default>; 
+2025-10-23 00:48:51.617158: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (2, 2) with args: forest grass none. Is not default>; 
+2025-10-23 00:48:51.622436: INFO [Handler.reset_chosen_cell] -> chosen cell reset; 
+2025-10-23 00:48:51.627656: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:51.632937: INFO [Handler.set_chosen_cell] -> chosen cell changed from <Cell on coord (0, 0) with args: field none none. Is  default> to <Cell on coord (2, 1) with args: field none none. Is not default>; 
+2025-10-23 00:48:51.659908: ERROR [Language.get] -> Key 'field' not found in language 'english'; 
+2025-10-23 00:48:51.665442: ERROR [Language.get] -> Key 'field_desc' not found in language 'english'; 
+2025-10-23 00:48:52.116556: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:52.124246: WARNING [Handler.is_opened_pawn_default] -> opened pawn is default; self.opened_pawn: <Pawn unknown with id -1 on coord (0, 0). Is  default> ,self.opened_pawn.is_default: True
+2025-10-23 00:48:52.129416: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (2, 1) with args: field none none. Is not default>; 
+2025-10-23 00:48:52.134575: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (2, 1) with args: field none none. Is not default>; 
+2025-10-23 00:48:52.139827: INFO [Handler.reset_chosen_cell] -> chosen cell reset; 
+2025-10-23 00:48:52.146091: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:52.151328: INFO [Handler.set_chosen_cell] -> chosen cell changed from <Cell on coord (0, 0) with args: field none none. Is  default> to <Cell on coord (2, 0) with args: field none none. Is not default>; 
+2025-10-23 00:48:52.157236: ERROR [Language.get] -> Key 'field' not found in language 'english'; 
+2025-10-23 00:48:52.162573: ERROR [Language.get] -> Key 'field_desc' not found in language 'english'; 
+2025-10-23 00:48:52.613563: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:52.621744: WARNING [Handler.is_opened_pawn_default] -> opened pawn is default; self.opened_pawn: <Pawn unknown with id -1 on coord (0, 0). Is  default> ,self.opened_pawn.is_default: True
+2025-10-23 00:48:52.627092: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (2, 0) with args: field none none. Is not default>; 
+2025-10-23 00:48:52.633315: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (2, 0) with args: field none none. Is not default>; 
+2025-10-23 00:48:52.638683: INFO [Handler.reset_chosen_cell] -> chosen cell reset; 
+2025-10-23 00:48:52.643943: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:52.649318: INFO [Handler.set_chosen_cell] -> chosen cell changed from <Cell on coord (0, 0) with args: field none none. Is  default> to <Cell on coord (3, 0) with args: hills none none. Is not default>; 
+2025-10-23 00:48:52.655193: ERROR [Language.get] -> Key 'hills' not found in language 'english'; 
+2025-10-23 00:48:52.660642: ERROR [Language.get] -> Key 'hills_desc' not found in language 'english'; 
+2025-10-23 00:48:52.978213: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:52.987181: WARNING [Handler.is_opened_pawn_default] -> opened pawn is default; self.opened_pawn: <Pawn unknown with id -1 on coord (0, 0). Is  default> ,self.opened_pawn.is_default: True
+2025-10-23 00:48:52.992423: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (3, 0) with args: hills none none. Is not default>; 
+2025-10-23 00:48:52.997836: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (3, 0) with args: hills none none. Is not default>; 
+2025-10-23 00:48:53.003236: INFO [Handler.reset_chosen_cell] -> chosen cell reset; 
+2025-10-23 00:48:53.008500: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:53.013860: INFO [Handler.set_chosen_cell] -> chosen cell changed from <Cell on coord (0, 0) with args: field none none. Is  default> to <Cell on coord (6, 2) with args: swamp none cows. Is not default>; 
+2025-10-23 00:48:53.019619: ERROR [Language._translate_multiple_keys] -> Key 'swamp' not found in language 'english'; 
+2025-10-23 00:48:53.024820: ERROR [Language._translate_multiple_keys] -> Key 'with_cows' not found in language 'english'; 
+2025-10-23 00:48:53.031478: ERROR [Language.get] -> Key 'swamp_desc' not found in language 'english'; 
+2025-10-23 00:48:53.333480: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:53.341382: WARNING [Handler.is_opened_pawn_default] -> opened pawn is default; self.opened_pawn: <Pawn unknown with id -1 on coord (0, 0). Is  default> ,self.opened_pawn.is_default: True
+2025-10-23 00:48:53.346614: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (6, 2) with args: swamp none cows. Is not default>; 
+2025-10-23 00:48:53.351871: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (6, 2) with args: swamp none cows. Is not default>; 
+2025-10-23 00:48:53.357220: INFO [Handler.reset_chosen_cell] -> chosen cell reset; 
+2025-10-23 00:48:53.362427: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:53.368661: INFO [Handler.set_chosen_cell] -> chosen cell changed from <Cell on coord (0, 0) with args: field none none. Is  default> to <Cell on coord (5, 3) with args: field grass cows. Is not default>; 
+2025-10-23 00:48:53.374933: ERROR [Language._translate_multiple_keys] -> Key 'field' not found in language 'english'; 
+2025-10-23 00:48:53.380227: ERROR [Language._translate_multiple_keys] -> Key 'with_grass' not found in language 'english'; 
+2025-10-23 00:48:53.385516: ERROR [Language._translate_multiple_keys] -> Key 'and' not found in language 'english'; 
+2025-10-23 00:48:53.390653: ERROR [Language._translate_multiple_keys] -> Key 'with_cows' not found in language 'english'; 
+2025-10-23 00:48:53.396438: ERROR [Language.get] -> Key 'field_desc' not found in language 'english'; 
+2025-10-23 00:48:54.707293: INFO [GUIGame.set_target_coord_null] -> target coord reset; 
+2025-10-23 00:48:54.716197: WARNING [Handler.is_opened_pawn_default] -> opened pawn is default; self.opened_pawn: <Pawn unknown with id -1 on coord (0, 0). Is  default> ,self.opened_pawn.is_default: True
+2025-10-23 00:48:54.721453: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (5, 3) with args: field grass cows. Is not default>; 
+2025-10-23 00:48:54.726673: INFO [Handler.get_chosen_cell] -> query chosen cell: <Cell on coord (5, 3) with args: field grass cows. Is not default>; 
+2025-10-23 00:48:54.731985: INFO [Handler.reset_chosen_cell] -> chosen cell reset; 
+2025-10-23 00:48:54.737212: WARNING [Cell.__init__] -> created default cell; position: (0, 0), coord: (0, 0), data: {'type': 'field', 'desc': 'field_desc', 'temperature': 0.5, 'height': 0.5, 'humidity': 0.5, 'soil_fertility': 0.5}
+2025-10-23 00:48:54.742485: INFO [Handler.set_chosen_cell] -> chosen cell changed from <Cell on coord (0, 0) with args: field none none. Is  default> to <Cell on coord (3, 4) with args: swamp none none. Is not default>; 
+2025-10-23 00:48:54.748203: ERROR [Language.get] -> Key 'swamp' not found in language 'english'; 
+2025-10-23 00:48:54.753657: ERROR [Language.get] -> Key 'swamp_desc' not found in language 'english'; 

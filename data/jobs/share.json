@@ -1,0 +1,11 @@
+{
+    "id": "share",
+    "desc": "share_desc",
+    "type": "action",
+    "movement_points_cost": 0,
+    "pawn_types": ["any"],
+    "pawn_ids": ["any"],
+    "work_time": 0,
+    "trigger": {"type": "target_is_near", "args": {"target_of_action": "target_of_action", "distance": 1}},
+    "result": {"type": "open_share_menu", "args": {"target_of_action": "target_of_action"}}
+}
