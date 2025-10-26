@@ -1,0 +1,2 @@
+-add free space check for building
+-add grave (or something like that) after pawn death

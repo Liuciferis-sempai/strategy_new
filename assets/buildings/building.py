@@ -1,5 +1,6 @@
 from assets import root
-from assets.functions import logging, update_gui
+from assets.root import logger
+from assets.functions import update_gui
 from assets.world.cell import Cell
 from typing import Any
 
@@ -7,7 +8,7 @@ class Building:
     def __init__(self, coord: tuple[int, int] = (0, 0), cell: Cell = Cell(), data: dict = {"name": "unknow"}, is_default: bool = True):
         self.is_default = is_default
         if self.is_default:
-            logging("WARNING", "created default building", "Building.__init__")
+            logger.warning("created default building", f"Building.__init__({coord}, {cell}, {data}, {is_default})")
         self.coord = coord
         self.name = data["name"]
         self.data = data
@@ -15,16 +16,16 @@ class Building:
 
         self.fraction_id = data.get("fraction_id", -1)
         if self.fraction_id == -1:
-            logging("ERROR", "Building created without fraction_id", "Building.__init__")
+            logger.error("Building created without fraction_id", f"Building.__init__({coord}, {cell}, {data}, {is_default})")
         self.level = data.get("level", 0)
         self.max_hp = data.get("max_hp", 100)
-        self.max_hp_mod = {}
+        self.max_hp_mod = data.get("max_hp_mod", {})
         self.hp = data.get("max_hp", 100)
-        self.hp_mod = {}
+        self.hp_mod = data.get("hp_mod", {})
         self.max_service = data.get("max_service", 50)
-        self.max_service_mod = {}
+        self.max_service_mod = data.get("max_service_mod", {})
         self.service = data.get("max_service", 50)
-        self.service_mod = {}
+        self.service_mod = data.get("service_mod", {})
 
         if self.data.get("type", False) == "workbench":
             self.is_workbench = True
@@ -66,7 +67,7 @@ class Building:
                 if type == "none":
                     return
                 if self.is_scheme:
-                    print(len(self.scheme_inventory[type]), self.scheme_inventory_size[type]) #type: ignore
+                    #print(len(self.scheme_inventory[type]), self.scheme_inventory_size[type]) #type: ignore
                     if len(self.scheme_inventory[type]) < self.scheme_inventory_size[type]: #type: ignore
                         remainder = amout
                         if self.scheme_inventory[type] != []: #type: ignore
@@ -239,6 +240,7 @@ class Building:
             self.level += 1
             for effect in self.data["upgrades"][str(self.level)]["effect"]:
                 self.do_change(effect["type"], effect["args"])
+            self.cell.buildings = {"name": self.data["name"], "desc": self.data["desc"], "img": self.data["img"], "fraction_id": self.data["fraction_id"], "type": self.data["type"], "level": self.data["level"]}
 
     def do_change(self, type: str, args: dict[str, Any]):
         match type:
@@ -282,6 +284,8 @@ class Building:
                     if amout % root.handler.resource_manager.get_resource_data(resource)["max_amout"] != 0:#type: ignore
                         self.scheme_inventory_size += 1
                 self.scheme_inventory_size = {"cost": self.scheme_inventory_size, "inventory": self.scheme_inventory_size}
+            else:
+                logger.error(f"Building can not be upgraded", f"Building.set_upgrade_mod({mod})")
         else:
             self.is_scheme = False
 

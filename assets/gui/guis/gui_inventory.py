@@ -6,8 +6,8 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 import assets.root as root
+from assets.root import logger
 import pygame as py
-from assets.functions import logging
 from assets.decorators import timeit
 
 class GUIInventory:
@@ -35,7 +35,7 @@ class GUIInventory:
                 self.owner_inventory_org = self.owner.inventory
             self._set_inventory(self.owner.inventory, self.owner.inventory_size)
         else:
-            logging("ERROR", "No owner found", "GUIInventory.set_inventory")
+            logger.error("No owner found", "GUIInventory.set_inventory()")
     
     def _set_inventory(self, inventory: list|dict, max_inventory: int|dict):
         if isinstance(inventory, list):
@@ -121,5 +121,5 @@ class GUIInventory:
         
             root.need_update_gui = False
         else:
-            logging("ERROR", "self.owner or self.owner_ico is not difinded", "GUIInventory.draw", f"self.owner_ico {self.owner_ico}; self.owner {self.owner}")
+            logger.error(f"self.owner or self.owner_ico is not difinded. self.owner_ico: {self.owner_ico}; self.owner: {self.owner}", "GUIInventory.draw()")
             root.need_update_gui = False

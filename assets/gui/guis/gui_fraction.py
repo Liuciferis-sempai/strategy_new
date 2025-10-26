@@ -6,7 +6,7 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 import assets.root as root
-from assets.functions import logging
+from assets.root import logger
 
 class GUIFraction:
     def __init__(self):
@@ -15,7 +15,7 @@ class GUIFraction:
     def open_player_fraction(self):
         self.player_fraction = root.handler.allFractions.get_player_fraction()
         if not self.player_fraction:
-            logging("ERROR", "Cannot find player fraction", "GUIFraction.open_player_fraction")
+            logger.error("Cannot find player fraction", "GUIFraction.open_player_fraction()")
             return
         self.fraction_name = py.font.Font(None, 30).render(self.player_fraction.name, False, (255, 255, 255))                   #Textfield?
         self.fraction_symbol = py.font.Font(None, 30).render(self.player_fraction.symbol, False, self.player_fraction.color)    #Textfield?

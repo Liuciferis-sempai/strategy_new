@@ -1,6 +1,6 @@
 import pygame as py
 import assets.root as root
-from assets.functions import logging
+from assets.root import logger
 
 class Cell(py.sprite.Sprite):
     def __init__(self, position: tuple[int, int]=(0, 0), coord: tuple[int, int]=(0, 0), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
@@ -11,7 +11,7 @@ class Cell(py.sprite.Sprite):
 
         self.is_default = is_default
         if is_default:
-            logging("WARNING", "created default cell", "Cell.__init__", f"position: {position}, coord: {coord}, data: {data}")
+            logger.warning("created default cell", f"Cell.__init__({position}, {coord}, {data}, {is_default})")
 
         self.type = data.get("type", "field")
         self.land = data.get("img", "field.png")
@@ -58,12 +58,12 @@ class Cell(py.sprite.Sprite):
             if self.flora != {}:
                 title += ":and:"
             title += f":with_{self.fauna.get("name")}"
-        root.handler.gui.game.open_main_info_window({"title": title, "text": self.data["desc"]})
+        #root.handler.gui.game.open_main_info_window({"title": title, "text": self.data["desc"]})
     
     def _open_pawn(self):
         title = self.pawns[self.chosen_pawn_index].get("name")
         desc = self.pawns[self.chosen_pawn_index].get("desc")
-        root.handler.gui.game.open_main_info_window({"title": title, "text": desc})
+        #root.handler.gui.game.open_main_info_window({"title": title, "text": desc})
         root.handler.gui.game.open_pawn()
         root.handler.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), self.pawns[self.chosen_pawn_index].get("movement_points", 1), (0, 0, 255, 100))
         if root.player_id == self.pawns[self.chosen_pawn_index].get("fraction_id"):
@@ -72,7 +72,7 @@ class Cell(py.sprite.Sprite):
     def _open_building(self):
         if self.buildings.get("fraction_id") == root.player_id:
             root.handler.gui.game.open_building()
-        root.handler.gui.game.open_main_info_window({"title": self.buildings.get("name"), "text": self.buildings.get("desc")})
+        #root.handler.gui.game.open_main_info_window({"title": self.buildings.get("name"), "text": self.buildings.get("desc")})
 
     def change_type(self, new_type: str):
         self.type = new_type

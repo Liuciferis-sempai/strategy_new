@@ -1,7 +1,7 @@
 import pygame as py
 import assets.root as root
-from assets.functions import logging, update_gui
-from assets.root import language
+from assets.functions import update_gui
+from assets.root import language, logger
 
 class Button(py.sprite.Sprite):
     def __init__(self, text:str="Button", img:str="", width:int=0, height:int=0, color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), font_size:int=20, position:tuple[int, int]=(5, 5)):
@@ -32,7 +32,7 @@ class Button(py.sprite.Sprite):
         self.image.blit(self.text_surface, self.text_rect)
     
     def click(self):
-        logging("INFO", f"Button '{self.text}' clicked", "Button.click")
+        logger.info(f"Button '{self.text}' clicked", "Button.click()")
         #print(f"{self.text} button clicked!")
         pass
 
@@ -162,4 +162,14 @@ class WorkbenchButton(Button):
         super().click()
         root.handler.gui.reciept.open()
         root.change_window_state("reciept")
+        update_gui()
+
+class UpgradeBuildingButton(Button):
+    def __init__(self):
+        super().__init__(text="upgrade", width=100, height=50, position=(10, 10))
+
+    def click(self):
+        super().click()
+        root.handler.buildings_manager.get_building_by_coord(root.handler.get_chosen_cell_coord()).set_upgrade_mod(True)
+        root.change_window_state("game")
         update_gui()

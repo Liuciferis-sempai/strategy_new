@@ -3,8 +3,7 @@ from assets.work_with_files import read_json_file
 from .building import *
 from assets import root
 from assets.world.cell import Cell
-from assets.functions import logging
-from assets.root import loading
+from assets.root import loading, logger
 
 class BuildingsManager:
     def __init__(self):
@@ -68,14 +67,14 @@ class BuildingsManager:
         data["scheme"] = True
         cell = root.handler.world_map.get_cell_by_coord(coord)
         self.buildings[str(coord)] = Building(coord, cell, data.copy(), False)
-        cell.add_building({"name": data["name"], "desc": data["desc"], "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"]})
+        cell.add_building({"name": data["name"], "desc": data["desc"], "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
 
     def _build(self, data: dict, coord: tuple[int, int], fraction_id: int):
         data = data.copy()
         data["fraction_id"] = fraction_id
         cell = root.handler.world_map.get_cell_by_coord(coord)
         self.buildings[str(coord)] = Building(coord, cell, data.copy(), False)
-        cell.add_building({"name": data["name"], "desc": data["desc"], "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"]})
+        cell.add_building({"name": data["name"], "desc": data["desc"], "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
     
     def remove(self, coord: tuple[int, int]):
         building = self.buildings[str(coord)]
@@ -96,7 +95,7 @@ class BuildingsManager:
         if only_allowed_for_players_fraction:
             player_fraction = root.handler.allFractions.get_player_fraction()
             if not player_fraction:
-                logging("ERROR", "No player fraction found in get_all_buildings_sorted_by_types", "BuildingsManager.get_all_buildings_sorted_by_types")
+                logger.error("No player fraction found in get_all_buildings_sorted_by_types", f"BuildingsManager.get_all_buildings_sorted_by_types({only_allowed_for_players_fraction})")
                 return buildings_by_types
 
         for building in self.buildings.values():

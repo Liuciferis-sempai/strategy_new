@@ -18,6 +18,7 @@ class GUIBuildings:
         self.buildings_queue_name = TextField(root.interface_size//2, root.interface_size//4, position=(10, root.cell_sizes[root.cell_size_scale][1]+80+60), text="Queue") #type: ignore
         self.buildings_queue = []
         self.building_reciept_button = WorkbenchButton()
+        self.upgrade_building_button = UpgradeBuildingButton()
     
     def change_position_for_new_screen_sizes(self):
         self.building_reciept_button.change_position((root.window_size[0]-self.building_reciept_button.width-10, root.window_size[1]-self.building_reciept_button.height-10))
@@ -31,11 +32,14 @@ class GUIBuildings:
         self.building_level = TextField(60, 60, position=(root.cell_sizes[root.cell_size_scale][0]+self.building_name.rect.width+30, 10), text=f"lvl {chosen_cell.buildings["level"]}") #type: ignore
         building = root.handler.buildings_manager.get_building_by_coord(root.handler.get_chosen_cell_coord())
         self.buildings_queue = []
-        for i in range(building.max_queue): #type: ignore
-            if i < len(building.queue): #type: ignore
-                self.buildings_queue.append(Icon(root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1], position=(10+root.cell_sizes[root.cell_size_scale][0]*i, root.cell_sizes[root.cell_size_scale][1]+80+self.building_desc.height+70), img=f"data/reciepts/img/{building.queue[i]["img"]}")) #type: ignore
-            else:
-                self.buildings_queue.append(Icon(root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1], position=(10+root.cell_sizes[root.cell_size_scale][0]*i, root.cell_sizes[root.cell_size_scale][1]+80+self.building_desc.height+70), img="data/reciepts/img/empty.png")) #type: ignore
+        i = 0
+        if building.data.get("max_queue", False):
+            for i in range(building.max_queue): #type: ignore
+                if i < len(building.queue): #type: ignore
+                    self.buildings_queue.append(Icon(root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1], position=(10+root.cell_sizes[root.cell_size_scale][0]*i, root.cell_sizes[root.cell_size_scale][1]+80+self.building_desc.height+70), img=f"data/reciepts/img/{building.queue[i]["img"]}")) #type: ignore
+                else:
+                    self.buildings_queue.append(Icon(root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1], position=(10+root.cell_sizes[root.cell_size_scale][0]*i, root.cell_sizes[root.cell_size_scale][1]+80+self.building_desc.height+70), img="data/reciepts/img/empty.png")) #type: ignore
+        self.upgrade_building_button.change_position((10+root.cell_sizes[root.cell_size_scale][0]*i, root.cell_sizes[root.cell_size_scale][1]+80+self.building_desc.height+70))
 
         #self.building_info = Statistikbox()
     
@@ -53,5 +57,7 @@ class GUIBuildings:
             reciept.draw()
         if root.handler.get_chosen_cell().buildings.get("type", False) == "workbench": #type: ignore
             self.building_reciept_button.draw()
+        if root.handler.buildings_manager.get_building_by_coord(root.handler.get_chosen_cell_coord()).can_be_upgraded():
+            self.upgrade_building_button.draw()
         
         root.need_update_gui = False

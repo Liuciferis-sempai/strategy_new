@@ -1,6 +1,6 @@
-from assets.functions import logging
 import datetime
 import time
+from assets.root import logger as logger_
 
 # Threshold in seconds: only log timing info if function runs longer than this
 TIMEIT_THRESHOLD = 0.005  # 5 ms
@@ -27,7 +27,7 @@ def timeit(func):
         # Only log timing info if it exceeds the threshold
         if execution_time >= TIMEIT_THRESHOLD:
             try:
-                logging("TIME", f"function '{func.__name__}' executed in {execution_time:.6f} seconds.", f"{func.__module__}.{func.__name__}")
+                logger_.time(f"function '{func.__name__}' executed in {execution_time:.6f} seconds.", f"{func.__module__}.{func.__name__}")
             except Exception:
                 pass
         return result

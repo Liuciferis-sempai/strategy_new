@@ -1,6 +1,8 @@
 from .work_with_files import write_txt_file
 #Clear logs
 write_txt_file("data/logs.txt", "")
+from .logger import Logger
+logger = Logger()
 
 #pygame load
 import pygame as py

@@ -1,8 +1,7 @@
 import assets.root as root
 import os
 from assets.work_with_files import read_json_file
-from assets.root import loading
-from assets.functions import logging
+from assets.root import loading, logger
 
 class RecieptsManager:
     def __init__(self):
@@ -22,7 +21,7 @@ class RecieptsManager:
         for reciept in self.reciepts:
             if reciept["id"] == reciept_id:
                 return reciept.copy()
-        logging("ERROR", f"reciept id {reciept_id} not found", "RecieptsManager.get_reciept_by_id")
+        logger.error(f"reciept id {reciept_id} not found", f"RecieptsManager.get_reciept_by_id({reciept_id})")
         return {}
     
     def get_reciepts_for_workbench(self, workbench_type: str, workbench_level: int) -> list:
@@ -55,6 +54,6 @@ class RecieptsManager:
                         root.handler.turn_manager.add_event_in_queue(reciept["time"], {"do": "clear_the_queue", "event_data": {"cell": chosen_cell, "reciept": reciept}})
                         building.add_in_queue(reciept.copy()) #type: ignore
                     else:
-                        logging("DEBUG", f"reciept {reciept["id"]} is not allowed, because building has not enought resources", "RecieptsManager.use_recipe")
+                        logger.warning(f"reciept {reciept["id"]} is not allowed, because building has not enought resources", f"RecieptsManager.use_recipe({mouse_pos})")
                 else:
-                    logging("DEBUG", f"reciept {reciept["id"]} is not allowed", "RecieptsManager.use_recipe")
+                    logger.warning(f"reciept {reciept["id"]} is not allowed", f"RecieptsManager.use_recipe({mouse_pos})")

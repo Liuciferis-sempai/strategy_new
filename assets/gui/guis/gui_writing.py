@@ -6,6 +6,7 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 import assets.root as root
+from assets.root import logger
 
 class GUIWriting:
     def __init__(self):
@@ -35,7 +36,7 @@ class GUIWriting:
             case "Fraction Name":
                 self.titles = ["Fraction Name", "Symbol", "Color"]
             case _:
-                logging("ERROR", f"Unknown writing type: {self.writing}", "GUIWriting._set_titles")
+                logger.error(f"Unknown writing type: {self.writing}", "GUIWriting._set_titles()")
 
     def _save_fraction_name(self):
         color = [255, 255, 255]

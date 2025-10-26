@@ -3,8 +3,7 @@ import json
 import assets.triggers as tm
 from assets.pawns.pawn import Pawn
 from assets import root
-from assets.functions import logging
-from assets.root import loading
+from assets.root import loading, logger
 
 class JobManager:
     def __init__(self):
@@ -78,7 +77,7 @@ class JobManager:
         job = self.jobs.get(job_id, None)
         if job:
             return job.copy()
-        logging("ERROR", f"job id is not founded {job_id}", "JobManager.get_job_by_id")
+        logger.error(f"job id is not founded {job_id}", f"JobManager.get_job_by_id({job_id})")
         return {}
     
     def get_jobs_for_pawn(self, pawn: Pawn) -> list:
@@ -114,9 +113,9 @@ class JobManager:
                         result.append(self._is_job_available(temp_job, job_id, pawn))
                     return all(result)
             else:
-                logging("DEBUG", f"job type or id is not enable for this job. {job} | {pawn}")
+                logger.warning(f"job type or id is not enable for this job.", f"JobManager.is_job_availible({job_id}, {pawn})")
         else:
-            logging("WARNING", f"job id is not recognized {self.get_job_id_from_name(job_id)}", "JobManager.is_job_available")
+            logger.warning(f"job id is not recognized '{self.get_job_id_from_name(job_id)}'", f"JobManager.is_job_available({job_id}, {pawn})")
         return False
     
     def _is_job_available(self, job: dict, job_id: str, pawn: Pawn) -> bool:

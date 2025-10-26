@@ -1,5 +1,5 @@
 from assets import root
-from assets.functions import logging
+from assets.root import logger
 
 class TurnManager:
     def __init__(self):
@@ -13,7 +13,7 @@ class TurnManager:
 
         for event in self.events:
             if event["turn"] == self.turn:
-                logging("INFO", f"Executing turn event: {event}", "TurnManager.do_step")
+                logger.info(f"Executing turn event: {event}", f"TurnManager.do_step()")
                 root.handler.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
 
     def add_event_in_queue(self, time: int, event: dict):
@@ -24,10 +24,10 @@ class TurnManager:
         for example: {"do": event_type, "event_data": {"cell": root.handler.get_chosen_cell(), "resource": {"resource_0": 10, "resource_1": 5}}}
         '''
         if time == 0:
-            logging("INFO", f"event {event} has time {time} (0) and will be executed on this turn {self.turn}", "TurnManager.add_event_in_queue")
+            logger.info(f"event {event} has time {time} (0) and will be executed on this turn {self.turn}", f"TurnManager.add_event_in_queue({time}, {event})")
             root.handler.effect_manager.do(event["do"], event["event_data"])
         elif time < 0:
-            logging("ERROR", "Time for event must be a positive integer or zero", "TurnManager.add_event_in_queue", f"time: {time}, event: {event}")
+            logger.error("Time for event must be a positive integer or zero", f"TurnManager.add_event_in_queue({time}, {event})")
         else:
             self.events.append({"turn": self.turn+time, "event": event})
-            logging("INFO", f"event {event} successfully added in qeue with time: {time} and will be executed on turn {self.turn+time}", "TurnManager.add_event_in_queue")
+            logger.info(f"event {event} successfully added in qeue with time: {time} and will be executed on turn {self.turn+time}", f"TurnManager.add_event_in_queue({time}, {event})")

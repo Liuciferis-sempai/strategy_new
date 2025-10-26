@@ -3,8 +3,7 @@ from assets.work_with_files import read_json_file
 from .pawn import Pawn
 from assets.world.cell import Cell
 from assets import root
-from assets.functions import logging
-from assets.root import loading
+from assets.root import loading, logger
 
 class PawnsManager:
     def __init__(self):
@@ -26,14 +25,14 @@ class PawnsManager:
         for pawn in self.pawns:
             if pawn.id == id:
                 return pawn
-        logging("ERROR", f"pawn id not found {id}", "PawnsManager.get_pawn_by_id")
+        logger.error(f"pawn id not found {id}", f"PawnsManager.get_pawn_by_id({id})")
         return Pawn()
 
     def get_pawn_by_name(self, name: str, coord: tuple[int, int]) -> Pawn:
         for pawn in self.pawns:
             if pawn.data.get("name", "") == name and pawn.coord == coord:
                 return pawn
-        logging("ERROR", f"pawn not found {name} {coord}", "PawnsManager.get_pawn_by_name")
+        logger.error(f"pawn not found {name} {coord}", f"PawnsManager.get_pawn_by_name({name}, {coord})")
         return Pawn()
 
     def spawn(self, data: str, coord: tuple[int, int], fraction_id: int) -> bool:
@@ -63,7 +62,7 @@ class PawnsManager:
 
             self.pawns.append(Pawn(pawn_id, coord, data, False))
             cell.add_pawn(data)
-            logging("INFO", f"Spawned pawn id {pawn_id} of type {data.get('type', 'unknown')} at {coord}", "PawnsManager._spawn")
+            logger.info(f"Spawned pawn id {pawn_id} of type {data.get('type', 'unknown')} at {coord}", f"PawnsManager._spawn({data}, {coord}, {fraction_id})")
 
     def despawn(self, id: int):
         for pawn in self.pawns:
@@ -72,9 +71,9 @@ class PawnsManager:
                 self.pawns.remove(pawn)
                 cell = root.handler.world_map.get_cell_by_coord(pawn.coord)
                 cell.remove_pawn(id) #type: ignore
-                logging("INFO", f"Despawned pawn id {id} from {pawn.coord}", "PawnsManager.despawn")
+                logger.info(f"Despawned pawn id {id} from {pawn.coord}", f"PawnsManager.despawn({id})")
                 return
-        logging("ERROR", f"Trying to despawn non-existing pawn with id {id}", "PawnsManager.despawn")
+        logger.error(f"Trying to despawn non-existing pawn with id {id}", f"PawnsManager.despawn({id})")
 
     def restore_movement_points(self, pawn: Pawn):
         for p in self.pawns:
@@ -127,7 +126,7 @@ class PawnsManager:
                     elif isinstance(int, job["movement_points_cost"]):
                         pawn.data["movement_points"] -= job["movement_points_cost"]
                         if pawn.data["movement_points"] < 0:
-                            logging("DEBUG", f"Pawn {pawn.id} cannot do job {job_id} due to insufficient movement points.", "PawnsManager.do_job", f"Required: {job['movement_points_cost']}, Available: {pawn.data['movement_points'] + job['movement_points_cost']}")
+                            logger.warning(f"Pawn '{pawn.id}' cannot do job '{job_id}' due to insufficient movement points.", f"PawnsManager.do_job({pawn}, {job_id})")
                             #print(f"pawn {pawn["id"]} can not do this job. Not enought movement points")
                             pawn.data["movement_points"] += job["movement_points_cost"]
                             return
@@ -137,11 +136,10 @@ class PawnsManager:
 
                 root.handler.world_map.unmark_region("for_move")
 
-                root.handler.gui.game.hide_jobs()
-                root.handler.gui.game.main_info_window_content_close()
-                logging("INFO", f"Pawn {pawn.id} will do job {job_id}", "PawnsManager.do_job", f"Job result: {result}, work time: {job['work_time']}")
+                root.handler.gui.clouse_all_extra_windows()
+                logger.info(f"Pawn '{pawn.id}' will do job '{job_id}'", f"PawnsManager.do_job({pawn}, {job_id})")
                 #print(f"pawn {pawn["id"]} will do {result["type"]} with args: {result["args"]} and finish after {job["work_time"]} turn(s)")
         else:
-            logging("DEBUG", f"Pawn {pawn.id} cannot do job {job_id} as it is not available.", "PawnsManager.do_job")
+            logger.warning(f"Pawn '{pawn.id}' cannot do job '{job_id}' as it is not available.", f"PawnsManager.do_job({pawn}, {job_id})")
             #print(f"pawn {pawn["id"]} can not do this job")
         return

@@ -1,7 +1,6 @@
 import pygame as py
 import assets.root as root
 from assets.world.cell import Cell
-from assets.functions import logging
 from assets.functions import update_gui
 
 class InputKeyProcessor:
@@ -18,7 +17,8 @@ class InputKeyProcessor:
 
         #self.scale_index = 4
 
-        self.cell_under_mouse = Cell()
+        self.default_cell = Cell()
+        self.cell_under_mouse = self.default_cell
 
     def is_move_button_pressed(self):
         if any([self.k_a_pressed, self.k_d_pressed, self.k_s_pressed, self.k_w_pressed]):
@@ -302,6 +302,8 @@ class InputKeyProcessor:
         if event.button == 1:
             if root.handler.gui.building.building_reciept_button.rect.collidepoint(mouse_pos):
                 root.handler.gui.building.building_reciept_button.click()
+            if root.handler.gui.building.upgrade_building_button.rect.collidepoint(mouse_pos):
+                root.handler.gui.building.upgrade_building_button.click()
         update_gui()
     
     #@logger
@@ -388,6 +390,9 @@ class InputKeyProcessor:
     def process_mousemotion(self, event:py.event.Event):
         pass #there are no functions yet
 
+    def pass_func(self, *args, **kwargs):
+        pass
+
     #@logger
     def process_mousemotion_game(self, event:py.event.Event):
         mouse_pos = event.pos
@@ -405,13 +410,19 @@ class InputKeyProcessor:
                     self.cell_under_mouse = cell
                     root.handler.gui.game.show_building_info(coord, mouse_pos)
                     root.update_gui()
-                    return
+                return
             root.handler.gui.game.hide_building_info()
         for pawn in root.handler.pawns_manager.pawns:
             cell = root.handler.world_map.get_cell_by_coord(pawn.coord)
             rel_mouse_pos = (mouse_pos[0] - root.handler.world_map.rect.x - root.handler.world_map.x_offset, mouse_pos[1] - root.handler.world_map.rect.y - root.handler.world_map.y_offset)
             if cell.rect.collidepoint(rel_mouse_pos):
-                root.handler.gui.game.show_pawn_info(pawn, mouse_pos)
-                root.update_gui()
+                if self.cell_under_mouse != cell:
+                    self.cell_under_mouse = cell
+                    root.handler.gui.game.show_pawn_info(pawn, mouse_pos)
+                    root.update_gui()
                 return
+            root.handler.gui.game.hide_pawn_info()
+
+        self.cell_under_mouse = self.default_cell
+        root.handler.gui.game.hide_pawn_info()
         root.handler.gui.game.hide_building_info()

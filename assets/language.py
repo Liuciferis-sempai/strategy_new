@@ -1,6 +1,6 @@
 from assets.work_with_files import read_json_file
-from random import choice
-from assets.functions import logging
+#from random import choice
+from assets.root import logger
 
 class Language:
     def __init__(self, language:str):
@@ -21,7 +21,7 @@ class Language:
                 return key[1:]
             translate = self.language.get(key, None)
             if translate is None:
-                logging("ERROR", f"Key '{key}' not found in language '{self.language_name}'", "Language.get")
+                logger.error(f"Key '{key}' not found in language '{self.language_name}'", f"Language.get({key})")
                 return key
             else:
                 return translate
@@ -37,7 +37,7 @@ class Language:
                 translate = self.language.get(key, None)
 
             if translate is None:
-                logging("ERROR", f"Key '{key}' not found in language '{self.language_name}'", "Language._translate_multiple_keys")
+                logger.error(f"Key '{key}' not found in language '{self.language_name}'", f"Language._translate_multiple_keys({keys})")
                 data += f" {key}"
             else:
                 data += f" {translate}"

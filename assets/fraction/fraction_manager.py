@@ -1,6 +1,6 @@
 from .fraction import Fraction
 from assets import root
-from assets.functions import logging
+from assets.root import logger
 
 class AllFactions:
     def __init__(self):
@@ -18,7 +18,7 @@ class AllFactions:
         for fraction in self.fractions:
             if fraction.name == name:
                 return fraction
-        logging("ERROR", f"fraction by name {name} not found", "AllFactions.get_fraction_by_name")
+        logger.error(f"fraction by name {name} not found", f"AllFactions.get_fraction_by_name({name})")
         return Fraction()
 
     def get_all_fractions(self) -> list[Fraction]:
@@ -28,14 +28,14 @@ class AllFactions:
         for fraction in self.fractions:
             if fraction.type == "player" and fraction.id == root.player_id:
                 return fraction
-        logging("ERROR", f"player fraction not found", "AllFactions.get_fraction_by_name")
+        logger.error(f"player fraction not found", "AllFactions.get_fraction_by_name()")
         return Fraction()
 
     def get_fraction_by_id(self, id: int) -> Fraction:
         for fraction in self.fractions:
             if fraction.id == id:
                 return fraction
-        logging("ERROR", f"fraction id not found", "AllFactions.get_fraction_by_name")
+        logger.error(f"fraction id not found", f"AllFactions.get_fraction_by_name({id})")
         return Fraction()
 
     def edit_fraction(self, name:str="", id:int=0, data:dict={}) -> bool:

@@ -6,7 +6,7 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 import assets.root as root
-from assets.functions import logging
+from assets.root import logger
 from assets.decorators import timeit
 
 class GUIReciept:
@@ -21,7 +21,7 @@ class GUIReciept:
         self.reciepts_list = []
         player_fraction = root.handler.allFractions.get_player_fraction()
         if player_fraction == None:
-            logging("ERROR", "Player fraction not found when opening GUIReciept", "GUIReciept.open")
+            logger.error("Player fraction not found when opening GUIReciept", "GUIReciept.open()")
             #print("Player Fraction doesnt found")
             return False
         self.reciepts = root.handler.reciept_manager.get_reciepts_for_workbench(chosen_cell.buildings["name"], chosen_cell.buildings["level"]) #type: ignore

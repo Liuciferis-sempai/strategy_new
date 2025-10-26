@@ -7,8 +7,8 @@ from random import randint, seed, choice, uniform, random
 import os
 from assets.work_with_files import read_json_file
 from assets.decorators import timeit
-from assets.functions import logging, update_gui
-from assets.root import loading
+from assets.functions import update_gui
+from assets.root import loading, logger
 
 class WorldMap(py.sprite.Sprite):
     def __init__(self):
@@ -51,7 +51,7 @@ class WorldMap(py.sprite.Sprite):
                 else:
                     #if (cell.pawns != [] or cell.buildings != {}) and mouse_button == 1:
                     #    root.handler.reset_opened_pawn()
-                    print(cell)
+                    #print(cell)
                     self._normal_click(cell, rel_mouse_pos, mouse_button)
                 return
     
@@ -165,7 +165,7 @@ class WorldMap(py.sprite.Sprite):
 
         root.screen.blit(self.image, self.rect)
         #root.handler.gui.game.main_info_window_content.draw()
-        #logging("INFO", f"drawn {len(self.cells_on_screen)}")
+        #logger.info(f"drawn {len(self.cells_on_screen)}", "WorldMap.draw()")
     
     def _draw_cell(self, cell: Cell):
         cell_position = cell.rect.topleft
@@ -232,7 +232,7 @@ class WorldMap(py.sprite.Sprite):
 
     def resize(self):
         loading.draw("Resizing world map...")
-        logging("INFO", "Resizing world map", "WorldMap.resize", f"New scale: {root.cell_size_scale}, New cell size: {root.cell_sizes[root.cell_size_scale]}")
+        logger.info("Resizing world map", f"WorldMap.resize()")
         for row in self.terrain:
             for cell in row:
                 cell.resize()
@@ -252,7 +252,7 @@ class WorldMap(py.sprite.Sprite):
         self.width = root.window_size[0]
         self.height = root.window_size[1]-top_offset-bottom_offset
         if self.height < 0:
-            logging("WARNING", "Calculated world map height is negative. Adjusting to minimum size.", "WorldMap.change_position", f"Calculated height: {self.height}")
+            logger.warning("Calculated world map height is negative. Adjusting to minimum size.", f"WorldMap.change_position({header_tab}, {footer_tab}, {header_info_tab})")
             #print("Screen is too low", self.height)
             self.height = root.cell_sizes[root.cell_size_scale][1]*2
             #y = root.cell_sizes[root.cell_size_scale][1]//2+20
@@ -267,7 +267,7 @@ class WorldMap(py.sprite.Sprite):
         try:
             return self.terrain[coord[0]][coord[1]]
         except:
-            logging("WARNING", f"Cell coord {coord} is not founded", "WorldMap.get_cell_by_coord")
+            logger.warning(f"Cell coord {coord} is not founded", f"WorldMap.get_cell_by_coord({coord})")
             return Cell()
     
     def get_cell_under_mouse(self):
@@ -362,7 +362,7 @@ class WorldMap(py.sprite.Sprite):
                 if type["priority"] == 0:
                     possible_types.remove(type)
         elif len(possible_types) == 0:
-            logging("WARNING", "No possible land types found for cell with given conditions. Choosing random land type.", "WorldMap._define_land", f"data: {data}")
+            logger.warning("No possible land types found for cell with given conditions. Choosing random land type.", f"WorldMap._define_land({data})")
             #print("impossible cell conditions")
             possible_types.append(choice(self.types_of_land))
 

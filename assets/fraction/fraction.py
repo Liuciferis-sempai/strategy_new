@@ -1,11 +1,11 @@
 import random
-from assets.functions import logging
+from assets.root import logger
 
 class Fraction:
     def __init__(self, name:str="New Fraction", type_:str="bot", id: int=-1, data:dict={}, is_default: bool=True):
         self.is_default = is_default
         if self.is_default:
-            logging("WARNING", "created default fraction")
+            logger.warning("created default fraction", f"Fraction.__init__({name}, {type_}, {id}, {data}, {is_default})")
         self.name = name
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         self.symbol = name[0].upper()

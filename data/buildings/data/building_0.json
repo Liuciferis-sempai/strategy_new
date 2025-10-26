@@ -23,10 +23,6 @@
     },
     "upgrades": {
         "1": {
-            "cost": {},
-            "effect": []
-        },
-        "2": {
             "cost": {
                 "resource_0": 2
             },

@@ -6,6 +6,7 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 import assets.root as root
+from assets.root import logger
 from assets.pawns.pawn import Pawn
 from assets.decorators import timeit
 
@@ -34,6 +35,7 @@ class GUIGame:
         self.buildings_types_list = None
         self.scheme_list = []
         self.building_info = []
+        self.pawn_info = []
 
         self.set_standard_footer()
 
@@ -46,17 +48,17 @@ class GUIGame:
 
     def get_target_coord(self):
         if self.targets_coord == (-1, -1):
-            logging("ERROR", f"target coord are {self.targets_coord}", "GUIGame.get_target_coord")
-        else:
-            logging("INFO", f"target coord are {self.targets_coord}", "GUIGame.get_target_coord")
+            logger.error(f"target coord are {self.targets_coord}", "GUIGame.get_target_coord()")
+        #else:
+        #    logger.info(f"target coord are {self.targets_coord}", "GUIGame.get_target_coord()")
         return self.targets_coord
     
     def set_target_coord(self, new_target_coord: tuple[int, int]):
-        logging("INFO", f"target coord changet from {self.targets_coord} to {new_target_coord}", "GUIGame.set_target_coord")
+        logger.info(f"target coord changet from {self.targets_coord} to {new_target_coord}", f"GUIGame.set_target_coord({new_target_coord})")
         self.targets_coord = new_target_coord
 
     def set_target_coord_null(self):
-        logging("INFO", f"target coord reset", "GUIGame.set_target_coord_null")
+        logger.info(f"target coord reset", "GUIGame.set_target_coord_null()")
         self.targets_coord = (-1, -1)
 
     def set_standard_footer(self):
@@ -199,6 +201,10 @@ class GUIGame:
     def hide_building_info(self):
         #root.handler.world_map.redraw_cells_under(self.building_info[0])
         self.building_info = []
+        root.update_gui()
+    
+    def hide_pawn_info(self):
+        self.pawn_info = []
         root.update_gui()
 
     def hide_action_list(self):

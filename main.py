@@ -4,6 +4,7 @@ py.init()
 py.font.init()
 
 import assets.root as root
+from assets.root import logger
 from assets.functions import update_gui
 
 def main():
@@ -13,6 +14,7 @@ def main():
     while running:
         for event in py.event.get():
             if event.type == py.QUIT:
+                logger.write_down()
                 running = False
             elif event.type == py.VIDEORESIZE:
                 root.window_size = event.w, event.h
@@ -30,10 +32,14 @@ def main():
             elif event.type == py.MOUSEBUTTONUP:
                 root.handler.input_processor.process_mousebuttonup(event)
 
-        if root.need_update_gui:
-            root.handler.gui.draw()
         if root.handler.input_processor.is_move_button_pressed():
             root.handler.input_processor.move()
+
+        if root.need_update_gui:
+            root.handler.gui.draw()
+        else:
+            logger.write_down()
+
         py.display.update()
 
         clock.tick(root.config["FPS"])

@@ -1,6 +1,6 @@
 from assets.world.cell import Cell
 from assets import root
-from assets.functions import logging
+from assets.root import logger
 
 class EffectManager:
     def __init__(self):
@@ -19,7 +19,7 @@ class EffectManager:
         - add_resource (pawns only) args: target: int|Pawn, resource: str, amout: int
         - open_share_menu
         '''
-        logging("INFO", f"execution the effect {effect_type} with data: {effect_data}", "EffectManager.do")
+        logger.info(f"execution the effect {effect_type} with data: {effect_data}", f"EffectManager.do({effect_type}, {effect_data})")
         match effect_type:
             case "take_resources_from_building":
                 root.handler.buildings_manager.remove_resource(effect_data["cell"], effect_data["resources"])
@@ -39,4 +39,4 @@ class EffectManager:
             case "build_scheme":
                 root.handler.buildings_manager.build(effect_data["target_building_str"], effect_data["building_coord"], effect_data["building_fraction"])
             case _:
-                logging("ERROR", f"effect {effect_type} not found", "Effectmanager.do")
+                logger.error(f"effect {effect_type} not found", f"EffectManager.do({effect_type}, {effect_data})")

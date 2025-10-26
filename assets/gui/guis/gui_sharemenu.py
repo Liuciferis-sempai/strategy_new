@@ -6,8 +6,8 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 import assets.root as root
+from assets.root import logger
 import pygame as py
-from assets.functions import logging
 from assets.decorators import timeit
 
 class GUIShareMenu:
@@ -32,7 +32,7 @@ class GUIShareMenu:
         if self.share_target and self.share_starter:
             if hasattr(self.share_target, "is_scheme"):
                 if self.share_target.is_scheme: #type: ignore
-                    logging("INFO", "share target is scheme", "GUIShereMenu.set_inventories", f"{self.share_target.is_scheme}") #type: ignore
+                    logger.info("share target is scheme", "GUIShereMenu.set_inventories()", f"{self.share_target.is_scheme}") #type: ignore
                     self.share_starter_inventory_org = self.share_target.scheme_inventory #type: ignore
                     self._set_inventories(self.share_target.scheme_inventory, self.share_target.scheme_inventory_size) #type: ignore
                     return
@@ -73,7 +73,7 @@ class GUIShareMenu:
             elif self.share_target_type == "building":
                 self.share_target_ico = Icon(root.window_size[0]//8, int(root.window_size[1]//2), img=self.share_target.data.get("img", "none.png"), spec_path="data/buildings/img")
         else:
-            logging("ERROR", "Share starter or target not found", "GUIShareMenu._set_inventories")
+            logger.error("Share starter or target not found", f"GUIShareMenu._set_inventories({target_inventory}, {max_target_inventory})")
     
     def open(self, target:str):
         self.share_starter = root.handler.pawns_manager.get_pawn_by_id(root.handler.get_opened_pawn().id)
@@ -122,7 +122,7 @@ class GUIShareMenu:
                                     update_gui()
                                     return
         else:
-            logging("ERROR", f"Unknown inventory type '{inventory_type}' in GUIShareMenu click method", "GUIShareMenu.click")
+            logger.error(f"Unknown inventory type '{inventory_type}' in GUIShareMenu click method", f"GUIShareMenu.click({cell}, {inventory_type}, {button})")
             #print("unknown inventory type")
     
     #@timeit

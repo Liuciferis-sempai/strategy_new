@@ -1,8 +1,8 @@
 from assets.root import player_id
 from assets.pawns.pawn import Pawn
 from assets import root
+from assets.root import logger
 from assets.buildings.building import Building
-from assets.functions import logging
 
 class TriggerManager:
     def __init__(self):
@@ -85,9 +85,9 @@ class TriggerManager:
         if target:
             if abs(pawn.coord[0]-target.coord[0]) <= args["distance"] and abs(pawn.coord[1]-target.coord[1]) <= args["distance"]:
                 return True
-            logging("DEBUG", f"target is too far. pawn stand on {pawn.coord}, target stand on {target.coord}. distance must be {args["distance"]} or less", "TriggerManager.compare_inventory")
+            logger.warning(f"target is too far. pawn stand on {pawn.coord}, target stand on {target.coord}. distance must be {args["distance"]} or less", f"TriggerManager.compare_inventory({pawn}, {args})")
         else:
-            logging("DEBUG", f"target is not recognized. target coord {args['coord']}", "TriggerManager.compare_inventory")
+            logger.warning(f"target is not recognized. target coord {args['coord']}", f"TriggerManager.compare_inventory({pawn}, {args})")
         return False
 
     def compare_inventory(self, pawn: Pawn, args: dict) -> bool:
@@ -102,9 +102,9 @@ class TriggerManager:
             for resource, amout in building.data["cost"].items():
                 if total.get(resource, False):
                     if total[resource] < amout:
-                        logging("DEBUG", f"not enought of resource {resource}. required: {amout}, available: {total[resource]}", "TriggerManager.compare_inventory")
+                        logger.warning(f"not enought of resource {resource}. required: {amout}, available: {total[resource]}", f"TriggerManager.compare_inventory({pawn}, {args})")
                         return False
                 else:
-                    logging("DEBUG", f"scheme has no resource {resource}", "TriggerManager.compare_inventory")
+                    logger.warning(f"scheme has no resource {resource}", f"TriggerManager.compare_inventory({pawn}, {args})")
                     return False
         return True
