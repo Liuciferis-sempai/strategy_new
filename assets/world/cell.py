@@ -11,7 +11,7 @@ class Cell(py.sprite.Sprite):
 
         self.is_default = is_default
         if is_default:
-            logger.warning("created default cell", f"Cell.__init__({position}, {coord}, {data}, {is_default})")
+            logger.warning("created default cell", f"Cell.__init__(...)")
 
         self.type = data.get("type", "field")
         self.land = data.get("img", "field.png")

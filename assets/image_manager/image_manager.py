@@ -30,7 +30,7 @@ class ImageManager:
                         image = py.image.load(full_path)
                         self.images[full_path] = image
                     except Exception as e:
-                        logger.error(f"Failed to load image '{full_path}': {e}", f"ImageManager._open_dir({dir_path})")
+                        logger.error(f"Failed to load image '{full_path}': {e}", f"ImageManager._open_dir(...)")
     
     def transform_worldcell_images(self):
         for size_key, size_value in self.cell_sizes.items():
@@ -42,18 +42,18 @@ class ImageManager:
     def get_image(self, image_path: str, none_path: str="data/icons/none.png") -> py.Surface:
         image = self.images.get(image_path, None)
         if image is None:
-            logger.error(f"Image '{image_path}' not found in ImageManager", f"ImageManager.get_image({image_path}, {none_path})")
+            logger.error(f"Image '{image_path}' not found in ImageManager", f"ImageManager.get_image(...)")
             image = self.images.get(none_path, None)
             if image is None:
-                logger.error(f"None image '{none_path}' not found in ImageManager", f"ImageManager.get_image({image_path}, {none_path})")
+                logger.error(f"None image '{none_path}' not found in ImageManager", f"ImageManager.get_image(...)")
                 try:
                     return py.image.load(image_path)
                 except Exception as e:
-                    logger.error(f"Failed to load image '{image_path}': {e}", f"ImageManager.get_image({image_path}, {none_path})")
+                    logger.error(f"Failed to load image '{image_path}': {e}", f"ImageManager.get_image(...)")
                     try:
                         return py.image.load(none_path)
                     except Exception as e:
-                        logger.error(f"Failed to load none image '{none_path}': {e}", f"ImageManager.get_image({image_path}, {none_path})")
+                        logger.error(f"Failed to load none image '{none_path}': {e}", f"ImageManager.get_image(...)")
                         return py.image.load("data/icons/none.png")
         return image.copy()
     
@@ -61,6 +61,6 @@ class ImageManager:
         key = f"{image_name}_worldcell_{root.cell_size_scale}"
         image = self.worldcell_images.get(key, None)
         if image is None:
-            logger.error(f"Worldcell image '{key}' not found in ImageManager", f"ImageManager.get_worldcell_image({image_name}, {none_cat})")
+            logger.error(f"Worldcell image '{key}' not found in ImageManager", f"ImageManager.get_worldcell_image(...)")
             return self.get_image(image_name, f"data/map/cells_img/{none_cat}/none.png")
         return image.copy()

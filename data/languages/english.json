@@ -25,9 +25,11 @@
     "town_count": "town count",
     "pawn_count": "pawn count",
     "building_count": "building count",
-    "3": "3",
     "manufactory": "manufactory",
     "manufactory_desc": "The manufactory is an important building for development; it allows you to produce most of the basic, but extremely necessary items.",
     "pawn_0": "barbar",
-    "pawn_0_desc": "barbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbar."
+    "pawn_0_desc": "barbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbarbar.",
+    "hp": "hp",
+    "upgrade": "upgrade",
+    "service": "service"
 }

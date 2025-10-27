@@ -8,7 +8,7 @@ class Building:
     def __init__(self, coord: tuple[int, int] = (0, 0), cell: Cell = Cell(), data: dict = {"name": "unknow"}, is_default: bool = True):
         self.is_default = is_default
         if self.is_default:
-            logger.warning("created default building", f"Building.__init__({coord}, {cell}, {data}, {is_default})")
+            logger.warning("created default building", f"Building.__init__(...)")
         self.coord = coord
         self.name = data["name"]
         self.data = data
@@ -16,7 +16,7 @@ class Building:
 
         self.fraction_id = data.get("fraction_id", -1)
         if self.fraction_id == -1:
-            logger.error("Building created without fraction_id", f"Building.__init__({coord}, {cell}, {data}, {is_default})")
+            logger.error("Building created without fraction_id", f"Building.__init__(...)")
         self.level = data.get("level", 0)
         self.max_hp = data.get("max_hp", 100)
         self.max_hp_mod = data.get("max_hp_mod", {})

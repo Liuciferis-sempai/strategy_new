@@ -8,6 +8,7 @@ from ..listof import *
 import assets.root as root
 from assets.root import logger
 from assets.pawns.pawn import Pawn
+from assets.world.cell import Cell
 from assets.decorators import timeit
 
 class GUIGame:
@@ -34,8 +35,7 @@ class GUIGame:
         self.buildings_list = {}
         self.buildings_types_list = None
         self.scheme_list = []
-        self.building_info = []
-        self.pawn_info = []
+        self.cell_info = []
 
         self.set_standard_footer()
 
@@ -169,43 +169,79 @@ class GUIGame:
             self.jobs_list = ListOf(root.handler.job_manager.get_jobs_id_for_pawn(root.handler.get_opened_pawn()), position=self.show_job_button.rect.topleft, type_of_list="job_list")
         update_gui()
 
-    def show_pawn_info(self, pawn: Pawn, mouse_pos: tuple[int, int]):
-        pass
-    
-    def show_building_info(self, coord: tuple[int, int], mouse_pos: tuple[int, int]):
-        building = root.handler.buildings_manager.get_building_by_coord(coord)
+    def show_info(self, cell: Cell, mouse_pos: tuple[int, int]):
+        cell_info = []
+        self.cell_info = []
+        y_offset = 0
+        if cell.buildings != {}:
+            cell_info.append([])
+            building = root.handler.buildings_manager.get_building_by_coord(cell.coord)
 
-        building_name = TextField(text=building.name, 
+            building_name = TextField(text=building.name, 
+                                        position=(
+                                            mouse_pos[0]+10,
+                                            mouse_pos[1]+10
+                                        ), font_size=20)
+            building_service = TextField(text=f"service:*{building.get_service()}/{building.get_max_service()}",
+                                        position=(
+                                            mouse_pos[0]+10,
+                                            mouse_pos[1]+building_name.text_rect.height+10
+                                        ), font_size=20)
+            building_hp = TextField(text=f"hp:*{building.get_hp()}/{building.get_max_hp()}",
                                     position=(
                                         mouse_pos[0]+10,
-                                        mouse_pos[1]+10
+                                        mouse_pos[1]+building_name.text_rect.height+building_service.text_rect.height+10
                                     ), font_size=20)
-        building_service = TextField(text=f"service:*{building.get_service()}/{building.get_max_service()}",
+
+            cell_info[-1].append(building_name)
+            cell_info[-1].append(building_service)
+            cell_info[-1].append(building_hp)
+
+            y_offset = sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height])+10
+
+        if cell.pawns != []:
+            for pawn_in_cell in cell.pawns:
+                cell_info.append([])
+                pawn = root.handler.pawns_manager.get_pawn_by_id(pawn_in_cell["id"])
+                pawns_name = TextField(text=pawn.name,
+                                       position=(
+                                           mouse_pos[0]+10,
+                                           mouse_pos[1]+y_offset+10
+                                       ), font_size=20)
+                pawns_hp = TextField(text=f"hp:*{pawn.get_hp()}/{pawn.get_max_hp()}",
                                     position=(
                                         mouse_pos[0]+10,
-                                        mouse_pos[1]+building_name.text_rect.height+10
+                                        mouse_pos[1]+y_offset+pawns_name.text_rect.height+10
                                     ), font_size=20)
-        building_hp = TextField(text=f"hp:*{building.get_hp()}/{building.get_max_hp()}",
-                                position=(
-                                    mouse_pos[0]+10,
-                                    mouse_pos[1]+building_name.text_rect.height+building_service.text_rect.height+10
-                                ), font_size=20)
-        building_info_bg = Icon(
-            max([building_name.text_rect.width, building_service.text_rect.width, building_hp.text_rect.width])+20,
-            sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height])+20, position=(mouse_pos[0], mouse_pos[1]),
-            bg=(150, 150, 150, 255)
-        )
 
-        self.building_info = [building_info_bg, building_name, building_service, building_hp]
-    
-    def hide_building_info(self):
-        #root.handler.world_map.redraw_cells_under(self.building_info[0])
-        self.building_info = []
-        root.update_gui()
-    
-    def hide_pawn_info(self):
-        self.pawn_info = []
-        root.update_gui()
+                cell_info[-1].append(pawns_name)
+                cell_info[-1].append(pawns_hp)
+
+                y_offset += sum([pawns_name.text_rect.height, pawns_hp.text_rect.height])+10
+        
+        if cell_info != []:
+            y_offset = 0
+            max_width = 0
+            for info in cell_info:
+                new_max_width = max([content.text_rect.width for content in info])
+                if new_max_width > max_width:
+                    max_width = new_max_width
+            
+            for info in cell_info:
+                bg = Icon(
+                    max_width+20,
+                    sum([content.text_rect.height for content in info])+10,
+                    position=(mouse_pos[0]+5, mouse_pos[1]+y_offset),
+                    bg=(150, 150, 150, 255)
+                )
+                y_offset += bg.rect.height+5
+                self.cell_info.append(bg)
+                for info_content in info:
+                    self.cell_info.append(info_content)
+ 
+    def hide_info(self):
+        self.cell_info = []
+        update_gui()
 
     def hide_action_list(self):
         self.action_list = None
@@ -284,8 +320,8 @@ class GUIGame:
         if self.sticked_object:
             self.sticked_object.draw()
 
-        if self.building_info != []:
-            for info in self.building_info:
+        if self.cell_info != []:
+            for info in self.cell_info:
                 info.draw()
 
         root.need_update_gui = False

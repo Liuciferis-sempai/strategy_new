@@ -88,3 +88,5 @@ def start_the_game(game_name: str="New Game", game_seed: int=9999):
     root.handler.pawns_manager.spawn("pawn_0", (1, 0), root.player_id)
     root.handler.pawns_manager.spawn("pawn_0", (2, 2), root.player_id)
     root.handler.pawns_manager.add_resource(0, "resource_0", 2)
+
+    logger.info("game started", f"start_the_game({game_name}, {game_seed})")

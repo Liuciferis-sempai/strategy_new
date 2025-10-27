@@ -401,28 +401,13 @@ class InputKeyProcessor:
             update_gui()
             return
         
-        for coord in root.handler.buildings_manager.buildings.keys():
-            coord = (int(coord[1]), int(coord[4]))
-            rel_mouse_pos = (mouse_pos[0] - root.handler.world_map.rect.x - root.handler.world_map.x_offset, mouse_pos[1] - root.handler.world_map.rect.y - root.handler.world_map.y_offset)
-            cell = root.handler.world_map.get_cell_by_coord(coord)
+        rel_mouse_pos = (mouse_pos[0] - root.handler.world_map.rect.x - root.handler.world_map.x_offset, mouse_pos[1] - root.handler.world_map.rect.y - root.handler.world_map.y_offset)
+        for cell in root.handler.world_map.cells_on_screen:
             if cell.rect.collidepoint(rel_mouse_pos):
-                if self.cell_under_mouse != cell:
-                    self.cell_under_mouse = cell
-                    root.handler.gui.game.show_building_info(coord, mouse_pos)
+                self.cell_under_mouse = cell
+                if cell.buildings != {} or cell.pawns != []:
+                    root.handler.gui.game.show_info(cell, mouse_pos)
                     root.update_gui()
-                return
-            root.handler.gui.game.hide_building_info()
-        for pawn in root.handler.pawns_manager.pawns:
-            cell = root.handler.world_map.get_cell_by_coord(pawn.coord)
-            rel_mouse_pos = (mouse_pos[0] - root.handler.world_map.rect.x - root.handler.world_map.x_offset, mouse_pos[1] - root.handler.world_map.rect.y - root.handler.world_map.y_offset)
-            if cell.rect.collidepoint(rel_mouse_pos):
-                if self.cell_under_mouse != cell:
-                    self.cell_under_mouse = cell
-                    root.handler.gui.game.show_pawn_info(pawn, mouse_pos)
-                    root.update_gui()
-                return
-            root.handler.gui.game.hide_pawn_info()
+                    return
 
-        self.cell_under_mouse = self.default_cell
-        root.handler.gui.game.hide_pawn_info()
-        root.handler.gui.game.hide_building_info()
+        root.handler.gui.game.hide_info()
