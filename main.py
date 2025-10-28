@@ -32,8 +32,8 @@ def main():
             elif event.type == py.MOUSEBUTTONUP:
                 root.game.input_processor.process_mousebuttonup(event)
 
-        if root.game.input_processor.is_move_button_pressed():
-            root.game.input_processor.move()
+        if root.game.input_processor.game_input.is_move_button_pressed():
+            root.game.input_processor.game_input.move()
 
         if root.need_update_gui:
             root.game.gui.draw()

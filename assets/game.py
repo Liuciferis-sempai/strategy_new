@@ -15,15 +15,17 @@ from assets.policy.policytable import PolicyTable
 from assets.effects.effectmanager import EffectManager
 from assets.jobs.jobmanager import JobManager
 from assets.resources.resourcemanager import ResourceManager
-from assets.proccessing_input import InputKeyProcessor
+from assets.processing_input.proccessing_input import InputKeyProcessor
 
 
 class Game:
     def __init__(self):
         loading.draw("Loading variables...")
-        self.chosen_cell = Cell()
+        self._default_cell = Cell()
+        self._default_pawn = Pawn()
+        self.chosen_cell = self._default_cell
         self.chosen_cell_coord = self.chosen_cell.coord
-        self.opened_pawn = Pawn()
+        self.opened_pawn = self._default_pawn
         self.opened_pawn_coord = self.opened_pawn.coord
         self.targets_coord = (-1, -1)
 
@@ -61,7 +63,7 @@ class Game:
     
     def reset_chosen_cell(self):
         logger.info("chosen cell reset", "Game.reset_chosen_cell()")
-        self.chosen_cell = Cell()
+        self.chosen_cell = self._default_cell
         self.chosen_cell_coord = self.chosen_cell.coord
     
     def get_chosen_cell_coord(self) -> tuple[int, int]:
@@ -116,7 +118,7 @@ class Game:
 
     def reset_opened_pawn(self):
         logger.info("opened pawn reset", "Game.reset_opened_pawn()")
-        self.opened_pawn = Pawn()
+        self.opened_pawn = self._default_pawn
         self.opened_pawn_coord = self.opened_pawn.coord
 
     def get_target_coord(self):
