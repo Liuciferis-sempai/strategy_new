@@ -84,9 +84,11 @@ def start_the_game(game_name: str="New Game", game_seed: int=9999):
 
     loading.draw("Loading preset stuff...")
     #For the testrun
-    root.handler.buildings_manager.build("manufactory", (0, 0), root.player_id)
+    root.handler.buildings_manager.build("manufactory", (0, 1), root.player_id)
     root.handler.pawns_manager.spawn("pawn_0", (1, 0), root.player_id)
-    root.handler.pawns_manager.spawn("pawn_0", (2, 2), root.player_id)
-    root.handler.pawns_manager.add_resource(0, "resource_0", 2)
+    root.handler.pawns_manager.spawn("pawn_1", (2, 0), root.player_id)
+    root.handler.pawns_manager.spawn("pawn_2", (3, 0), root.player_id)
+    root.handler.pawns_manager.spawn("pawn_3", (4, 0), root.player_id)
+    #root.handler.pawns_manager.add_resource(0, "resource_0", 2)
 
     logger.info("game started", f"start_the_game({game_name}, {game_seed})")

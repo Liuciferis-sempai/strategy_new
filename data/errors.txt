@@ -1,0 +1,10 @@
+16:33:5.113852: ERROR [ImageManager.get_image(...)] -> Image 'data/buildings/img/manufactory.png' not found in ImageManager;
+16:33:5.113939: ERROR [ImageManager.get_image(...)] -> Image 'data/pawns/img/pawn_0.png' not found in ImageManager;
+16:33:5.114023: ERROR [ImageManager.get_image(...)] -> Image 'data/pawns/img/pawn_1.png' not found in ImageManager;
+16:33:5.114096: ERROR [ImageManager.get_image(...)] -> Image 'data/pawns/img/pawn_1.png' not found in ImageManager;
+16:33:5.114183: ERROR [ImageManager.get_image(...)] -> Image 'data/pawns/img/pawn_1.png' not found in ImageManager;
+16:33:6.723418: ERROR [Language.get(pawn_3)] -> Key 'pawn_3' not found in language 'english';
+16:33:7.485849: ERROR [Handler.get_chosen_cell()] -> query chosen cell before it is defined;
+16:33:8.422894: ERROR [ImageManager.get_image(...)] -> Image 'data/pawns/img/pawn_1.png' not found in ImageManager;
+16:33:10.392906: ERROR [Handler.get_chosen_cell()] -> query chosen cell before it is defined;
+16:33:10.689767: ERROR [ImageManager.get_image(...)] -> Image 'data/pawns/img/pawn_1.png' not found in ImageManager;

@@ -1,6 +1,7 @@
 from .work_with_files import write_txt_file
 #Clear logs
 write_txt_file("data/logs.txt", "")
+write_txt_file("data/errors.txt", "")
 from .logger import Logger
 logger = Logger()
 

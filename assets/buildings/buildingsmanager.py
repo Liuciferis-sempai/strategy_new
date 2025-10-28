@@ -67,14 +67,14 @@ class BuildingsManager:
         data["scheme"] = True
         cell = root.handler.world_map.get_cell_by_coord(coord)
         self.buildings[str(coord)] = Building(coord, cell, data.copy(), False)
-        cell.add_building({"name": data["name"], "desc": data["desc"], "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
+        cell.add_building({"name": data["name"], "desc": data["desc"], "coord": coord, "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
 
     def _build(self, data: dict, coord: tuple[int, int], fraction_id: int):
         data = data.copy()
         data["fraction_id"] = fraction_id
         cell = root.handler.world_map.get_cell_by_coord(coord)
         self.buildings[str(coord)] = Building(coord, cell, data.copy(), False)
-        cell.add_building({"name": data["name"], "desc": data["desc"], "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
+        cell.add_building({"name": data["name"], "desc": data["desc"], "coord": coord, "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
     
     def remove(self, coord: tuple[int, int]):
         building = self.buildings[str(coord)]

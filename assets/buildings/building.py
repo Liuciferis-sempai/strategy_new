@@ -240,7 +240,7 @@ class Building:
             self.level += 1
             for effect in self.data["upgrades"][str(self.level)]["effect"]:
                 self.do_change(effect["type"], effect["args"])
-            self.cell.buildings = {"name": self.data["name"], "desc": self.data["desc"], "img": self.data["img"], "fraction_id": self.data["fraction_id"], "type": self.data["type"], "level": self.data["level"]}
+            self.cell.buildings = {"name": self.data["name"], "desc": self.data["desc"], "coord": self.coord, "img": self.data["img"], "fraction_id": self.data["fraction_id"], "type": self.data["type"], "level": self.data["level"]}
 
     def do_change(self, type: str, args: dict[str, Any]):
         match type:

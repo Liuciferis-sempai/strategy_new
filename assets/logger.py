@@ -26,6 +26,9 @@ class Logger:
         self.logging_info["error"] += f"{self.get_time()}: ERROR [{func}] -> {message};\n"
 
     def write_down(self):
+        if self.logging_info["error"] != "":
+            with open("data/errors.txt", "a", encoding="utf-8") as f:
+                f.write(self.logging_info["error"])
         with open("data/logs.txt", "a", encoding="utf-8") as f:
             for log_type in self.logging_info:
                 f.write(self.logging_info[log_type])

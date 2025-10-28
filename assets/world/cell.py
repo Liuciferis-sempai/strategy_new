@@ -3,7 +3,7 @@ import assets.root as root
 from assets.root import logger
 
 class Cell(py.sprite.Sprite):
-    def __init__(self, position: tuple[int, int]=(0, 0), coord: tuple[int, int]=(0, 0), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
+    def __init__(self, position: tuple[int, int]=(-1, -1), coord: tuple[int, int]=(0, 0), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
         super().__init__()
         self.data = data
         self.position = position
@@ -26,7 +26,7 @@ class Cell(py.sprite.Sprite):
         self._set_graph()
     
     def __repr__(self) -> str:
-        return f"<Cell on coord {self.coord} with args: {self.type} | {self.flora.get("name", "none")} | {self.fauna.get("name", "none")}. Is {"not" if not self.is_default else ""} default>"
+        return f"<Cell {self.type} on coord {self.coord} has {len(self.pawns)} pawns and {0 if self.buildings == {} else 1} buildings>"
 
     def click(self, mouse_pos: tuple[int, int]):
         root.handler.set_chosen_cell(self)
@@ -71,7 +71,7 @@ class Cell(py.sprite.Sprite):
 
     def _open_building(self):
         if self.buildings.get("fraction_id") == root.player_id:
-            root.handler.gui.game.open_building()
+            root.handler.gui.game.open_building(self.buildings)
         #root.handler.gui.game.open_main_info_window({"title": self.buildings.get("name"), "text": self.buildings.get("desc")})
 
     def change_type(self, new_type: str):

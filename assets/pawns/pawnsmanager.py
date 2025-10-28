@@ -54,15 +54,14 @@ class PawnsManager:
         data = data.copy()
         data["fraction_id"] = fraction_id
         cell = root.handler.world_map.get_cell_by_coord(coord)
-        if cell != None:
-            pawn_id = self.available_pawn_id
-            self.available_pawn_id += 1
-            data["id"] = pawn_id
-            data["coord"] = coord
+        pawn_id = self.available_pawn_id
+        self.available_pawn_id += 1
+        data["id"] = pawn_id
+        data["coord"] = coord
 
-            self.pawns.append(Pawn(pawn_id, coord, data, False))
-            cell.add_pawn(data)
-            logger.info(f"Spawned pawn id {pawn_id} of type {data.get('type', 'unknown')} at {coord}", f"PawnsManager._spawn({data}, {coord}, {fraction_id})")
+        self.pawns.append(Pawn(pawn_id, coord, data, False))
+        cell.add_pawn(data)
+        logger.info(f"Spawned pawn id {pawn_id} of type {data.get('type', 'unknown')} at {coord}", f"PawnsManager._spawn({data}, {coord}, {fraction_id})")
 
     def despawn(self, id: int):
         for pawn in self.pawns:
@@ -101,12 +100,15 @@ class PawnsManager:
         pawn.coord = new_cell.coord
         pawn.data["coord"] = new_cell.coord
         new_cell.add_pawn(pawn.data)
+        
         pawn.data["movement_points"] = new_cell.data["subdata"]["movement_points"]
         root.handler.world_map.unmark_region("for_move")
         root.handler.turn_manager.add_event_in_queue(1, {"do": "restore_movement_points", "event_data": {"target": pawn}})
         root.handler.reset_opened_pawn()
+        
+        logger.info(f"{pawn} moved from {old_cell} to {new_cell}", f"PawnsManager.move_pawn(...)")
 
-    def try_to_move_pawn(self, pawn: Pawn, new_cell):
+    def try_to_move_pawn(self, pawn: Pawn, new_cell: Cell):
         if new_cell in root.handler.world_map.marked_region["for_move"]:
             if new_cell.pawns != [] or new_cell.buildings != {}:
                 root.handler.gui.game.set_target_coord(new_cell.coord)

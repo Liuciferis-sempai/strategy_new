@@ -30,7 +30,7 @@ class GUIBuildings:
         self.building_name = TextField(root.interface_size*2, 60, position=(root.cell_sizes[root.cell_size_scale][0]+20, 10), text=f"{chosen_cell.buildings["name"]}") #type: ignore
         self.building_desc = TextField(root.interface_size*2, 60, position=(10, 80), text=f"{chosen_cell.buildings["desc"]}") #type: ignore
         self.building_level = TextField(60, 60, position=(root.cell_sizes[root.cell_size_scale][0]+self.building_name.rect.width+30, 10), text=f"lvl {chosen_cell.buildings["level"]}") #type: ignore
-        building = root.handler.buildings_manager.get_building_by_coord(root.handler.get_chosen_cell_coord())
+        building = root.handler.buildings_manager.get_building_by_coord(chosen_cell.coord)
         self.buildings_queue = []
         i = 0
         if building.data.get("max_queue", False):

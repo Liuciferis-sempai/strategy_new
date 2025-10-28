@@ -18,8 +18,6 @@ class GUIGame:
 
         self.header_content = [FractionButton(), TechnologyButton(), PolicyButton()]
 
-        self.opened_object = None
-
         self.targets_coord = (-1, -1)
 
         self.next_turn_button = NextTurnButton()
@@ -63,8 +61,8 @@ class GUIGame:
 
     def set_standard_footer(self):
         self.footer_content = [self.next_turn_button, self.show_scheme_list_button]
-    
-    def change_position_for_new_screen_sizes(self):
+
+    def update_header_info_content(self) -> int:
         # Change position of header info content
         header_info_tab = 1
         for i, item in enumerate(self.header_info_content):
@@ -77,7 +75,9 @@ class GUIGame:
                     item_position = (10, item_position[1]+root.info_box_size[1]+5)
                     header_info_tab += 1
                 item.change_position(item_position)
+        return header_info_tab
 
+    def update_header_tab_content(self, header_info_tab: int) -> tuple[int, int]:
         # Header
         header_tab = 0
         for i, item in enumerate(self.header_content):
@@ -90,7 +90,9 @@ class GUIGame:
                     item_position = (10, item_position[1]+root.button_standard_size[1]+20)
                     header_tab += 1
                 item.change_position(item_position)
-
+        return header_info_tab, header_tab
+    
+    def update_footer_tab_content(self) -> int:
         # Footer
         footer_tab = 0
         for i, item in enumerate(self.footer_content):
@@ -105,6 +107,13 @@ class GUIGame:
                     item_position = (10, root.window_size[1]-root.button_standard_size[1]-20)
                     footer_tab += 1
                 item.change_position(item_position)
+
+        return footer_tab
+    
+    def change_position_for_new_screen_sizes(self):
+        header_info_tab = self.update_header_info_content()
+        header_info_tab, header_tab = self.update_header_tab_content(header_info_tab)
+        footer_tab = self.update_footer_tab_content()
         
         # Main info window
         if self.main_info_window_content:
@@ -126,7 +135,6 @@ class GUIGame:
     
     def main_info_window_content_close(self):
         self.main_info_window_content.close()
-        self.opened_object = None
         self.set_standard_footer()
         update_gui()
 
@@ -141,27 +149,26 @@ class GUIGame:
         self.scheme_list = []
         for i, building in enumerate(self.buildings_list.get(building_type, [])):
             self.scheme_list.append(Icon(root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1], position=(root.interface_size+10+(root.cell_sizes[root.cell_size_scale][1]*i), root.handler.world_map.rect.bottomleft[1]-root.cell_sizes[root.cell_size_scale][1]), img=f"{building.data['img']}", spec_path="data/buildings/img", bg=(125, 125, 125, 255))) #type: ignore
-        self.change_position_for_new_screen_sizes()
+        #self.change_position_for_new_screen_sizes()
         update_gui()
 
     def open_scheme_list(self):
         self.buildings_list = root.handler.buildings_manager.get_all_unique_buildings_sorted_by_types(True)
         self.buildings_types_list = ListOf(list(self.buildings_list.keys()), position=(0, root.handler.world_map.rect.bottomleft[1]), type_of_list="scheme_list", open_direction="up")
-        self.change_position_for_new_screen_sizes()
+        #self.change_position_for_new_screen_sizes()
         update_gui()
 
-    def open_building(self):
+    def open_building(self, buildings_dict: dict):
+        buildings = root.handler.buildings_manager.get_building_by_coord(buildings_dict["coord"])
         self.footer_content = [self.next_turn_button, self.open_building_interface_button, self.open_inventory_button]
-        if root.handler.buildings_manager.get_building_by_coord(root.handler.get_chosen_cell_coord()).is_workbench: #type: ignore
+        if buildings.is_workbench: #type: ignore
             self.footer_content.append(self.open_reciept_button)
-        self.opened_object = root.handler.get_chosen_cell().buildings
-        self.change_position_for_new_screen_sizes()
+        self.update_footer_tab_content()
         update_gui()
 
     def open_pawn(self):
         self.footer_content = [self.next_turn_button, self.show_job_button, self.open_inventory_button]
-        self.opened_object = root.handler.get_opened_pawn()
-        self.change_position_for_new_screen_sizes()
+        self.update_footer_tab_content()
         update_gui()
     
     def show_jobs(self):

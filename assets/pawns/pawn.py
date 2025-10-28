@@ -23,7 +23,7 @@ class Pawn:
         self.max_hp_mod = data.get("hp_mod", {})
     
     def __repr__(self) -> str:
-        return f"<Pawn {self.type} with id {self.id} on coord {self.coord}. Is {"not" if not self.is_default else ""} default>"
+        return f"<Pawn {self.type} with id {self.id} on coord {self.coord}>"
     
     def add_resource(self, resource:str, amout:int):
         if len(self.inventory) < self.inventory_size:

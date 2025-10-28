@@ -21,6 +21,7 @@ class Language:
                 return key[1:]
             translate = self.language.get(key, None)
             if translate is None:
+                self.language[key] = key
                 logger.error(f"Key '{key}' not found in language '{self.language_name}'", f"Language.get({key})")
                 return key
             else:
@@ -38,6 +39,7 @@ class Language:
 
             if translate is None:
                 logger.error(f"Key '{key}' not found in language '{self.language_name}'", f"Language._translate_multiple_keys({keys})")
+                self.language[key] = key
                 data += f" {key}"
             else:
                 data += f" {translate}"

@@ -178,8 +178,8 @@ class WorldMap(py.sprite.Sprite):
         self.image.blit(cell.bg_image, cell_position)
 
     def mark_region(self, coord: tuple[int, int], color: tuple[int, int, int, int]=(255, 0, 0, 100), radius:int=1, mark_type:str="for_move"):
-        for x in range(coord[0]-radius, coord[0]+radius+1):
-            for y in range(coord[1]-radius, coord[1]+radius+1):
+        for y in range(coord[0]-radius, coord[0]+radius+1):
+            for x in range(coord[1]-radius, coord[1]+radius+1):
                 if 0 <= x < root.world_map_size[0] and 0 <= y < root.world_map_size[1]:
                     cell = self.get_cell_by_coord((x, y))
                     if cell:
@@ -201,8 +201,8 @@ class WorldMap(py.sprite.Sprite):
                             self._add_mark(cell, "for_move")
 
     def _mark_movement_region(self, coord: tuple[int, int], movement_points: int=1, color: tuple[int, int, int, int]=(0, 0, 255, 100)):
-        for x in range(coord[0]-1, coord[0]+2):
-            for y in range(coord[1]-1, coord[1]+2):
+        for y in range(coord[1]-1, coord[1]+2):
+            for x in range(coord[0]-1, coord[0]+2):
                 if 0 <= x < root.world_map_size[0] and 0 <= y < root.world_map_size[1]:
                     cell = self.get_cell_by_coord((x, y))
                     if cell:
@@ -269,14 +269,10 @@ class WorldMap(py.sprite.Sprite):
 
     def get_cell_by_coord(self, coord: tuple[int, int]) -> Cell:
         try:
-            return self.terrain[coord[0]][coord[1]]
+            return self.terrain[coord[1]][coord[0]]
         except:
             logger.warning(f"Cell coord {coord} is not founded", f"WorldMap.get_cell_by_coord({coord})")
             return Cell()
-    
-    def get_cell_under_mouse(self):
-        mouse_pos = py.mouse.get_pos()
-
 
     def change_cell_by_coord(self, coord: tuple[int, int], new_type: str):
         cell = self.terrain[coord[0]][coord[1]]

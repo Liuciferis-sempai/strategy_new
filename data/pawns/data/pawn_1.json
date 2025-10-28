@@ -1,0 +1,11 @@
+{
+    "name": "pawn_1",
+    "desc": "pawn_1_desc",
+    "img": "pawn_1.png",
+    "ico": "pawn_1.png",
+    "type": "pawn_type_1",
+    "movement_points": 1.5,
+    "movement_points_max": 1.5,
+    "inventory_size": 5,
+    "max_hp": 100
+}
