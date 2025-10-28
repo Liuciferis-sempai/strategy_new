@@ -138,7 +138,7 @@ class PawnsManager:
 
                 root.game.world_map.unmark_region("for_move")
 
-                root.game.gui.clouse_all_extra_windows()
+                root.game.gui.close_all_extra_windows()
                 logger.info(f"Pawn '{pawn.id}' will do job '{job_id}'", f"PawnsManager.do_job({pawn}, {job_id})")
                 #print(f"pawn {pawn["id"]} will do {result["type"]} with args: {result["args"]} and finish after {job["work_time"]} turn(s)")
         else:

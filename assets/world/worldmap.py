@@ -62,8 +62,9 @@ class WorldMap(py.sprite.Sprite):
             else:
                 root.game.pawns_manager.try_to_move_pawn(root.game.get_opened_pawn(), cell)
                 return
-        if root.game.get_chosen_cell() != cell:
-            self.unchose_cell()
+        #if not root.game.is_chosen_cell_default():
+        #    if root.game.get_chosen_cell() != cell:
+        #        self.unchose_cell()
         cell.click(rel_mouse_pos)
         cell.mark((255, 0, 0, 100))
         self._draw_cell(cell)

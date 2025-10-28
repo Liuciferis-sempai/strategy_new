@@ -25,6 +25,7 @@ class Game:
         self.chosen_cell_coord = self.chosen_cell.coord
         self.opened_pawn = Pawn()
         self.opened_pawn_coord = self.opened_pawn.coord
+        self.targets_coord = (-1, -1)
 
         loading.draw("Loading game...")
         self.allFractions = AllFactions()
@@ -82,9 +83,9 @@ class Game:
     
     def get_opened_pawn_coord(self) -> tuple[int, int]:
         if self.opened_pawn.is_default:
-            logger.error(f"query opened pawn before it is defined", "Game.get_opened_pawn_coord")
+            logger.error(f"query opened pawn coord before it is defined", "Game.get_opened_pawn_coord()")
         #else:
-        #    logger.info(f"query opened pawn: {self.opened_pawn_coord}", "Game.get_opened_pawn_coord")
+        #    logger.info(f"query opened pawn: {self.opened_pawn_coord}", "Game.get_opened_pawn_coord()")
         return self.opened_pawn_coord
     
     def is_opened_pawn_default(self) -> bool:
@@ -108,6 +109,7 @@ class Game:
                 logger.error("new pawn is default. Something is wrong", f"Game.set_open_pawn({new_pawn})")
         else:
             logger.error(f"attempt to assign an impossible value to opened pawn", f"Game.set_opened_pawn({new_pawn})")
+        self.update_opened_pawn_coord()
 
     def update_opened_pawn_coord(self):
         self.opened_pawn_coord = self.opened_pawn.coord
@@ -116,3 +118,22 @@ class Game:
         logger.info("opened pawn reset", "Game.reset_opened_pawn()")
         self.opened_pawn = Pawn()
         self.opened_pawn_coord = self.opened_pawn.coord
+
+    def get_target_coord(self):
+        if self.is_target_coord_default():
+            logger.error(f"query target coord before it is defined", "Game.get_target_coord()")
+        return self.targets_coord
+    
+    def set_target_coord(self, new_target_coord: tuple[int, int]):
+        logger.info(f"target coord changet from {self.targets_coord} to {new_target_coord}", f"GUIGame.set_target_coord({new_target_coord})")
+        self.targets_coord = new_target_coord
+
+    def reset_target_coord(self):
+        logger.info(f"target coord reset", "GUIGame.set_target_coord_null()")
+        self.targets_coord = (-1, -1)
+    
+    def is_target_coord_default(self):
+        if self.targets_coord == (-1, -1):
+            logger.warning("target coord is default", "Game.is_target_coord_default()")
+            return True
+        return False

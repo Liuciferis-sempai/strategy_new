@@ -18,7 +18,7 @@ def change_window_state(new_state:str):
             root.game.input_processor.process_keydown = root.game.input_processor.process_keydown_game
             root.game.input_processor.process_mousebuttondown = root.game.input_processor.process_mousebuttondown_game
             root.game.input_processor.process_mousemotion = root.game.input_processor.process_mousemotion_game
-            root.game.gui.clouse_all_extra_windows()
+            root.game.gui.close_all_extra_windows()
         case "fraction":
             root.game.gui.draw = root.game.gui.fraction.draw
             root.game.input_processor.process_keydown = root.game.input_processor.process_keydown_fraction

@@ -15,7 +15,7 @@ class Language:
             return key
 
         if " " in key:
-            return self._translate_multiple_keys(key.split(":"))
+            return self._translate_multiple_keys(key.split(" "))
         else:
             if key[0] == "*":
                 return key[1:]

@@ -83,9 +83,7 @@ class InputKeyProcessor:
             elif root.game.gui.game.sticked_object != None:
                 root.game.gui.game.sticked_object = None
             elif any([root.game.gui.game.jobs_list, root.game.gui.game.buildings_types_list, root.game.gui.game.action_list]):
-                root.game.gui.game.hide_jobs()
-                root.game.gui.game.hide_action_list()
-                root.game.gui.game.hide_scheme_list()
+                root.game.gui.close_all_extra_windows()
         elif event.key == py.K_UP:
             root.cell_size_scale += 1
             if root.cell_size_scale > len(root.cell_sizes)-1:
@@ -228,9 +226,7 @@ class InputKeyProcessor:
 
             if root.game.gui.game.world_map:
                 if root.game.gui.game.world_map.rect.collidepoint(mouse_pos):
-                    root.game.gui.game.hide_jobs()
-                    root.game.gui.game.hide_action_list()
-                    root.game.gui.game.hide_scheme_list()
+                    root.game.gui.close_all_extra_windows()
                     root.game.gui.game.world_map.click(mouse_pos, 1)
                     return
 
@@ -253,16 +249,13 @@ class InputKeyProcessor:
             #            return
 
             root.game.gui.game.main_info_window_content_close()
-            root.game.gui.game.hide_jobs()
-            root.game.gui.game.hide_action_list()
+            root.game.gui.close_all_extra_windows()
             update_gui()
             
         elif event.button == 3:
             if root.game.gui.game.world_map:
                 if root.game.gui.game.world_map.rect.collidepoint(mouse_pos):
-                    root.game.gui.game.hide_jobs()
-                    root.game.gui.game.hide_action_list()
-                    root.game.gui.game.hide_scheme_list()
+                    root.game.gui.close_all_extra_windows()
                     root.game.gui.game.world_map.click(mouse_pos, 3)
                     return
 

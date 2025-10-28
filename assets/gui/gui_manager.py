@@ -46,9 +46,11 @@ class GUI:
         self.sharemenu.change_position_for_new_screen_sizes()
         self.inventory.change_position_for_new_screen_sizes()
 
-    def clouse_all_extra_windows(self):
+    def close_all_extra_windows(self):
         self.game.hide_jobs()
         self.game.hide_action_list()
+        self.game.hide_info()
+        self.game.hide_scheme_list()
         self.game.main_info_window_content_close()
 
     def draw(self):

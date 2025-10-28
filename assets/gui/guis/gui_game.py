@@ -18,8 +18,6 @@ class GUIGame:
 
         self.header_content = [FractionButton(), TechnologyButton(), PolicyButton()]
 
-        self.targets_coord = (-1, -1)
-
         self.next_turn_button = NextTurnButton()
         self.show_scheme_list_button = SchemeListButton()
         self.open_building_interface_button = BuildingButton()
@@ -43,21 +41,6 @@ class GUIGame:
         self.sticked_object = None
 
         self.change_position_for_new_screen_sizes()
-
-    def get_target_coord(self):
-        if self.targets_coord == (-1, -1):
-            logger.error(f"target coord are {self.targets_coord}", "GUIGame.get_target_coord()")
-        #else:
-        #    logger.info(f"target coord are {self.targets_coord}", "GUIGame.get_target_coord()")
-        return self.targets_coord
-    
-    def set_target_coord(self, new_target_coord: tuple[int, int]):
-        logger.info(f"target coord changet from {self.targets_coord} to {new_target_coord}", f"GUIGame.set_target_coord({new_target_coord})")
-        self.targets_coord = new_target_coord
-
-    def set_target_coord_null(self):
-        logger.info(f"target coord reset", "GUIGame.set_target_coord_null()")
-        self.targets_coord = (-1, -1)
 
     def set_standard_footer(self):
         self.footer_content = [self.next_turn_button, self.show_scheme_list_button]
@@ -252,7 +235,6 @@ class GUIGame:
 
     def hide_action_list(self):
         self.action_list = None
-        self.set_target_coord_null()
         update_gui()
     
     def hide_jobs(self):

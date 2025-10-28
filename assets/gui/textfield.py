@@ -24,7 +24,7 @@ class TextField(py.sprite.Sprite):
         self.text_rect = self.text_surface.get_rect(topleft=(self.position[0] + 5, self.position[1] + (self.height - self.text_surface.get_height()) // 2))
     
     def set_text(self, new_text:str):
-        self.text = new_text
+        self.text = root.language.get(new_text) if not self._can_be_int(new_text) else str(new_text)
         self.update_text_surface()
     
     def draw(self):
