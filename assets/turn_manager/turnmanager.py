@@ -9,23 +9,23 @@ class TurnManager:
 
     def do_step(self):
         self.turn += 1
-        root.handler.gui.game.turn_counter.change_value(1)
+        root.game.gui.game.turn_counter.change_value(1)
 
         for event in self.events:
             if event["turn"] == self.turn:
                 logger.info(f"Executing turn event: {event}", f"TurnManager.do_step()")
-                root.handler.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
+                root.game.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
 
     def add_event_in_queue(self, time: int, event: dict):
         '''
         event = {"do": event_type, "event_data": {"att": data...}}
 
         instead of {"att": data...} all attributes for the effects to be executed must be specified
-        for example: {"do": event_type, "event_data": {"cell": root.handler.get_chosen_cell(), "resource": {"resource_0": 10, "resource_1": 5}}}
+        for example: {"do": event_type, "event_data": {"cell": root.game.get_chosen_cell(), "resource": {"resource_0": 10, "resource_1": 5}}}
         '''
         if time == 0:
             logger.info(f"event {event} has time {time} (0) and will be executed on this turn {self.turn}", f"TurnManager.add_event_in_queue({time}, {event})")
-            root.handler.effect_manager.do(event["do"], event["event_data"])
+            root.game.effect_manager.do(event["do"], event["event_data"])
         elif time < 0:
             logger.error("Time for event must be a positive integer or zero", f"TurnManager.add_event_in_queue({time}, {event})")
         else:

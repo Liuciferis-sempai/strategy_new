@@ -19,24 +19,24 @@ def main():
             elif event.type == py.VIDEORESIZE:
                 root.window_size = event.w, event.h
                 root.screen = py.display.set_mode(root.window_size, py.RESIZABLE)
-                root.handler.update_positions()
+                root.game.update_positions()
                 update_gui()
             elif event.type == py.MOUSEMOTION:
-                root.handler.input_processor.process_mousemotion(event)
+                root.game.input_processor.process_mousemotion(event)
             elif event.type == py.MOUSEBUTTONDOWN:
-                root.handler.input_processor.process_mousebuttondown(event)
+                root.game.input_processor.process_mousebuttondown(event)
             elif event.type == py.KEYDOWN:
-                root.handler.input_processor.process_keydown(event)
+                root.game.input_processor.process_keydown(event)
             elif event.type == py.KEYUP:
-                root.handler.input_processor.process_keyup(event)
+                root.game.input_processor.process_keyup(event)
             elif event.type == py.MOUSEBUTTONUP:
-                root.handler.input_processor.process_mousebuttonup(event)
+                root.game.input_processor.process_mousebuttonup(event)
 
-        if root.handler.input_processor.is_move_button_pressed():
-            root.handler.input_processor.move()
+        if root.game.input_processor.is_move_button_pressed():
+            root.game.input_processor.move()
 
         if root.need_update_gui:
-            root.handler.gui.draw()
+            root.game.gui.draw()
         else:
             logger.write_down()
 

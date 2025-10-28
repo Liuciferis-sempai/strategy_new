@@ -38,7 +38,7 @@ class GUIGame:
         self.set_standard_footer()
 
         self.main_info_window_content = InfoBox(title="Info Box", text="Description", position=(root.window_size[0]-root.interface_size*2, 20))
-        self.world_map = root.handler.world_map
+        self.world_map = root.game.world_map
 
         self.sticked_object = None
 
@@ -148,18 +148,18 @@ class GUIGame:
     def open_scheme_type(self, building_type: str):
         self.scheme_list = []
         for i, building in enumerate(self.buildings_list.get(building_type, [])):
-            self.scheme_list.append(Icon(root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1], position=(root.interface_size+10+(root.cell_sizes[root.cell_size_scale][1]*i), root.handler.world_map.rect.bottomleft[1]-root.cell_sizes[root.cell_size_scale][1]), img=f"{building.data['img']}", spec_path="data/buildings/img", bg=(125, 125, 125, 255))) #type: ignore
+            self.scheme_list.append(Icon(root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1], position=(root.interface_size+10+(root.cell_sizes[root.cell_size_scale][1]*i), root.game.world_map.rect.bottomleft[1]-root.cell_sizes[root.cell_size_scale][1]), img=f"{building.data['img']}", spec_path="data/buildings/img", bg=(125, 125, 125, 255))) #type: ignore
         #self.change_position_for_new_screen_sizes()
         update_gui()
 
     def open_scheme_list(self):
-        self.buildings_list = root.handler.buildings_manager.get_all_unique_buildings_sorted_by_types(True)
-        self.buildings_types_list = ListOf(list(self.buildings_list.keys()), position=(0, root.handler.world_map.rect.bottomleft[1]), type_of_list="scheme_list", open_direction="up")
+        self.buildings_list = root.game.buildings_manager.get_all_unique_buildings_sorted_by_types(True)
+        self.buildings_types_list = ListOf(list(self.buildings_list.keys()), position=(0, root.game.world_map.rect.bottomleft[1]), type_of_list="scheme_list", open_direction="up")
         #self.change_position_for_new_screen_sizes()
         update_gui()
 
     def open_building(self, buildings_dict: dict):
-        buildings = root.handler.buildings_manager.get_building_by_coord(buildings_dict["coord"])
+        buildings = root.game.buildings_manager.get_building_by_coord(buildings_dict["coord"])
         self.footer_content = [self.next_turn_button, self.open_building_interface_button, self.open_inventory_button]
         if buildings.is_workbench: #type: ignore
             self.footer_content.append(self.open_reciept_button)
@@ -172,8 +172,8 @@ class GUIGame:
         update_gui()
     
     def show_jobs(self):
-        if not root.handler.is_opened_pawn_default():
-            self.jobs_list = ListOf(root.handler.job_manager.get_jobs_id_for_pawn(root.handler.get_opened_pawn()), position=self.show_job_button.rect.topleft, type_of_list="job_list")
+        if not root.game.is_opened_pawn_default():
+            self.jobs_list = ListOf(root.game.job_manager.get_jobs_id_for_pawn(root.game.get_opened_pawn()), position=self.show_job_button.rect.topleft, type_of_list="job_list")
         update_gui()
 
     def show_info(self, cell: Cell, mouse_pos: tuple[int, int]):
@@ -182,19 +182,19 @@ class GUIGame:
         y_offset = 0
         if cell.buildings != {}:
             cell_info.append([])
-            building = root.handler.buildings_manager.get_building_by_coord(cell.coord)
+            building = root.game.buildings_manager.get_building_by_coord(cell.coord)
 
             building_name = TextField(text=building.name, 
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+10
                                         ), font_size=20)
-            building_service = TextField(text=f"service:*{building.get_service()}/{building.get_max_service()}",
+            building_service = TextField(text=f"service *{building.get_service()}/{building.get_max_service()}",
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+building_name.text_rect.height+10
                                         ), font_size=20)
-            building_hp = TextField(text=f"hp:*{building.get_hp()}/{building.get_max_hp()}",
+            building_hp = TextField(text=f"hp *{building.get_hp()}/{building.get_max_hp()}",
                                     position=(
                                         mouse_pos[0]+10,
                                         mouse_pos[1]+building_name.text_rect.height+building_service.text_rect.height+10
@@ -209,13 +209,13 @@ class GUIGame:
         if cell.pawns != []:
             for pawn_in_cell in cell.pawns:
                 cell_info.append([])
-                pawn = root.handler.pawns_manager.get_pawn_by_id(pawn_in_cell["id"])
+                pawn = root.game.pawns_manager.get_pawn_by_id(pawn_in_cell["id"])
                 pawns_name = TextField(text=pawn.name,
                                        position=(
                                            mouse_pos[0]+10,
                                            mouse_pos[1]+y_offset+10
                                        ), font_size=20)
-                pawns_hp = TextField(text=f"hp:*{pawn.get_hp()}/{pawn.get_max_hp()}",
+                pawns_hp = TextField(text=f"hp *{pawn.get_hp()}/{pawn.get_max_hp()}",
                                     position=(
                                         mouse_pos[0]+10,
                                         mouse_pos[1]+y_offset+pawns_name.text_rect.height+10
@@ -270,14 +270,14 @@ class GUIGame:
             open_direction = "up"
         else:
             open_direction = "down"
-        if not root.handler.is_opened_pawn_default():
+        if not root.game.is_opened_pawn_default():
             action_list = []
             for pawn in pawns:
                 if pawn["fraction_id"] != root.player_id:
                     action_list.append(f"attack.{pawn["name"]}")
                 else:
                     action_list.append(f"share.with_{pawn["name"]}")
-                    if pawn["type"] != root.handler.get_opened_pawn().type and "stand_here" not in action_list:
+                    if pawn["type"] != root.game.get_opened_pawn().type and "stand_here" not in action_list:
                         action_list.append("stand_here")
             if buildings.get("fraction_id") == root.player_id:
                 action_list.append(f"share.with_{buildings["name"]}")

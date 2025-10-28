@@ -13,7 +13,7 @@ class GUIFraction:
         self.fraction_name_edit_button = FractionNameEditButton()
     
     def open_player_fraction(self):
-        self.player_fraction = root.handler.allFractions.get_player_fraction()
+        self.player_fraction = root.game.allFractions.get_player_fraction()
         if not self.player_fraction:
             logger.error("Cannot find player fraction", "GUIFraction.open_player_fraction()")
             return

@@ -33,7 +33,7 @@ class Pawn:
                     if item.name == resource:
                         remainder = item.add(amout)
             if remainder > 0:
-                self.inventory.append(root.handler.resource_manager.create(resource, remainder))
+                self.inventory.append(root.game.resource_manager.create(resource, remainder))
             self.optimize_inventory()
     
     def remove_resource(self, resource:str, amout:int) -> bool:
@@ -77,4 +77,4 @@ class Pawn:
             self.destroy()
     
     def destroy(self):
-        root.handler.pawns_manager.despawn(self.id)
+        root.game.pawns_manager.despawn(self.id)

@@ -49,7 +49,7 @@ class Techtree:
         for tech in self.techs:
             if tech.rect.collidepoint(mouse_pos):
                 if tech.is_allowed():
-                    root.handler.allFractions.edit_fraction(id=root.player_id, data={"set": True, "research_technology": tech.data.get("id")})
+                    root.game.allFractions.edit_fraction(id=root.player_id, data={"set": True, "research_technology": tech.data.get("id")})
                     if self.chosen_tech is not None:
                         self.chosen_tech.chosen = False
                         self.chosen_tech.chosen_tech()
@@ -61,7 +61,7 @@ class Techtree:
         return False
 
     def set_none_tech(self):
-        root.handler.allFractions.edit_fraction(id=root.player_id, data={"set": True, "research_technology": "none_technology"})
+        root.game.allFractions.edit_fraction(id=root.player_id, data={"set": True, "research_technology": "none_technology"})
         if self.chosen_tech is not None:
             self.chosen_tech.chosen = False
             self.chosen_tech.chosen_tech()

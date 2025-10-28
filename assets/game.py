@@ -18,7 +18,7 @@ from assets.resources.resourcemanager import ResourceManager
 from assets.proccessing_input import InputKeyProcessor
 
 
-class Handler:
+class Game:
     def __init__(self):
         loading.draw("Loading variables...")
         self.chosen_cell = Cell()
@@ -26,7 +26,7 @@ class Handler:
         self.opened_pawn = Pawn()
         self.opened_pawn_coord = self.opened_pawn.coord
 
-        loading.draw("Loading handler...")
+        loading.draw("Loading game...")
         self.allFractions = AllFactions()
         self.world_map = WorldMap()
         self.gui = GUI()
@@ -47,27 +47,27 @@ class Handler:
         self.policy_table.update_positions()
 
     def set_chosen_cell(self, new_chosen_cell: Cell):
-        logger.info(f"chosen cell changed from {self.chosen_cell} to {new_chosen_cell}", f"Handler.set_chosen_cell({new_chosen_cell})")
+        logger.info(f"chosen cell changed from {self.chosen_cell} to {new_chosen_cell}", f"Game.set_chosen_cell({new_chosen_cell})")
         self.chosen_cell = new_chosen_cell
         self.chosen_cell_coord = self.chosen_cell.coord
     
     def get_chosen_cell(self) -> Cell:
         if self.chosen_cell.is_default:
-            logger.error(f"query chosen cell before it is defined", "Handler.get_chosen_cell()")
+            logger.error(f"query chosen cell before it is defined", "Game.get_chosen_cell()")
         #else:
-        #    logger.info(f"query chosen cell: {self.chosen_cell}", "Handler.get_chosen_cell()")
+        #    logger.info(f"query chosen cell: {self.chosen_cell}", "Game.get_chosen_cell()")
         return self.chosen_cell
     
     def reset_chosen_cell(self):
-        logger.info("chosen cell reset", "Handler.reset_chosen_cell()")
+        logger.info("chosen cell reset", "Game.reset_chosen_cell()")
         self.chosen_cell = Cell()
         self.chosen_cell_coord = self.chosen_cell.coord
     
     def get_chosen_cell_coord(self) -> tuple[int, int]:
         if self.chosen_cell.is_default:
-            logger.error(f"query chosen cell coord before chosen cell is defined", "Handler.get_chosen_cell_coord()")
+            logger.error(f"query chosen cell coord before chosen cell is defined", "Game.get_chosen_cell_coord()")
         #else:
-        #    logger.info(f"query chosen cell coord: {self.chosen_cell_coord}", "Handler.get_chosen_cell_coord()")
+        #    logger.info(f"query chosen cell coord: {self.chosen_cell_coord}", "Game.get_chosen_cell_coord()")
         return self.chosen_cell_coord
     
     def is_chosen_cell_default(self) -> bool:
@@ -75,44 +75,44 @@ class Handler:
     
     def get_opened_pawn(self) -> Pawn:
         if self.opened_pawn.is_default:
-            logger.error(f"query opened pawn before it is defined", "Handler.get_opened_pawn()")
+            logger.error(f"query opened pawn before it is defined", "Game.get_opened_pawn()")
         #else:
-        #    logger.info(f"query opened pawn: {self.opened_pawn}", "Handler.get_opened_pawn()")
+        #    logger.info(f"query opened pawn: {self.opened_pawn}", "Game.get_opened_pawn()")
         return self.opened_pawn
     
     def get_opened_pawn_coord(self) -> tuple[int, int]:
         if self.opened_pawn.is_default:
-            logger.error(f"query opened pawn before it is defined", "Handler.get_opened_pawn_coord")
+            logger.error(f"query opened pawn before it is defined", "Game.get_opened_pawn_coord")
         #else:
-        #    logger.info(f"query opened pawn: {self.opened_pawn_coord}", "Handler.get_opened_pawn_coord")
+        #    logger.info(f"query opened pawn: {self.opened_pawn_coord}", "Game.get_opened_pawn_coord")
         return self.opened_pawn_coord
     
     def is_opened_pawn_default(self) -> bool:
         if self.opened_pawn.is_default:
-            logger.warning("opened pawn is default", "Handler.is_opened_pawn_default()")
+            logger.warning("opened pawn is default", "Game.is_opened_pawn_default()")
         return self.opened_pawn.is_default
     
     def set_opened_pawn(self, new_pawn: Pawn|dict):
-        logger.info(f"open pawn {new_pawn}", f"Handler.set_opened_pawn({new_pawn})")
+        logger.info(f"open pawn {new_pawn}", f"Game.set_opened_pawn({new_pawn})")
         if isinstance(new_pawn, dict):
             new_pawn = self.pawns_manager.get_pawn_by_id(new_pawn["id"]) #type: ignore
-            logger.info(f"new pawn was dict. now is {new_pawn}", f"Handler.set_opened_pawn({new_pawn})")
+            logger.info(f"new pawn was dict. now is {new_pawn}", f"Game.set_opened_pawn({new_pawn})")
             if new_pawn.is_default:
-                logger.error("new pawn is default. Something is wrong", f"Handler.set_opened_pawn({new_pawn})")
+                logger.error("new pawn is default. Something is wrong", f"Game.set_opened_pawn({new_pawn})")
 
         if isinstance(new_pawn, Pawn):
-            logger.info(f"opened pawn changed from {self.opened_pawn} to {new_pawn}", f"Handler.set_opened_pawn({new_pawn})")
+            logger.info(f"opened pawn changed from {self.opened_pawn} to {new_pawn}", f"Game.set_opened_pawn({new_pawn})")
             self.opened_pawn = new_pawn
             self.opened_pawn_coord = self.opened_pawn.coord
             if self.opened_pawn.is_default:
-                logger.error("new pawn is default. Something is wrong", f"Handler.set_open_pawn({new_pawn})")
+                logger.error("new pawn is default. Something is wrong", f"Game.set_open_pawn({new_pawn})")
         else:
-            logger.error(f"attempt to assign an impossible value to opened pawn", f"Handler.set_opened_pawn({new_pawn})")
+            logger.error(f"attempt to assign an impossible value to opened pawn", f"Game.set_opened_pawn({new_pawn})")
 
     def update_opened_pawn_coord(self):
         self.opened_pawn_coord = self.opened_pawn.coord
 
     def reset_opened_pawn(self):
-        logger.info("opened pawn reset", "Handler.reset_opened_pawn()")
+        logger.info("opened pawn reset", "Game.reset_opened_pawn()")
         self.opened_pawn = Pawn()
         self.opened_pawn_coord = self.opened_pawn.coord

@@ -89,7 +89,7 @@ class Tech(py.sprite.Sprite):
     
     def is_allowed(self) -> bool:
         for prerequisite in self.data.get("prerequisites", []):
-            if root.handler.trigger_manager.has_no_tech(prerequisite, root.player_id):
+            if root.game.trigger_manager.has_no_tech(prerequisite, root.player_id):
                 return False
         return True
 

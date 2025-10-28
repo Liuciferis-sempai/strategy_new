@@ -54,10 +54,10 @@ loading.draw("Image manager initializing...")
 from .image_manager.image_manager import ImageManager
 image_manager = ImageManager()
 
-loading.draw("Handler initializing...")
-from assets.handler import Handler
-handler = Handler()
-handler.gui.initialize()
-handler.gui.change_position_for_new_screen_sizes()
+loading.draw("Game initializing...")
+from assets.game import Game
+game = Game()
+game.gui.initialize()
+game.gui.change_position_for_new_screen_sizes()
 
 from .functions import *

@@ -27,7 +27,7 @@ class BuildingsManager:
         use data dict to build building with specials characteristics
         '''
         #print(self.types_of_buildings)
-        root.handler.allFractions.get_fraction_by_id(fraction_id).statistics["building_count"] += 1 #type: ignore
+        root.game.allFractions.get_fraction_by_id(fraction_id).statistics["building_count"] += 1 #type: ignore
         for type in self.types_of_buildings:
             if data == type["name"] or data == type:
                 if not self.buildings.get(str(coord), False):
@@ -65,22 +65,22 @@ class BuildingsManager:
         data["name"] = "scheme" + ":of_" + data["name"]
         data["img"] = data["img"].replace(".png", "_scheme.png")
         data["scheme"] = True
-        cell = root.handler.world_map.get_cell_by_coord(coord)
+        cell = root.game.world_map.get_cell_by_coord(coord)
         self.buildings[str(coord)] = Building(coord, cell, data.copy(), False)
         cell.add_building({"name": data["name"], "desc": data["desc"], "coord": coord, "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
 
     def _build(self, data: dict, coord: tuple[int, int], fraction_id: int):
         data = data.copy()
         data["fraction_id"] = fraction_id
-        cell = root.handler.world_map.get_cell_by_coord(coord)
+        cell = root.game.world_map.get_cell_by_coord(coord)
         self.buildings[str(coord)] = Building(coord, cell, data.copy(), False)
         cell.add_building({"name": data["name"], "desc": data["desc"], "coord": coord, "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
     
     def remove(self, coord: tuple[int, int]):
         building = self.buildings[str(coord)]
-        root.handler.allFractions.get_fraction_by_id(building.fraction_id).statistics["building_count"] -= 1 #type: ignore
+        root.game.allFractions.get_fraction_by_id(building.fraction_id).statistics["building_count"] -= 1 #type: ignore
         self.buildings.pop(str(coord))
-        cell = root.handler.world_map.get_cell_by_coord(coord)
+        cell = root.game.world_map.get_cell_by_coord(coord)
         cell.remove_building()
 
     def get_building_by_coord(self, coord:tuple[int, int]) -> Building:
@@ -93,7 +93,7 @@ class BuildingsManager:
         buildings_by_types = {}
         uniqu_buildings = []
         if only_allowed_for_players_fraction:
-            player_fraction = root.handler.allFractions.get_player_fraction()
+            player_fraction = root.game.allFractions.get_player_fraction()
             if not player_fraction:
                 logger.error("No player fraction found in get_all_buildings_sorted_by_types", f"BuildingsManager.get_all_buildings_sorted_by_types({only_allowed_for_players_fraction})")
                 return buildings_by_types
@@ -117,7 +117,7 @@ class BuildingsManager:
     
     def try_to_build_on_cell(self, cell: Cell):
         if self.buildings.get(str(cell.coord), None) == None:
-            self.build_scheme(root.handler.gui.game.sticked_object.img.replace(".png", ""), cell.coord, root.player_id) #type: ignore
+            self.build_scheme(root.game.gui.game.sticked_object.img.replace(".png", ""), cell.coord, root.player_id) #type: ignore
         
     def remove_resource(self, cell: Cell, resources: dict|list):
         building = self.buildings[str(cell.coord)]

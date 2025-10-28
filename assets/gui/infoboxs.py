@@ -69,9 +69,9 @@ class InfoBox(py.sprite.Sprite):
     def close(self):
         self.closed = True
         self.image.fill((0, 0, 0, 0))
-        root.handler.world_map.unchose_cell()
-        if not root.handler.is_opened_pawn_default():
-            root.handler.reset_opened_pawn()
+        root.game.world_map.unchose_cell()
+        if not root.game.is_opened_pawn_default():
+            root.game.reset_opened_pawn()
 
 
     def open(self, content:dict[str, Any]):

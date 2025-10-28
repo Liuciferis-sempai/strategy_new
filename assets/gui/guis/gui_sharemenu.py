@@ -76,11 +76,11 @@ class GUIShareMenu:
             logger.error("Share starter or target not found", f"GUIShareMenu._set_inventories({target_inventory}, {max_target_inventory})")
     
     def open(self, target:str):
-        self.share_starter = root.handler.pawns_manager.get_pawn_by_id(root.handler.get_opened_pawn().id)
-        self.share_target = root.handler.pawns_manager.get_pawn_by_name(target, root.handler.gui.game.get_target_coord())
+        self.share_starter = root.game.pawns_manager.get_pawn_by_id(root.game.get_opened_pawn().id)
+        self.share_target = root.game.pawns_manager.get_pawn_by_name(target, root.game.gui.game.get_target_coord())
 
         if self.share_target.is_default:
-            self.share_target = root.handler.buildings_manager.get_building_by_coord(root.handler.gui.game.get_target_coord())
+            self.share_target = root.game.buildings_manager.get_building_by_coord(root.game.gui.game.get_target_coord())
             self.share_target_type = "building"
         else:
             self.share_target_type = "pawn"

@@ -7,7 +7,7 @@ class EffectManager:
         pass
     
     def clear_the_queue(self, cell: Cell, reciept: dict):
-        root.handler.buildings_manager.get_building_by_coord(cell.coord).remove_from_queue(reciept) #type: ignore
+        root.game.buildings_manager.get_building_by_coord(cell.coord).remove_from_queue(reciept) #type: ignore
         
     def do(self, effect_type: str, effect_data):
         '''
@@ -22,21 +22,21 @@ class EffectManager:
         logger.info(f"execution the effect {effect_type} with data: {effect_data}", f"EffectManager.do({effect_type}, {effect_data})")
         match effect_type:
             case "take_resources_from_building":
-                root.handler.buildings_manager.remove_resource(effect_data["cell"], effect_data["resources"])
+                root.game.buildings_manager.remove_resource(effect_data["cell"], effect_data["resources"])
             case "add_item_to_building":
-                root.handler.buildings_manager.add_resources(effect_data["cell"], effect_data["items"])
+                root.game.buildings_manager.add_resources(effect_data["cell"], effect_data["items"])
             case "clear_the_queue":
                 self.clear_the_queue(effect_data["cell"], effect_data["reciept"])
             case "restore_movement_points":
-                root.handler.pawns_manager.restore_movement_points(effect_data["target"])
+                root.game.pawns_manager.restore_movement_points(effect_data["target"])
             case "add_resource":
-                root.handler.pawns_manager.add_resource(effect_data["target"], effect_data["resource"], effect_data["amout"])
+                root.game.pawns_manager.add_resource(effect_data["target"], effect_data["resource"], effect_data["amout"])
             case "open_share_menu":
                 root.change_window_state("share_menu")
-                root.handler.gui.sharemenu.open(effect_data["target_of_action"])
+                root.game.gui.sharemenu.open(effect_data["target_of_action"])
             case "stand_here":
-                root.handler.pawns_manager.move_pawn(effect_data["target"], effect_data["target_cell"])
+                root.game.pawns_manager.move_pawn(effect_data["target"], effect_data["target_cell"])
             case "build_scheme":
-                root.handler.buildings_manager.build(effect_data["target_building_str"], effect_data["building_coord"], effect_data["building_fraction"])
+                root.game.buildings_manager.build(effect_data["target_building_str"], effect_data["building_coord"], effect_data["building_fraction"])
             case _:
                 logger.error(f"effect {effect_type} not found", f"EffectManager.do({effect_type}, {effect_data})")

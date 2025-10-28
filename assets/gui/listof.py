@@ -32,9 +32,9 @@ class ListOf(py.sprite.Sprite):
         if self.type_of_list == "job_list":
             for job in self.jobs:
                 if job.rect.collidepoint(mouse_pos):
-                    if not root.handler.is_opened_pawn_default():
-                        root.handler.pawns_manager.do_job(root.handler.get_opened_pawn(), job.text)
+                    if not root.game.is_opened_pawn_default():
+                        root.game.pawns_manager.do_job(root.game.get_opened_pawn(), job.text)
         elif self.type_of_list == "scheme_list":
             for job in self.jobs:
                 if job.rect.collidepoint(mouse_pos):
-                    root.handler.gui.game.open_scheme_type(job.text)
+                    root.game.gui.game.open_scheme_type(job.text)

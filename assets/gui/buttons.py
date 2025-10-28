@@ -53,7 +53,7 @@ class FractionButton(Button):
     def click(self):
         super().click()
         root.change_window_state("fraction")
-        root.handler.gui.fraction.open_player_fraction()
+        root.game.gui.fraction.open_player_fraction()
 
 class TechnologyButton(Button):
     def __init__(self):
@@ -62,7 +62,7 @@ class TechnologyButton(Button):
     def click(self):
         super().click()
         root.change_window_state("technology")
-        root.handler.gui.technology.open()
+        root.game.gui.technology.open()
 
 class PolicyButton(Button):
     def __init__(self):
@@ -71,7 +71,7 @@ class PolicyButton(Button):
     def click(self):
         super().click()
         root.change_window_state("policy")
-        root.handler.gui.policy.open()
+        root.game.gui.policy.open()
     
 class NextTurnButton(Button):
     def __init__(self):
@@ -80,7 +80,7 @@ class NextTurnButton(Button):
     def click(self):
         super().click()
         #gui.gui.turn_counter.change_value(1) #после сделать нормальную функцию для смены хода
-        root.handler.turn_manager.do_step()
+        root.game.turn_manager.do_step()
 
 class BuildingButton(Button):
     def __init__(self):
@@ -88,7 +88,7 @@ class BuildingButton(Button):
 
     def click(self):
         super().click()
-        root.handler.gui.building.open()
+        root.game.gui.building.open()
         root.change_window_state("building")
         update_gui()
 
@@ -98,8 +98,8 @@ class RecieptButton(Button):
 
     def click(self):
         super().click()
-        root.handler.gui.building.open()
-        root.handler.gui.reciept.open()
+        root.game.gui.building.open()
+        root.game.gui.reciept.open()
         root.change_window_state("reciept")
         update_gui()
 
@@ -109,7 +109,7 @@ class OpenInventoryButton(Button):
 
     def click(self):
         super().click()
-        root.handler.gui.inventory.open()
+        root.game.gui.inventory.open()
         root.change_window_state("inventory")
         update_gui()
 
@@ -123,7 +123,7 @@ class ShowJobButton(Button):
 
     def click(self):
         super().click()
-        root.handler.gui.game.show_jobs()
+        root.game.gui.game.show_jobs()
 
 class SchemeListButton(Button):
     def __init__(self):
@@ -131,7 +131,7 @@ class SchemeListButton(Button):
     
     def click(self):
         super().click()
-        root.handler.gui.game.open_scheme_list()
+        root.game.gui.game.open_scheme_list()
         update_gui()
 
 #Fraction's buttons
@@ -142,8 +142,8 @@ class FractionNameEditButton(Button):
     def click(self):
         super().click()
         root.change_window_state("writing")
-        root.handler.gui.writing.writing = "Fraction Name"
-        root.handler.gui.writing.start_writing()
+        root.game.gui.writing.writing = "Fraction Name"
+        root.game.gui.writing.start_writing()
 
 class InputSubmitButton(Button):
     def __init__(self):
@@ -151,7 +151,7 @@ class InputSubmitButton(Button):
     
     def click(self):
         super().click()
-        root.handler.gui.writing.submit_input()
+        root.game.gui.writing.submit_input()
 
 #Building's buttons
 class WorkbenchButton(Button):
@@ -160,7 +160,7 @@ class WorkbenchButton(Button):
 
     def click(self):
         super().click()
-        root.handler.gui.reciept.open()
+        root.game.gui.reciept.open()
         root.change_window_state("reciept")
         update_gui()
 
@@ -170,6 +170,6 @@ class UpgradeBuildingButton(Button):
 
     def click(self):
         super().click()
-        root.handler.buildings_manager.get_building_by_coord(root.handler.get_chosen_cell_coord()).set_upgrade_mod(True)
+        root.game.buildings_manager.get_building_by_coord(root.game.get_chosen_cell_coord()).set_upgrade_mod(True)
         root.change_window_state("game")
         update_gui()

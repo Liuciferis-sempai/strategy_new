@@ -63,11 +63,11 @@ class GUIInventory:
             self.owner_ico = Icon(root.window_size[0]//8, int(root.window_size[1]//2), img=self.owner.data.get("img", "none.png"), spec_path="data/buildings/img")#type: ignore 
     
     def open(self):
-        if not root.handler.is_opened_pawn_default():
-            self.owner = root.handler.pawns_manager.get_pawn_by_id(root.handler.get_opened_pawn().id)
+        if not root.game.is_opened_pawn_default():
+            self.owner = root.game.pawns_manager.get_pawn_by_id(root.game.get_opened_pawn().id)
             self.owner_type = "pawn"
-        elif not root.handler.is_chosen_cell_default():
-            self.owner = root.handler.buildings_manager.get_building_by_coord(root.handler.get_chosen_cell_coord())
+        elif not root.game.is_chosen_cell_default():
+            self.owner = root.game.buildings_manager.get_building_by_coord(root.game.get_chosen_cell_coord())
             self.owner_type = "building"
         
         self.change_position_for_new_screen_sizes()
