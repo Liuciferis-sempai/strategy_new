@@ -249,6 +249,7 @@ class InputKeyProcessor:
             #            return
 
             root.game.gui.game.main_info_window_content_close()
+            root.game.world_map.unchose_cell()
             root.game.gui.close_all_extra_windows()
             update_gui()
             

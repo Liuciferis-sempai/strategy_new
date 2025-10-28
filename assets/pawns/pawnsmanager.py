@@ -108,13 +108,15 @@ class PawnsManager:
         
         logger.info(f"{pawn} moved from {old_cell} to {new_cell}", f"PawnsManager.move_pawn(...)")
 
-    def try_to_move_pawn(self, pawn: Pawn, new_cell: Cell):
+    def try_to_move_pawn(self, pawn: Pawn, new_cell: Cell) -> bool:
         if new_cell in root.game.world_map.marked_region["for_move"]:
             if new_cell.pawns != [] or new_cell.buildings != {}:
-                root.game.gui.game.set_target_coord(new_cell.coord)
+                root.game.set_target_coord(new_cell.coord)
                 root.game.gui.game.show_actions(new_cell.pawns, new_cell.buildings)
-                return
+                return False
             self.move_pawn(pawn, new_cell)
+            return True
+        return False
 
     def do_job(self, pawn: Pawn, job_id:str):
         if root.game.job_manager.is_job_available(job_id, pawn):

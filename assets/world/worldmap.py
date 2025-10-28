@@ -49,9 +49,9 @@ class WorldMap(py.sprite.Sprite):
                 if root.game.gui.game.sticked_object != None:
                     root.game.buildings_manager.try_to_build_on_cell(cell)
                 else:
-                    #if (cell.pawns != [] or cell.buildings != {}) and mouse_button == 1:
-                    #    root.game.reset_opened_pawn()
-                    #print(cell)
+                    if (cell.pawns != [] or cell.buildings != {}) and mouse_button == 1:
+                        self.unchose_cell()
+                        root.game.reset_opened_pawn()
                     self._normal_click(cell, rel_mouse_pos, mouse_button)
                 return
     
@@ -60,11 +60,12 @@ class WorldMap(py.sprite.Sprite):
             if root.game.get_opened_pawn_coord() == cell.coord:
                 root.game.reset_opened_pawn()
             else:
-                root.game.pawns_manager.try_to_move_pawn(root.game.get_opened_pawn(), cell)
+                if root.game.pawns_manager.try_to_move_pawn(root.game.get_opened_pawn(), cell):
+                    self.unchose_cell()
+                    cell.click(rel_mouse_pos)
+                    cell.mark((255, 0, 0, 100))
+                    self._draw_cell(cell)
                 return
-        #if not root.game.is_chosen_cell_default():
-        #    if root.game.get_chosen_cell() != cell:
-        #        self.unchose_cell()
         cell.click(rel_mouse_pos)
         cell.mark((255, 0, 0, 100))
         self._draw_cell(cell)
@@ -83,10 +84,6 @@ class WorldMap(py.sprite.Sprite):
         if self.y_offset > 0:
             self.y_offset = 0
             return
-        #for row in self.terrain:
-        #    for cell in row:
-        #        cell.rect.top += self.move_distance
-        #update_gui()
         self.draw()
 
     def move_map_down(self):
@@ -94,10 +91,6 @@ class WorldMap(py.sprite.Sprite):
         if -self.y_offset > self.lower_limit:
             self.y_offset = -self.lower_limit
             return
-        #for row in self.terrain:
-        #    for cell in row:
-        #        cell.rect.top -= self.move_distance
-        #update_gui()
         self.draw()
 
     def move_map_left(self):
@@ -105,10 +98,6 @@ class WorldMap(py.sprite.Sprite):
         if self.x_offset > 0:
             self.x_offset = 0
             return
-        #for row in self.terrain:
-        #    for cell in row:
-        #        cell.rect.left += self.move_distance
-        #update_gui()
         self.draw()
 
     def move_map_right(self):
@@ -116,10 +105,6 @@ class WorldMap(py.sprite.Sprite):
         if -self.x_offset > self.right_limit:
             self.x_offset = -self.right_limit
             return
-        #for row in self.terrain:
-        #    for cell in row:
-        #        cell.rect.right -= self.move_distance
-        #update_gui()
         self.draw()
 
     def load_types_of_land(self):
@@ -188,31 +173,45 @@ class WorldMap(py.sprite.Sprite):
                         self._draw_cell(cell)
                         self._add_mark(cell, mark_type)
     
-    def mark_movement_region(self, coord: tuple[int, int], movement_points: int=1, color: tuple[int, int, int, int]=(0, 0, 255, 100)):
-        for x in range(coord[0]-1, coord[0]+2):
-            for y in range(coord[1]-1, coord[1]+2):
-                if 0 <= x < root.world_map_size[0] and 0 <= y < root.world_map_size[1]:
-                    cell = self.get_cell_by_coord((x, y))
-                    if cell:
-                        if movement_points >= cell.data["subdata"]["difficulty"] and movement_points > 0:
-                            self._mark_movement_region((x, y), movement_points-cell.data["subdata"]["difficulty"], color)
-                            cell.mark(color)
-                            cell.data["subdata"]["movement_points"] = movement_points - cell.data["subdata"]["difficulty"]
-                            self._draw_cell(cell)
-                            self._add_mark(cell, "for_move")
+    def mark_movement_region(self, start_coord: tuple[int, int], movement_points: int=1, color: tuple[int, int, int, int]=(0, 0, 255, 100)):
+        width, height = root.world_map_size
 
-    def _mark_movement_region(self, coord: tuple[int, int], movement_points: int=1, color: tuple[int, int, int, int]=(0, 0, 255, 100)):
-        for y in range(coord[1]-1, coord[1]+2):
-            for x in range(coord[0]-1, coord[0]+2):
-                if 0 <= x < root.world_map_size[0] and 0 <= y < root.world_map_size[1]:
-                    cell = self.get_cell_by_coord((x, y))
-                    if cell:
-                        if movement_points >= cell.data["subdata"]["difficulty"] and movement_points > 0:
-                            self._mark_movement_region((x, y), movement_points-cell.data["subdata"]["difficulty"], color)
-                            cell.data["subdata"]["movement_points"] = movement_points - cell.data["subdata"]["difficulty"]
-                            cell.mark(color)
-                            self._draw_cell(cell)
-                            self._add_mark(cell, "for_move")
+        visited = {}
+        queue = []
+
+        for nx in range(start_coord[0]-1, start_coord[0]+2):
+            for ny in range(start_coord[1]-1, start_coord[1]+2):
+                if (nx, ny) != (start_coord[0], start_coord[1]):
+                    queue.append(((nx, ny), movement_points))
+
+        while queue:
+            (x, y), points_left = queue.pop(0)
+
+            if not (0 <= x < width and 0 <= y < height):
+                continue
+
+            cell = self.get_cell_by_coord((x, y))
+            difficulty = cell.data["subdata"]["difficulty"]
+            remaining = points_left - difficulty
+
+            if remaining < 0:
+                continue
+
+            if (x, y) in visited and visited[(x, y)] >= remaining:
+                continue
+
+            visited[(x, y)] = remaining
+            cell.data["subdata"]["movement_points"] = remaining
+            cell.mark(color)
+            self._add_mark(cell, "for_move")
+
+            if cell in self.cells_on_screen:
+                self._draw_cell(cell)
+
+            for nx in range(x-1, x+2):
+                for ny in range(y-1, y+2):
+                    if (nx, ny) != (x, y):
+                        queue.append(((nx, ny), remaining))
     
     def _add_mark(self, cell: Cell, type_:str):
         if type_ not in self.marked_region:
