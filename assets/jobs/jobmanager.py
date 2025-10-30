@@ -41,8 +41,8 @@ class JobManager:
         if there is no target pawn, then job will return without changes
         coord can be (-1, -1) if there is no target cell in root file. check it in this case
         '''
-        chosen_cell_coord = root.game.get_chosen_cell_coord()
-        target_coord = root.game.gui.game.get_target_coord()
+        chosen_cell_coord = root.game_manager.get_chosen_cell_coord()
+        target_coord = root.game_manager.gui.game.get_target_coord()
 
         if job["trigger"]["args"].get("target_of_action", None) != None:
             job["trigger"]["args"]["target_of_action"] = job_id.split(".")[-1]
@@ -57,10 +57,10 @@ class JobManager:
             job["result"]["args"]["target_of_action"] = job["result"]["args"]["target_of_action"].replace("with_", "")
 
         if job["result"]["args"].get("target_cell", None) != None:
-            job["result"]["args"]["target_cell"] = root.game.world_map.get_cell_by_coord(target_coord)
+            job["result"]["args"]["target_cell"] = root.game_manager.world_map.get_cell_by_coord(target_coord)
 
         if job["result"]["args"].get("target_building_str", None) != None:
-            building = root.game.world_map.get_cell_by_coord(chosen_cell_coord).buildings
+            building = root.game_manager.world_map.get_cell_by_coord(chosen_cell_coord).buildings
             job["result"]["args"]["target_building_str"] = building.get("name", "").replace("scheme:of_", "")
             job["result"]["args"]["building_coord"] = chosen_cell_coord
             job["result"]["args"]["building_fraction"] = building.get("fraction_id", -1)
@@ -119,8 +119,8 @@ class JobManager:
         return False
     
     def _is_job_available(self, job: dict, job_id: str, pawn: Pawn) -> bool:
-        if hasattr(root.game.trigger_manager, job["trigger"]["type"]):
+        if hasattr(root.game_manager.trigger_manager, job["trigger"]["type"]):
             job = self._replace_target_in_args(job, job_id)
-            trigger_func = getattr(root.game.trigger_manager, job["trigger"]["type"])
+            trigger_func = getattr(root.game_manager.trigger_manager, job["trigger"]["type"])
             return trigger_func(pawn, job["trigger"].get("args", {})) #type: ignore
         return False

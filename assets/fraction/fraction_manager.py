@@ -2,7 +2,7 @@ from .fraction import Fraction
 from assets import root
 from assets.root import logger
 
-class AllFactions:
+class FractionManager:
     def __init__(self):
         self.fractions: list = []
 

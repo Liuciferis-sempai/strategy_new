@@ -46,13 +46,13 @@ class InputKeyProcessor:
             return
         elif root.window_state == "game":
             if event.key == py.K_w:
-                self.k_w_pressed = False
+                self.game_input.k_w_pressed = False
             elif event.key == py.K_s:
-                self.k_s_pressed = False
+                self.game_input.k_s_pressed = False
             elif event.key == py.K_a:
-                self.k_a_pressed = False
+                self.game_input.k_a_pressed = False
             elif event.key == py.K_d:
-                self.k_d_pressed = False
+                self.game_input.k_d_pressed = False
 
     #PROCESS_MOUSEDOWN--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     #@logger

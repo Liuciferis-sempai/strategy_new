@@ -12,9 +12,9 @@ class GUIGPolicy:
         pass
     
     def open(self):
-        root.game.policy_table.load_policies_for_player()
+        root.game_manager.policy_table.load_policies_for_player()
     
     def draw(self):
         root.screen.fill((0, 0, 0))
-        root.game.policy_table.draw()
+        root.game_manager.policy_table.draw()
         root.need_update_gui = False

@@ -16,5 +16,5 @@ class GUITechnology:
 
     def draw(self):
         root.screen.fill((0, 0, 0))
-        root.game.tech_tree.draw()
+        root.game_manager.tech_tree.draw()
         root.need_update_gui = False

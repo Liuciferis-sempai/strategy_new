@@ -29,6 +29,9 @@ class Fraction:
         self.allowed_buildings =  data.get("allowed_buildings", ["manufactory"]) #id (name) only
         self.allowed_pawns = data.get("allowed_pawns", []) #id (name) only
 
+        self.pawns = []
+        self.buildings = []
+
     def __repr__(self) -> str:
         return f"<Fraction {self.name} with id {self.id}. Is {"not" if self.is_default else ""} default>"
 

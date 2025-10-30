@@ -16,15 +16,15 @@ class GUIReciept:
         self.reciept_y_offset = 0
     
     def open(self):
-        chosen_cell = root.game.get_chosen_cell()
+        chosen_cell = root.game_manager.get_chosen_cell()
 
         self.reciepts_list = []
-        player_fraction = root.game.allFractions.get_player_fraction()
+        player_fraction = root.game_manager.fraction_manager.get_player_fraction()
         if player_fraction == None:
             logger.error("Player fraction not found when opening GUIReciept", "GUIReciept.open()")
             #print("Player Fraction doesnt found")
             return False
-        self.reciepts = root.game.reciept_manager.get_reciepts_for_workbench(chosen_cell.buildings["name"], chosen_cell.buildings["level"]) #type: ignore
+        self.reciepts = root.game_manager.reciept_manager.get_reciepts_for_workbench(chosen_cell.buildings["name"], chosen_cell.buildings["level"]) #type: ignore
         for reciept in self.reciepts:
             is_allowed = ["allowed.png", (0, 0, 0)] if reciept["id"] in player_fraction.reciepts else ["not_allowed.png", (255, 255, 255)]
 

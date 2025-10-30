@@ -1,0 +1,41 @@
+{
+    "name": "lumberjack",
+    "desc": "lumberjack_desc",
+    "img": "lumberjack.png",
+    "level": 0,
+    "max_hp": 250,
+    "max_service": 200,
+    "repair_cost": {
+        "resource_0": 1
+    },
+    "service_cost": {
+        "resource_0": 1
+    },
+    "type": "producer",
+    "storage_type": "dict",
+    "storage": {"output": []},
+    "storage_size": {"output": 10},
+    "cost": {
+        "resource_0": 2
+    },
+    "upgrades": {
+        "1": {
+            "cost": {
+                "resource_0": 2
+            },
+            "effect": [
+                {"type": "change_text",
+                    "args": {
+                        "new_name": "bigger_storage",
+                        "new_desc": "bigger_storage_desc",
+                        "new_img": "bigger_storage.png"
+                    }
+                },
+                {"type": "change_numbers", "args": {"max_hp": 600, "max_service": 600}},
+                {"type": "change_cost", "args": {"repair": {"resource_0": 2}}, "service": {"resource_0": 2}},
+                {"type": "change_storage_type", "args": {"new_type": "list"}},
+                {"type": "change_storage_size", "args": {"new_size": 30}}
+            ]
+        }
+    }
+}

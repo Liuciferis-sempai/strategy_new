@@ -1,6 +1,8 @@
 import datetime
 import time
 from assets.root import logger as logger_
+import assets.root as root
+import pygame as py
 
 # Threshold in seconds: only log timing info if function runs longer than this
 TIMEIT_THRESHOLD = 0.005  # 5 ms

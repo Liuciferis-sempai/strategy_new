@@ -12,7 +12,7 @@ class TriggerManager:
         if fraction_id == -1:
             fraction_id = player_id
         
-        fraction = root.game.allFractions.get_fraction_by_id(fraction_id)
+        fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         if fraction != None:
             if tech_id in fraction.technologies:
                 return True
@@ -61,7 +61,7 @@ class TriggerManager:
         return True
     
     def stand_on_cell(self, pawn: Pawn, args: dict) -> bool:
-        cell = root.game.world_map.get_cell_by_coord(pawn.coord)
+        cell = root.game_manager.world_map.get_cell_by_coord(pawn.coord)
         result = False
         if args.get("cell_type", False):
             if cell.data.get("type", "") == args["cell_type"]:
@@ -78,9 +78,9 @@ class TriggerManager:
         return result
     
     def target_is_near(self, pawn: Pawn, args: dict) -> bool:
-        target = root.game.buildings_manager.get_building_by_coord(args["coord"])
+        target = root.game_manager.buildings_manager.get_building_by_coord(args["coord"])
         if not target:
-            target = root.game.pawns_manager.get_pawn_by_name(args["target_of_action"], args["coord"])
+            target = root.game_manager.pawns_manager.get_pawn_by_name(args["target_of_action"], args["coord"])
 
         if target:
             if abs(pawn.coord[0]-target.coord[0]) <= args["distance"] and abs(pawn.coord[1]-target.coord[1]) <= args["distance"]:
@@ -91,7 +91,7 @@ class TriggerManager:
         return False
 
     def compare_inventory(self, pawn: Pawn, args: dict) -> bool:
-        building = root.game.buildings_manager.get_building_by_coord(root.game.get_chosen_cell_coord())
+        building = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
         if building.is_scheme:
             total = {}
             for resource in building.scheme_inventory[args["pay_inv"]]:

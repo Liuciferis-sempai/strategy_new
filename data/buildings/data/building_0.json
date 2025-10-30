@@ -12,7 +12,7 @@
         "resource_0": 1
     },
     "type": "workbench",
-    "spped_of_work_mod": 1,
+    "speed_of_work_mod": 1,
     "max_queue": 2,
     "queue": [],
     "storage_type": "dict",

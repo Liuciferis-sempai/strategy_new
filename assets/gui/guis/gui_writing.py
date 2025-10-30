@@ -51,7 +51,7 @@ class GUIWriting:
             "symbol": root.all_input[1],
             "color": color
         }
-        root.game.allFractions.edit_fraction(id=root.player_id, data=data)
+        root.game_manager.fraction_manager.edit_fraction(id=root.player_id, data=data)
     
     def update_input_field(self):
         self.input_field = py.font.Font(None, 30).render(root.input, False, (0, 0, 0))
@@ -72,7 +72,7 @@ class GUIWriting:
                 case _:
                     pass
         root.back_window_state()
-        root.game.gui.fraction.open_player_fraction()
+        root.game_manager.gui.fraction.open_player_fraction()
         update_gui()
     
     def draw(self):

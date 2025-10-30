@@ -39,11 +39,11 @@ class Building:
         
         if self.data.get("scheme", False):
             self.is_scheme = True
-            self.scheme_inventory = {"cost": [root.game.resource_manager.create(name, amout) for name, amout in self.data["cost"].items()], "inventory": []}
+            self.scheme_inventory = {"cost": [root.game_manager.resource_manager.create(name, amout) for name, amout in self.data["cost"].items()], "inventory": []}
             self.scheme_inventory_size = 0
             for resource, amout in self.data["cost"].items():
-                self.scheme_inventory_size += int(amout / root.game.resource_manager.get_resource_data(resource)["max_amout"]) #type: ignore
-                if amout % root.game.resource_manager.get_resource_data(resource)["max_amout"] != 0:#type: ignore
+                self.scheme_inventory_size += int(amout / root.game_manager.resource_manager.get_resource_data(resource)["max_amout"]) #type: ignore
+                if amout % root.game_manager.resource_manager.get_resource_data(resource)["max_amout"] != 0:#type: ignore
                     self.scheme_inventory_size += 1
             self.scheme_inventory_size = {"cost": self.scheme_inventory_size, "inventory": self.scheme_inventory_size}
         else:
@@ -75,7 +75,7 @@ class Building:
                                 if item.name == resource:
                                     remainder = item.add(amout)
                         if remainder > 0:
-                            self.scheme_inventory[type].append(root.game.resource_manager.create(resource, remainder)) #type: ignore
+                            self.scheme_inventory[type].append(root.game_manager.resource_manager.create(resource, remainder)) #type: ignore
                         self.optimize_inventory(type)
                 else:
                     if len(self.inventory[type]) < self.inventory_size[type]: #type: ignore
@@ -85,7 +85,7 @@ class Building:
                                 if item.name == resource:
                                     remainder = item.add(amout)
                         if remainder > 0:
-                            self.inventory[type].append(root.game.resource_manager.create(resource, remainder)) #type: ignore
+                            self.inventory[type].append(root.game_manager.resource_manager.create(resource, remainder)) #type: ignore
                         self.optimize_inventory(type)
 
             def remove_resource_(resource: str, amout: int, type: str="none", *args):
@@ -158,7 +158,7 @@ class Building:
                             if item.name == resource:
                                 remainder = item.add(amout)
                     if remainder > 0:
-                        self.inventory.append(root.game.resource_manager.create(resource, remainder)) #type: ignore
+                        self.inventory.append(root.game_manager.resource_manager.create(resource, remainder)) #type: ignore
                     self.optimize_inventory()
             def remove_resource(resource: str, amout: int, *args):
                 for item in self.inventory:
@@ -225,8 +225,12 @@ class Building:
             self.destroy()
 
     def destroy(self):
-        root.game.buildings_manager.remove(self.coord)
-        root.game.buildings_manager.build({"name": f"ruin:of_{self.name}", "desc": f"ruin_of_{self.data["desc"]}", "img": f"ruin_of_{self.data["img"]}"}, self.coord, self.fraction_id)
+        fraction = root.game_manager.fraction_manager.get_fraction_by_id(self.fraction_id)
+        fraction.statistics["building_count"] -= 1
+        fraction.buildings.remove(self)
+
+        root.game_manager.buildings_manager.remove(self.coord)
+        root.game_manager.buildings_manager.build({"name": f"ruin:of_{self.name}", "desc": f"ruin_of_{self.data["desc"]}", "img": f"ruin_of_{self.data["img"]}"}, self.coord, self.fraction_id)
 
     def can_be_upgraded(self) -> bool:
         if self.data.get("upgrades", False):
@@ -277,13 +281,19 @@ class Building:
         if mod:
             if self.can_be_upgraded():
                 self.is_scheme = True
-                self.scheme_inventory = {"cost": [root.game.resource_manager.create(name, amout) for name, amout in self.data["upgrades"][str(self.level+1)]["cost"].items()], "inventory": []}
+                self.scheme_inventory = {"cost": [root.game_manager.resource_manager.create(name, amout) for name, amout in self.data["upgrades"][str(self.level+1)]["cost"].items()], "inventory": []}
                 self.scheme_inventory_size = 0
                 for resource, amout in self.data["cost"].items():
-                    self.scheme_inventory_size += int(amout / root.game.resource_manager.get_resource_data(resource)["max_amout"]) #type: ignore
-                    if amout % root.game.resource_manager.get_resource_data(resource)["max_amout"] != 0:#type: ignore
+                    self.scheme_inventory_size += int(amout / root.game_manager.resource_manager.get_resource_data(resource)["max_amout"]) #type: ignore
+                    if amout % root.game_manager.resource_manager.get_resource_data(resource)["max_amout"] != 0:#type: ignore
                         self.scheme_inventory_size += 1
                 self.scheme_inventory_size = {"cost": self.scheme_inventory_size, "inventory": self.scheme_inventory_size}
+
+                self.name = "scheme of_" + self.name
+                self.data["name"] = self.name
+                self.data["scheme"] = True
+                self.cell.buildings = self.data
+                self.cell.resize()
             else:
                 logger.error(f"Building can not be upgraded", f"Building.set_upgrade_mod({mod})")
         else:
@@ -291,9 +301,9 @@ class Building:
 
     def has_free_space(self) -> bool:
         return True
-    
+
     def _determine_type(self, resource: str, type: str) -> str:
-        resource_data = root.game.resource_manager.get_resource_data(resource)
+        resource_data = root.game_manager.resource_manager.get_resource_data(resource)
         if type in self.inventory.keys() and not self.is_scheme:
             return type
         elif self.is_scheme:
@@ -304,28 +314,28 @@ class Building:
                 return "food"
         if "input" in self.inventory.keys() and not self.is_scheme:
             return "input"
-        elif self.is_scheme:
+        elif self.is_scheme and "inventory" in self.scheme_inventory.keys():
             return "inventory"
         return "none"
-        
+
     def add_in_queue(self, reciept: dict|str):
         if self.is_workbench:
             if len(self.queue) <= self.max_queue:
                 if isinstance(reciept, dict):
                     self.queue.append(reciept)
                 else:
-                    self.queue.append(root.game.reciept_manager.get_reciept_by_id(reciept))
+                    self.queue.append(root.game_manager.reciept_manager.get_reciept_by_id(reciept))
 
     def remove_from_queue(self, reciept:dict|str):
         if self.is_workbench:
             if isinstance(reciept, dict):
                 self.queue.remove(reciept)
             else:
-                self.queue.remove(root.game.reciept_manager.get_reciept_by_id(reciept))
+                self.queue.remove(root.game_manager.reciept_manager.get_reciept_by_id(reciept))
     
     def build(self):
         if self.is_scheme:
-            self.name = self.name.replace("scheme:of_", "")
+            self.name = self.name.replace("scheme of_", "")
             self.data["name"] = self.name
             self.data["img"].replace("_scheme.png", ".png")
             self.data["scheme"] = False

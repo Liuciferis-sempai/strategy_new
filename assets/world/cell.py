@@ -29,7 +29,7 @@ class Cell(py.sprite.Sprite):
         return f"<Cell {self.type} on coord {self.coord} has {len(self.pawns)} pawns and {0 if self.buildings == {} else 1} buildings>"
 
     def click(self, mouse_pos: tuple[int, int]):
-        root.game.set_chosen_cell(self)
+        root.game_manager.set_chosen_cell(self)
         if self.pawns != []:
             self.chosen_pawn_index += 1
             if self.chosen_pawn_index > len(self.pawns)-1:
@@ -58,21 +58,21 @@ class Cell(py.sprite.Sprite):
             if self.flora != {}:
                 title += ":and:"
             title += f":with_{self.fauna.get("name")}"
-        #root.game.gui.game.open_main_info_window({"title": title, "text": self.data["desc"]})
+        #root.game_manager.gui.game.open_main_info_window({"title": title, "text": self.data["desc"]})
     
     def _open_pawn(self):
         title = self.pawns[self.chosen_pawn_index].get("name")
         desc = self.pawns[self.chosen_pawn_index].get("desc")
-        #root.game.gui.game.open_main_info_window({"title": title, "text": desc})
-        root.game.gui.game.open_pawn()
-        root.game.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), self.pawns[self.chosen_pawn_index].get("movement_points", 1), (0, 0, 255, 100))
+        #root.game_manager.gui.game.open_main_info_window({"title": title, "text": desc})
+        root.game_manager.gui.game.open_pawn()
+        root.game_manager.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), self.pawns[self.chosen_pawn_index].get("movement_points", 1), (0, 0, 255, 100))
         if root.player_id == self.pawns[self.chosen_pawn_index].get("fraction_id"):
-            root.game.set_opened_pawn(self.pawns[self.chosen_pawn_index])
+            root.game_manager.set_opened_pawn(self.pawns[self.chosen_pawn_index])
 
     def _open_building(self):
         if self.buildings.get("fraction_id") == root.player_id:
-            root.game.gui.game.open_building(self.buildings)
-        #root.game.gui.game.open_main_info_window({"title": self.buildings.get("name"), "text": self.buildings.get("desc")})
+            root.game_manager.gui.game.open_building(self.buildings)
+        #root.game_manager.gui.game.open_main_info_window({"title": self.buildings.get("name"), "text": self.buildings.get("desc")})
 
     def change_type(self, new_type: str):
         self.type = new_type

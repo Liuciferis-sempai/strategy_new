@@ -46,21 +46,21 @@ class WorldMap(py.sprite.Sprite):
         rel_mouse_pos = (mouse_pos[0] - self.rect.x - self.x_offset, mouse_pos[1] - self.rect.y - self.y_offset)
         for cell in self.cells_on_screen:
             if cell.rect.collidepoint(rel_mouse_pos):
-                if root.game.gui.game.sticked_object != None:
-                    root.game.buildings_manager.try_to_build_on_cell(cell)
+                if root.game_manager.gui.game.sticked_object != None:
+                    root.game_manager.buildings_manager.try_to_build_on_cell(cell)
                 else:
                     if (cell.pawns != [] or cell.buildings != {}) and mouse_button == 1:
                         self.unchose_cell()
-                        root.game.reset_opened_pawn()
+                        root.game_manager.reset_opened_pawn()
                     self._normal_click(cell, rel_mouse_pos, mouse_button)
                 return
     
     def _normal_click(self, cell: Cell, rel_mouse_pos: tuple[int, int], mouse_button: int):
-        if not root.game.is_opened_pawn_default():
-            if root.game.get_opened_pawn_coord() == cell.coord:
-                root.game.reset_opened_pawn()
+        if not root.game_manager.is_opened_pawn_default():
+            if root.game_manager.get_opened_pawn_coord() == cell.coord:
+                root.game_manager.reset_opened_pawn()
             else:
-                if root.game.pawns_manager.try_to_move_pawn(root.game.get_opened_pawn(), cell):
+                if root.game_manager.pawns_manager.try_to_move_pawn(root.game_manager.get_opened_pawn(), cell):
                     self.unchose_cell()
                     cell.click(rel_mouse_pos)
                     cell.mark((255, 0, 0, 100))
@@ -71,12 +71,12 @@ class WorldMap(py.sprite.Sprite):
         self._draw_cell(cell)
 
     def unchose_cell(self):
-        if not root.game.is_chosen_cell_default():
-            chosen_cell = root.game.get_chosen_cell()
+        if not root.game_manager.is_chosen_cell_default():
+            chosen_cell = root.game_manager.get_chosen_cell()
             chosen_cell.chosen_pawn_index = -1
             chosen_cell.unmark()
             self._draw_cell(chosen_cell)
-            root.game.reset_chosen_cell()
+            root.game_manager.reset_chosen_cell()
             self.unmark_region("all")
 
     def move_map_up(self):
@@ -154,7 +154,7 @@ class WorldMap(py.sprite.Sprite):
                 self._draw_cell(cell)
 
         root.screen.blit(self.image, self.rect)
-        #root.game.gui.game.main_info_window_content.draw()
+        #root.game_manager.gui.game.main_info_window_content.draw()
         #logger.info(f"drawn {len(self.cells_on_screen)}", "WorldMap.draw()")
     
     def _draw_cell(self, cell: Cell):

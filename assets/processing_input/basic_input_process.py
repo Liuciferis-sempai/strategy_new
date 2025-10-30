@@ -2,7 +2,7 @@ import pygame as py
 import assets.root as root
 from assets.world.cell import Cell
 
-class DefaultInputProcessor:
+class BasicInputProcessor:
     def __init__(self, root_prcessor_input):
         self.root_processor = root_prcessor_input
 
@@ -17,7 +17,21 @@ class DefaultInputProcessor:
 
         self.default_cell = Cell()
         self.cell_under_mouse = self.default_cell
-    
+
+    def process_keydown_for_inputfield(self, event:py.event.Event) -> bool:
+        if root.input_field_active:
+            root.game_manager.get_chosen_inputfield().key_down(event)
+            return True
+        return False
+
+    def process_mousebutton_for_inputfield(self, event:py.event.Event) -> bool:
+        for inputfield in root.game_manager.input_fields:
+            if inputfield.rect.collidepoint(event.pos):
+                inputfield.click()
+                return True
+        root.input_field_active = False
+        return False
+
     #@logger
     def process_keydown_base(self, event:py.event.Event) -> bool:
         if event.key == py.K_LCTRL or event.key == py.K_RCTRL:

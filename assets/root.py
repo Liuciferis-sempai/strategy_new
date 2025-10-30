@@ -2,6 +2,7 @@ from .work_with_files import write_txt_file
 #Clear logs
 write_txt_file("data/logs.txt", "")
 write_txt_file("data/errors.txt", "")
+
 from .logger import Logger
 logger = Logger()
 
@@ -34,6 +35,7 @@ game_name = ""
 player_id = 1
 input = ""
 all_input = []
+input_field_active = False
 
 #Boolean
 need_update_gui = True
@@ -55,9 +57,9 @@ from .image_manager.image_manager import ImageManager
 image_manager = ImageManager()
 
 loading.draw("Game initializing...")
-from assets.game import Game
-game = Game()
-game.gui.initialize()
-game.gui.change_position_for_new_screen_sizes()
+from assets.gamemanager import GameManager
+game_manager = GameManager()
+game_manager.gui.initialize()
+game_manager.gui.change_position_for_new_screen_sizes()
 
 from .functions import *

@@ -7,8 +7,9 @@ from assets.reciepts.reciept import RecieptsManager
 from assets.turn_manager.turnmanager import TurnManager
 from assets.world.worldmap import WorldMap
 from assets.world.cell import Cell
+from assets.gui.inputfield import InputField
 from assets.triggers.triggermanager import TriggerManager
-from assets.fraction.fraction_manager import AllFactions, Fraction
+from assets.fraction.fraction_manager import FractionManager, Fraction
 from assets.technologies.techtree import Techtree
 from assets.buildings.buildingsmanager import BuildingsManager
 from assets.policy.policytable import PolicyTable
@@ -18,19 +19,23 @@ from assets.resources.resourcemanager import ResourceManager
 from assets.processing_input.proccessing_input import InputKeyProcessor
 
 
-class Game:
+class GameManager:
     def __init__(self):
-        loading.draw("Loading variables...")
+        loading.draw("Loading game manager...")
         self._default_cell = Cell()
         self._default_pawn = Pawn()
+        self._default_chosen_inputfield = InputField()
         self.chosen_cell = self._default_cell
         self.chosen_cell_coord = self.chosen_cell.coord
         self.opened_pawn = self._default_pawn
         self.opened_pawn_coord = self.opened_pawn.coord
         self.targets_coord = (-1, -1)
+        self.chosen_inputfield = self._default_chosen_inputfield
 
-        loading.draw("Loading game...")
-        self.allFractions = AllFactions()
+        self.input_fields: list[InputField] = []
+
+        loading.draw("Loading other managers...")
+        self.fraction_manager = FractionManager()
         self.world_map = WorldMap()
         self.gui = GUI()
         self.pawns_manager = PawnsManager()
@@ -44,6 +49,11 @@ class Game:
         self.job_manager = JobManager()
         self.resource_manager = ResourceManager()
         self.input_processor = InputKeyProcessor()
+
+    def draw(self):
+        self.gui.draw()
+        for input in self.input_fields:
+            input.draw()
     
     def update_positions(self):
         self.gui.change_position_for_new_screen_sizes()
@@ -139,3 +149,20 @@ class Game:
             logger.warning("target coord is default", "Game.is_target_coord_default()")
             return True
         return False
+    
+    def get_chosen_inputfield(self):
+        if self.is_chosen_inputfield_default():
+            logger.error("query chosen inputfield  before it is defined", "Game.get_chosen_inputfield()")
+        return self.chosen_inputfield
+
+    def is_chosen_inputfield_default(self):
+        return self.chosen_inputfield == self._default_chosen_inputfield
+    
+    def chose_input_field(self, inputfield: InputField):
+        self.chosen_inputfield = inputfield
+    
+    def reset_chosen_inputfield(self):
+        self.chosen_inputfield = self._default_chosen_inputfield
+    
+    def add_inputfield(self, inputfield: InputField):
+        self.input_fields.append(inputfield)

@@ -11,54 +11,54 @@ def change_window_state(new_state:str):
     root.last_window_state = root.window_state
     root.window_state = new_state
     update_gui()
-    root.game.gui.close_all_extra_windows()
+    root.game_manager.gui.close_all_extra_windows()
 
     match root.window_state:
         case "game":
-            root.game.gui.draw = root.game.gui.game.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.game_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.game_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.game_input.process_mousemotion
+            root.game_manager.gui.draw = root.game_manager.gui.game.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.game_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.game_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.game_input.process_mousemotion
         case "fraction":
-            root.game.gui.draw = root.game.gui.fraction.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.fraction_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.fraction_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.pass_func #not yet
+            root.game_manager.gui.draw = root.game_manager.gui.fraction.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.fraction_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.fraction_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.pass_func #not yet
         case "writing":
-            root.game.gui.draw = root.game.gui.writing.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.writing_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.writing_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.pass_func #not yet
+            root.game_manager.gui.draw = root.game_manager.gui.writing.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.writing_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.writing_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.pass_func #not yet
         case "technology":
-            root.game.gui.draw = root.game.gui.technology.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.technology_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.technology_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.pass_func #not yet
+            root.game_manager.gui.draw = root.game_manager.gui.technology.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.technology_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.technology_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.pass_func #not yet
         case "policy":
-            root.game.gui.draw = root.game.gui.policy.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.policy_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.policy_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.pass_func #not yet
+            root.game_manager.gui.draw = root.game_manager.gui.policy.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.policy_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.policy_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.pass_func #not yet
         case "building":
-            root.game.gui.draw = root.game.gui.building.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.building_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.building_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.pass_func #not yet
+            root.game_manager.gui.draw = root.game_manager.gui.building.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.building_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.building_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.pass_func #not yet
         case "reciept":
-            root.game.gui.draw = root.game.gui.reciept.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.reciept_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.reciept_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.pass_func #not yet
+            root.game_manager.gui.draw = root.game_manager.gui.reciept.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.reciept_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.reciept_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.pass_func #not yet
         case "share_menu":
-            root.game.gui.draw = root.game.gui.sharemenu.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.share_menu_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.share_menu_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.pass_func #not yet
+            root.game_manager.gui.draw = root.game_manager.gui.sharemenu.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.share_menu_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.share_menu_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.pass_func #not yet
         case "inventory":
-            root.game.gui.draw = root.game.gui.inventory.draw
-            root.game.input_processor.process_keydown = root.game.input_processor.inventory_input.process_keydown
-            root.game.input_processor.process_mousebuttondown = root.game.input_processor.inventory_input.process_mousebuttondown
-            root.game.input_processor.process_mousemotion = root.game.input_processor.pass_func #not yet
+            root.game_manager.gui.draw = root.game_manager.gui.inventory.draw
+            root.game_manager.input_processor.process_keydown = root.game_manager.input_processor.inventory_input.process_keydown
+            root.game_manager.input_processor.process_mousebuttondown = root.game_manager.input_processor.inventory_input.process_mousebuttondown
+            root.game_manager.input_processor.process_mousemotion = root.game_manager.input_processor.pass_func #not yet
         case _:
             logger.error(f"Unknown window state: {root.window_state}", f"change_window_state({new_state})")
 
@@ -71,7 +71,7 @@ def start_the_game(game_name: str="New Game", game_seed: int=9999):
     loading.draw("Starting the game...")
     #Initialize game state
     root.game_name = game_name
-    root.game.world_map.map_generate(game_seed)
+    root.game_manager.world_map.map_generate(game_seed)
 
     loading.draw("Set initial GUI state...")
     #Set initial GUI state
@@ -79,16 +79,21 @@ def start_the_game(game_name: str="New Game", game_seed: int=9999):
 
     loading.draw("Create players fraction...")
     #Create players fraction
-    root.game.allFractions.create_fraction("Player's Fraction", "player", root.player_id)
-    root.game.gui.fraction.open_player_fraction()
+    root.game_manager.fraction_manager.create_fraction("Player's Fraction", "player", root.player_id)
+    root.game_manager.gui.fraction.open_player_fraction()
 
     loading.draw("Loading preset stuff...")
     #For the testrun
-    root.game.buildings_manager.build("manufactory", (0, 1), root.player_id)
-    root.game.pawns_manager.spawn("pawn_0", (1, 0), root.player_id)
-    root.game.pawns_manager.spawn("pawn_1", (2, 0), root.player_id)
-    root.game.pawns_manager.spawn("pawn_2", (3, 0), root.player_id)
-    root.game.pawns_manager.spawn("pawn_3", (4, 0), root.player_id)
-    #root.game.pawns_manager.add_resource(0, "resource_0", 2)
+    root.game_manager.buildings_manager.build("manufactory", (0, 1), root.player_id)
+    root.game_manager.buildings_manager.build("storage", (0, 2), root.player_id)
+    root.game_manager.buildings_manager.build("lumberjack", (0, 3), root.player_id)
+    root.game_manager.pawns_manager.spawn("pawn_0", (1, 0), root.player_id)
+    root.game_manager.pawns_manager.spawn("pawn_1", (2, 0), root.player_id)
+    root.game_manager.pawns_manager.spawn("pawn_2", (3, 0), root.player_id)
+    root.game_manager.pawns_manager.spawn("pawn_3", (4, 0), root.player_id)
+    #root.game_manager.pawns_manager.add_resource(0, "resource_0", 2)
+
+    from assets.gui.inputfield import InputField
+    root.game_manager.add_inputfield(InputField(width=200, height=50, bg_color=(100, 100, 100, 255), font_size=50))
 
     logger.info("game started", f"start_the_game({game_name}, {game_seed})")

@@ -22,7 +22,7 @@ class PolicyTable:
 
     def load_policies_for_player(self):
         self.chosen_policies = []
-        player_fraction = root.game.allFractions.get_player_fraction()
+        player_fraction = root.game_manager.fraction_manager.get_player_fraction()
         if player_fraction is None:
             return
         x = 0
