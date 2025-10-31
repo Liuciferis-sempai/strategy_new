@@ -26,7 +26,7 @@ button_standard_size = (150, 50)
 info_box_size = (75, 25)
 world_map_size = (150, 150)
 river_count = 10
-time_for_info_show = 1000
+time_for_show_info = 30
 
 #Variables
 window_state = "game"

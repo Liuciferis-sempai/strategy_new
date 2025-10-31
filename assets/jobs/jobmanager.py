@@ -42,7 +42,7 @@ class JobManager:
         coord can be (-1, -1) if there is no target cell in root file. check it in this case
         '''
         chosen_cell_coord = root.game_manager.get_chosen_cell_coord()
-        target_coord = root.game_manager.gui.game.get_target_coord()
+        target_coord = root.game_manager.get_target_coord()
 
         if job["trigger"]["args"].get("target_of_action", None) != None:
             job["trigger"]["args"]["target_of_action"] = job_id.split(".")[-1]

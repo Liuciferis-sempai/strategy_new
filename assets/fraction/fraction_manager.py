@@ -7,7 +7,7 @@ class FractionManager:
         self.fractions: list = []
 
     def create_fraction(self, name: str, type: str, id: int, data: dict={}):
-        fraction = Fraction(name, type, id, data)
+        fraction = Fraction(name, type, id, data, False)
         self._add_fraction(fraction)
         return fraction
 

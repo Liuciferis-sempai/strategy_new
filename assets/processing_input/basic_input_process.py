@@ -1,6 +1,5 @@
 import pygame as py
 import assets.root as root
-from assets.world.cell import Cell
 
 class BasicInputProcessor:
     def __init__(self, root_prcessor_input):
@@ -13,10 +12,7 @@ class BasicInputProcessor:
         self.k_a_pressed = False
         self.k_d_pressed = False
         self.k_s_pressed = False
-        self.k_w_pressed = False
-
-        self.default_cell = Cell()
-        self.cell_under_mouse = self.default_cell
+        self.k_w_pressed = False        
 
     def process_keydown_for_inputfield(self, event:py.event.Event) -> bool:
         if root.input_field_active:

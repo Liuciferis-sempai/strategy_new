@@ -26,7 +26,7 @@ class InputKeyProcessor:
 
     def pass_func(self, *args, **kwargs):
         pass
-        
+
     #PROCESS_KEYDOWN----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     #@logger
     def process_keydown(self, event:py.event.Event):

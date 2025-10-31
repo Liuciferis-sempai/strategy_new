@@ -1,10 +1,14 @@
 import pygame as py
 import assets.root as root
 from assets.processing_input.basic_input_process import BasicInputProcessor
+from assets.world.cell import Cell
 
 class GameInputProcessor(BasicInputProcessor):
     def __init__(self, root_prcessor_input):
         super().__init__(root_prcessor_input)
+
+        self._default_cell = Cell()
+        self.cell_under_mouse = self._default_cell
 
     def is_move_button_pressed(self):
         if any([self.k_a_pressed, self.k_d_pressed, self.k_s_pressed, self.k_w_pressed]):
@@ -151,9 +155,5 @@ class GameInputProcessor(BasicInputProcessor):
         for cell in root.game_manager.world_map.cells_on_screen:
             if cell.rect.collidepoint(rel_mouse_pos):
                 self.cell_under_mouse = cell
-                if cell.buildings != {} or cell.pawns != []:
-                    root.game_manager.gui.game.show_info(cell, mouse_pos)
-                    root.update_gui()
-                    return
 
         root.game_manager.gui.game.hide_info()

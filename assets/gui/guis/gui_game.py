@@ -159,10 +159,37 @@ class GUIGame:
             self.jobs_list = ListOf(root.game_manager.job_manager.get_jobs_id_for_pawn(root.game_manager.get_opened_pawn()), position=self.show_job_button.rect.topleft, type_of_list="job_list")
         update_gui()
 
-    def show_info(self, cell: Cell, mouse_pos: tuple[int, int]):
-        cell_info = []
+    def show_info_about_cell_under_mouse(self):
+        cell = root.game_manager.input_processor.game_input.cell_under_mouse
+        mouse_pos = py.mouse.get_pos()
+
+        cell_info = [[]]
         self.cell_info = []
         y_offset = 0
+
+        terrain = TextField(text=cell.type,
+                                position=(
+                                    mouse_pos[0]+10,
+                                    mouse_pos[1]+10
+                                ), font_size=20)
+        cell_info[-1].append(terrain)
+        if cell.flora != {}:
+            flora = TextField(text=cell.flora["name"],
+                                position=(
+                                    mouse_pos[0]+10,
+                                    mouse_pos[1]+terrain.text_rect.height+10
+                                ), font_size=20)
+            cell_info[-1].append(flora)
+        if cell.fauna != {}:
+            fauna = TextField(text=cell.fauna["name"],
+                                position=(
+                                    mouse_pos[0]+10,
+                                    mouse_pos[1]+terrain.text_rect.height+flora.text_rect.height+10 if cell.flora != {} else mouse_pos[1]+terrain.text_rect.height+10 #type: ignore
+                                ), font_size=20)
+            cell_info[-1].append(fauna)
+        
+        y_offset += sum([info.text_rect.height for info in cell_info[-1]])+10
+
         if cell.buildings != {}:
             cell_info.append([])
             building = root.game_manager.buildings_manager.get_building_by_coord(cell.coord)
@@ -170,24 +197,24 @@ class GUIGame:
             building_name = TextField(text=building.name, 
                                         position=(
                                             mouse_pos[0]+10,
-                                            mouse_pos[1]+10
+                                            mouse_pos[1]+y_offset+10
                                         ), font_size=20)
             building_service = TextField(text=f"service *{building.get_service()}/{building.get_max_service()}",
                                         position=(
                                             mouse_pos[0]+10,
-                                            mouse_pos[1]+building_name.text_rect.height+10
+                                            mouse_pos[1]+y_offset+building_name.text_rect.height+10
                                         ), font_size=20)
             building_hp = TextField(text=f"hp *{building.get_hp()}/{building.get_max_hp()}",
                                     position=(
                                         mouse_pos[0]+10,
-                                        mouse_pos[1]+building_name.text_rect.height+building_service.text_rect.height+10
+                                        mouse_pos[1]+y_offset+building_name.text_rect.height+building_service.text_rect.height+10
                                     ), font_size=20)
 
             cell_info[-1].append(building_name)
             cell_info[-1].append(building_service)
             cell_info[-1].append(building_hp)
 
-            y_offset = sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height])+10
+            y_offset += sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height])+10
 
         if cell.pawns != []:
             for pawn_in_cell in cell.pawns:
@@ -217,17 +244,27 @@ class GUIGame:
                 if new_max_width > max_width:
                     max_width = new_max_width
             
+            if mouse_pos[0]+5+max_width+20 > root.window_size[0]:
+                x_offset = max_width + 25
+                pos = (mouse_pos[0] - x_offset, mouse_pos[1])
+            else:
+                x_offset = 0
+                pos = mouse_pos
+
             for info in cell_info:
                 bg = Icon(
                     max_width+20,
                     sum([content.text_rect.height for content in info])+10,
-                    position=(mouse_pos[0]+5, mouse_pos[1]+y_offset),
+                    position=(pos[0]+5, pos[1]+y_offset),
                     bg=(150, 150, 150, 255)
                 )
                 y_offset += bg.rect.height+5
                 self.cell_info.append(bg)
                 for info_content in info:
+                    info_content.change_position((info_content.position[0]-x_offset, info_content.position[1]))
                     self.cell_info.append(info_content)
+        
+        update_gui()
  
     def hide_info(self):
         self.cell_info = []

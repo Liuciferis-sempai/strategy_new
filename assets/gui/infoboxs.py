@@ -70,7 +70,6 @@ class InfoBox(py.sprite.Sprite):
         self.closed = True
         self.image.fill((0, 0, 0, 0))
 
-
     def open(self, content:dict[str, Any]):
         self.closed = False
         self.title = content.get("title", "No Title")
