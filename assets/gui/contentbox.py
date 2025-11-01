@@ -1,6 +1,6 @@
 import pygame as py
 import assets.root as root
-from assets.functions import update_gui
+from assets.auxiliary_stuff.functions import update_gui
 
 class ContentBox(py.sprite.Sprite):
     def __init__(self, width:int=0, height:int=0, color:tuple[int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), value:int=0, img:str="", allowed_range:list[int]|None=[0, 100]):

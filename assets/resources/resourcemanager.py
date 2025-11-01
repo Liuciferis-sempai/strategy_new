@@ -1,5 +1,5 @@
 import os
-from assets.work_with_files import read_json_file
+from assets.auxiliary_stuff.work_with_files import read_json_file
 from .resource_type import ResourceType
 from assets import root
 from assets.root import loading, logger

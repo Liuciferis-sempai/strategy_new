@@ -5,9 +5,9 @@ from .cell import Cell
 from .river import River
 from random import randint, seed, choice, uniform, random
 import os
-from assets.work_with_files import read_json_file
-from assets.decorators import timeit
-from assets.functions import update_gui
+from assets.auxiliary_stuff.work_with_files import read_json_file
+from assets.auxiliary_stuff.decorators import timeit
+from assets.auxiliary_stuff.functions import update_gui
 from assets.root import loading, logger
 
 class WorldMap(py.sprite.Sprite):
@@ -30,7 +30,7 @@ class WorldMap(py.sprite.Sprite):
         self.cells_on_screen = []
         self.marked_region = {}
 
-        self.terrain = []
+        self.terrain: list[list[Cell]] = []
         self.types_of_land = []
         self.types_of_flora = []
         self.types_of_fauna = []
@@ -275,9 +275,8 @@ class WorldMap(py.sprite.Sprite):
             return Cell()
 
     def change_cell_by_coord(self, coord: tuple[int, int], new_type: str):
-        cell = self.terrain[coord[0]][coord[1]]
-        #print(coord, cell.coord)
-
+        cell = self.terrain[coord[1]][coord[0]]
+        old_type = cell.type
         data = {}
 
         for type in self.types_of_land:
@@ -297,7 +296,8 @@ class WorldMap(py.sprite.Sprite):
                             data[modification_type] = modification[0]
                 break
 
-        self.terrain[coord[0]][coord[1]] = Cell(position=cell.position, coord=cell.coord, data=data, is_default=False)
+        self.terrain[coord[1]][coord[0]] = Cell(position=cell.position, coord=cell.coord, data=data, is_default=False)
+        return f"changed cell by coord {cell.coord} from {old_type} to {new_type}"
 
     @timeit
     def map_generate(self, seed_:int=0):

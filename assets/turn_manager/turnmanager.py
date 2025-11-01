@@ -15,6 +15,11 @@ class TurnManager:
             if event["turn"] == self.turn:
                 logger.info(f"Executing turn event: {event}", f"TurnManager.do_step()")
                 root.game_manager.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
+        for fraction in root.game_manager.fraction_manager.get_all_fractions():
+            for producer in fraction.production["buildings"]:
+                if self.turn >= producer.last_prodaction_at + producer.prodaction_time:
+                    producer.last_prodaction_at = self.turn
+                    producer.produce(producer)
 
     def add_event_in_queue(self, time: int, event: dict):
         '''

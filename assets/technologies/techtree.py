@@ -1,10 +1,10 @@
-from assets.work_with_files import read_json_file
+from assets.auxiliary_stuff.work_with_files import read_json_file
 import pygame as py
 import os
 import assets.root as root
 from .tech import Tech
 from assets.root import loading
-from assets.functions import update_gui
+from assets.auxiliary_stuff.functions import update_gui
 
 class Link(py.sprite.Sprite):
     def __init__(self, prerequisite: Tech, tech: Tech):

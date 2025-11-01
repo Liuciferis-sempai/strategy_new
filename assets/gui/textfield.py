@@ -3,7 +3,7 @@ import pygame as py
 import assets.root as root
 
 class TextField(py.sprite.Sprite):
-    def __init__(self, width:int=0, height:int=0, color:tuple[int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), text:str="", font_size:int=40):
+    def __init__(self, width:int=0, height:int=0, color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), text:str="", font_size:int=40):
         super().__init__()
         self.width = width if width >= 0 else root.window_size[0] - 20
         self.height = height if height >= 0 else root.interface_size

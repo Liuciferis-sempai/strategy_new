@@ -9,7 +9,7 @@ import assets.root as root
 from assets.root import logger
 from assets.pawns.pawn import Pawn
 from assets.world.cell import Cell
-from assets.decorators import timeit
+from assets.auxiliary_stuff.decorators import timeit
 
 class GUIGame:
     def __init__(self):
@@ -167,7 +167,7 @@ class GUIGame:
         self.cell_info = []
         y_offset = 0
 
-        terrain = TextField(text=cell.type,
+        terrain = TextField(text=cell.type + f" *[{cell.coord[0]} *{cell.coord[1]}]",
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+10

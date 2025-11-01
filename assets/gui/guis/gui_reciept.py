@@ -7,7 +7,7 @@ from ..iconbox import *
 from ..listof import *
 import assets.root as root
 from assets.root import logger
-from assets.decorators import timeit
+from assets.auxiliary_stuff.decorators import timeit
 
 class GUIReciept:
     def __init__(self):

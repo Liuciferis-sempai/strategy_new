@@ -8,7 +8,7 @@ from ..listof import *
 import assets.root as root
 from assets.root import logger
 import pygame as py
-from assets.decorators import timeit
+from assets.auxiliary_stuff.decorators import timeit
 
 class GUIShareMenu:
     def __init__(self):

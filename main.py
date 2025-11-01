@@ -5,7 +5,7 @@ py.font.init()
 
 import assets.root as root
 from assets.root import logger
-from assets.functions import update_gui
+from assets.auxiliary_stuff.functions import update_gui
 
 def main():
     clock = py.time.Clock()
@@ -36,7 +36,7 @@ def main():
                 root.game_manager.input_processor.process_mousebuttonup(event)
 
         if root.window_state == "game":
-            if time_withoute_mouse_moving >= root.time_for_show_info:
+            if time_withoute_mouse_moving >= root.time_for_show_info and not root.game_manager.input_processor.game_input.cell_under_mouse.is_default and root.game_manager.gui.game.cell_info == []:
                 root.game_manager.gui.game.show_info_about_cell_under_mouse()
             else:
                 time_withoute_mouse_moving += 1

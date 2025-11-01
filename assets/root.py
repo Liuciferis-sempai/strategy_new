@@ -1,9 +1,9 @@
-from .work_with_files import write_txt_file
+from .auxiliary_stuff.work_with_files import write_txt_file
 #Clear logs
 write_txt_file("data/logs.txt", "")
 write_txt_file("data/errors.txt", "")
 
-from .logger import Logger
+from .auxiliary_stuff.logger import Logger
 logger = Logger()
 
 #pygame load
@@ -12,7 +12,7 @@ screen = py.display.set_mode((800, 600), py.RESIZABLE)
 #py.display.set_caption("My Game")
 py.display.set_caption("MyCountry")
 
-from .loading import Loading
+from .auxiliary_stuff.loading import Loading
 loading = Loading()
 loading.draw("Loading root module...")
 
@@ -45,11 +45,11 @@ screen = py.display.set_mode(window_size, py.RESIZABLE)
 
 loading.draw("Config loading...")
 #config load
-from .work_with_files import read_json_file
+from .auxiliary_stuff.work_with_files import read_json_file
 config = read_json_file("data/config.json")
 cell_size_scale = config.get("cell_size_scale", 1)
 
-from assets.language import Language
+from assets.auxiliary_stuff.language import Language
 language = Language(config["language"])
 
 loading.draw("Image manager initializing...")
@@ -62,4 +62,4 @@ game_manager = GameManager()
 game_manager.gui.initialize()
 game_manager.gui.change_position_for_new_screen_sizes()
 
-from .functions import *
+from .auxiliary_stuff.functions import *

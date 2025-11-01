@@ -1,5 +1,5 @@
 import os
-from assets.work_with_files import read_json_file
+from assets.auxiliary_stuff.work_with_files import read_json_file
 from .pawn import Pawn
 from assets.world.cell import Cell
 from assets import root
@@ -7,7 +7,7 @@ from assets.root import loading, logger
 
 class PawnsManager:
     def __init__(self):
-        self.pawns = []
+        self.pawns: list[Pawn] = []
         self.types_of_pawns = []
         self.available_pawn_id = 0
 
@@ -34,20 +34,27 @@ class PawnsManager:
                 return pawn
         logger.error(f"pawn not found {name} {coord}", f"PawnsManager.get_pawn_by_name({name}, {coord})")
         return Pawn()
+    
+    def get_pawn_by_coord(self, coord: tuple[int, int]) -> Pawn:
+        for pawn in self.pawns:
+            if pawn.coord == coord:
+                return pawn
+        return Pawn()
 
-    def spawn(self, data: str, coord: tuple[int, int], fraction_id: int) -> bool:
+    def spawn(self, data: str|dict, coord: tuple[int, int], fraction_id: int) -> bool:
         '''
         use data str to spawn standart pawn
         use data dict to spawn pawn with specials characteristics
         '''
         root.game_manager.fraction_manager.get_fraction_by_id(fraction_id).statistics["pawn_count"] += 1 #type: ignore
-        for type in self.types_of_pawns:
-            if data == type["name"] or data == type:
-                if isinstance(data, str):
+        if isinstance(data, str):
+            for type in self.types_of_pawns:
+                if data == type["name"]:
                     self._spawn(type, coord, fraction_id)
-                else:
-                    self._spawn(data, coord, fraction_id)
-                return True
+                    return True
+        else:
+            self._spawn(data, coord, fraction_id)
+            return True
         return False
     
     def _spawn(self, data: dict, coord: tuple[int, int], fraction_id: int):
@@ -74,24 +81,39 @@ class PawnsManager:
                 return
         logger.error(f"Trying to despawn non-existing pawn with id {id}", f"PawnsManager.despawn({id})")
 
-    def restore_movement_points(self, pawn: Pawn):
-        for p in self.pawns:
-            if p.id == pawn.id:
-                p.data["movement_points"] = p.data["movement_points_max"]
-                cell = root.game_manager.world_map.get_cell_by_coord(pawn.coord)
-                if cell != None:
-                    for pawn_ in cell.pawns:
-                        pawn_["movement_points"] = p.data["movement_points"]
+    def restore_movement_points(self, pawn: Pawn) -> str:
+        pawn.data["movement_points"] = pawn.data["movement_points_max"]
+        cell = root.game_manager.world_map.get_cell_by_coord(pawn.coord)
+        for pawn_ in cell.pawns:
+            if pawn_["id"] == pawn.id:
+                pawn_["movement_points"] = pawn.data["movement_points"]
+        return f"movement points by pawn {pawn.name} [{pawn.type} {pawn.id}] successfully restored to {pawn.data["movement_points"]}"
     
-    def add_resource(self, pawn_:int|Pawn, resource:str, amout:int):
+    def add_resource(self, pawn_:int|Pawn, resource:str, amout:int) -> str:
         if isinstance(pawn_, int):
             for pawn in self.pawns:
                 if pawn_ == pawn.id:
                     pawn.add_resource(resource, amout)
+                    return f"pawn {pawn.id} received {resource} in quantity {amout}"
         elif isinstance(pawn_, Pawn):
             for pawn in self.pawns:
                 if pawn_ == pawn:
                     pawn.add_resource(resource, amout)
+                    return f"pawn {pawn.id} received {resource} in quantity {amout}"
+        return f"pawn {pawn_} not found"
+    
+    def remove_resource(self, pawn_:int|Pawn, resource:str, amout:int):
+        if isinstance(pawn_, int):
+            for pawn in self.pawns:
+                if pawn_ == pawn.id:
+                    pawn.remove_resource(resource, amout)
+                    return f"pawn {pawn.id} lost {resource} in quantity {amout}"
+        elif isinstance(pawn_, Pawn):
+            for pawn in self.pawns:
+                if pawn_ == pawn:
+                    pawn.remove_resource(resource, amout)
+                    return f"pawn {pawn.id} lost {resource} in quantity {amout}"
+        return f"pawn {pawn_} not found"
 
     def move_pawn(self, pawn: Pawn, new_cell: Cell):
         old_cell = root.game_manager.world_map.get_cell_by_coord(pawn.coord)
@@ -103,10 +125,11 @@ class PawnsManager:
         
         pawn.data["movement_points"] = new_cell.data["subdata"]["movement_points"]
         root.game_manager.world_map.unmark_region("for_move")
-        root.game_manager.turn_manager.add_event_in_queue(1, {"do": "restore_movement_points", "event_data": {"target": pawn}})
+        root.game_manager.turn_manager.add_event_in_queue(1, {"do": "restore_movement_points", "event_data": {"pawn": pawn}})
         root.game_manager.reset_opened_pawn()
         
         logger.info(f"{pawn} moved from {old_cell} to {new_cell}", f"PawnsManager.move_pawn(...)")
+        return f"pawn {pawn.name} ({pawn.id} moved from {old_cell.coord} to {new_cell.coord}) and has rest {pawn.data["movement_points"]} movement_points"
 
     def try_to_move_pawn(self, pawn: Pawn, new_cell: Cell) -> bool:
         if new_cell in root.game_manager.world_map.marked_region["for_move"]:
@@ -123,7 +146,7 @@ class PawnsManager:
             job = root.game_manager.job_manager.get_job_by_id(root.game_manager.job_manager.get_job_id_from_name(job_id))
             if job != None:
                 result = job["result"]
-                result["args"]["target"] = pawn
+                result["args"]["pawn"] = pawn
                 if job.get("movement_points_cost", False):
                     if job["movement_points_cost"] == "all":
                         pawn.data["movement_points"] = 0
@@ -136,7 +159,7 @@ class PawnsManager:
                             return
 
                 root.game_manager.turn_manager.add_event_in_queue(job["work_time"], {"do": result["type"], "event_data": result["args"]}) #job event
-                root.game_manager.turn_manager.add_event_in_queue(1, {"do": "restore_movement_points", "event_data": {"target": pawn}}) #pawn movement points event
+                root.game_manager.turn_manager.add_event_in_queue(1, {"do": "restore_movement_points", "event_data": {"pawn": pawn}}) #pawn movement points event
 
                 root.game_manager.world_map.unmark_region("for_move")
 

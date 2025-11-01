@@ -20,7 +20,7 @@ class Fraction:
                 "pawn_count": 0,
                 "building_count": 0
             }
-        self.production = data.get("production", {})
+        self.production = data.get("production", {"buildings": []})
         self.technologies = data.get("technologies", []) #id only
         self.policies = data.get("policies", []) #full dict data
         self.research_technology = data.get("research_technology", "none_technology")

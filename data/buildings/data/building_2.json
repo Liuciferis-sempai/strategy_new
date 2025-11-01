@@ -12,6 +12,10 @@
         "resource_0": 1
     },
     "type": "producer",
+    "prodaction_time": 1,
+    "prodaction": {
+        "resource_0": 1
+    },
     "storage_type": "dict",
     "storage": {"output": []},
     "storage_size": {"output": 10},

@@ -1,9 +1,9 @@
 import os
-from assets.work_with_files import read_json_file
+from assets.auxiliary_stuff.work_with_files import read_json_file
 from .policy import PolicyCard
 import assets.root as root
 from assets.root import loading
-from assets.functions import update_gui
+from assets.auxiliary_stuff.functions import update_gui
 
 class PolicyTable:
     def __init__(self):

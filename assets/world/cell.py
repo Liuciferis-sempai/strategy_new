@@ -3,7 +3,7 @@ import assets.root as root
 from assets.root import logger
 
 class Cell(py.sprite.Sprite):
-    def __init__(self, position: tuple[int, int]=(-1, -1), coord: tuple[int, int]=(0, 0), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
+    def __init__(self, position: tuple[int, int]=(-1, -1), coord: tuple[int, int]=(-1, -1), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
         super().__init__()
         self.data = data
         self.position = position

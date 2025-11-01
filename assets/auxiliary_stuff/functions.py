@@ -1,4 +1,4 @@
-from . import root
+from .. import root
 from assets.root import loading, logger
 
 def update_gui():
@@ -93,7 +93,7 @@ def start_the_game(game_name: str="New Game", game_seed: int=9999):
     root.game_manager.pawns_manager.spawn("pawn_3", (4, 0), root.player_id)
     #root.game_manager.pawns_manager.add_resource(0, "resource_0", 2)
 
-    from assets.gui.inputfield import InputField
-    root.game_manager.add_inputfield(InputField(width=200, height=50, bg_color=(100, 100, 100, 255), font_size=50))
+    #from assets.gui.inputfield import InputField
+    #root.game_manager.add_inputfield(InputField(width=200, height=50, bg_color=(100, 100, 100, 255), font_size=50))
 
     logger.info("game started", f"start_the_game({game_name}, {game_seed})")

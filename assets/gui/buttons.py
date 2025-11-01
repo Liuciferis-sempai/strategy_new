@@ -1,6 +1,6 @@
 import pygame as py
 import assets.root as root
-from assets.functions import update_gui
+from assets.auxiliary_stuff.functions import update_gui
 from assets.root import language, logger
 
 class Button(py.sprite.Sprite):

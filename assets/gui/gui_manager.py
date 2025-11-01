@@ -16,7 +16,7 @@ from .guis.gui_sharemenu import GUIShareMenu
 from .guis.gui_fraction import GUIFraction
 from .guis.gui_inventory import GUIInventory
 import assets.root as root
-from assets.decorators import timeit
+from assets.auxiliary_stuff.decorators import timeit
 from assets.root import loading
 
 class GUI:

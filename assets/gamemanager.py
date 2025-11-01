@@ -17,7 +17,7 @@ from assets.effects.effectmanager import EffectManager
 from assets.jobs.jobmanager import JobManager
 from assets.resources.resourcemanager import ResourceManager
 from assets.processing_input.proccessing_input import InputKeyProcessor
-
+from assets.command_line.command_line import CommandLine
 
 class GameManager:
     def __init__(self):
@@ -50,10 +50,16 @@ class GameManager:
         self.resource_manager = ResourceManager()
         self.input_processor = InputKeyProcessor()
 
+        self.command_line = CommandLine()
+        self.input_fields.append(self.command_line.inputfield)
+
     def draw(self):
         self.gui.draw()
+        if self.command_line.is_active:
+            self.command_line.draw()
         for input in self.input_fields:
-            input.draw()
+            if not input.hidden:
+                input.draw()
     
     def update_positions(self):
         self.gui.change_position_for_new_screen_sizes()

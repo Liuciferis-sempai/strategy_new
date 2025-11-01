@@ -1,6 +1,6 @@
 import assets.root as root
 import os
-from assets.work_with_files import read_json_file
+from assets.auxiliary_stuff.work_with_files import read_json_file
 from assets.root import loading, logger
 
 class RecieptsManager:
@@ -38,7 +38,6 @@ class RecieptsManager:
             allowed_ico = reciept_py["allowed"]
             if allowed_ico.rect.collidepoint(mouse_pos):
                 if allowed_ico.color == (0, 0, 0) and not root.game_manager.is_chosen_cell_default():
-                    chosen_cell = root.game_manager.get_chosen_cell()
                     building = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
                     if root.game_manager.trigger_manager.building_has_resources(reciept["necessary"], building) and len(building.queue) < building.max_queue: #type: ignore
                         reciept["time"] *= building.data["spped_of_work_mod"]
@@ -49,9 +48,11 @@ class RecieptsManager:
                             else:
                                 reciept["time"] = int(reciept["time"][0])
 
-                        root.game_manager.buildings_manager.remove_resource(chosen_cell, reciept["necessary"])
-                        root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "add_item_to_building", "event_data": {"cell": chosen_cell, "items": reciept["production"]}})
-                        root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "clear_the_queue", "event_data": {"cell": chosen_cell, "reciept": reciept}})
+                        for resource, amout in reciept["necessary"].values():
+                            root.game_manager.buildings_manager.remove_resource(building, resource, amout)
+                        for resource, amout in reciept["production"]:
+                            root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "add_resource", "event_data": {"building": building, "resource": resource, "amout": amout}})
+                        root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "clear_the_queue", "event_data": {"building": building, "reciept": reciept}})
                         building.add_in_queue(reciept.copy()) #type: ignore
                     else:
                         logger.warning(f"reciept {reciept["id"]} is not allowed, because building has not enought resources", f"RecieptsManager.use_recipe({mouse_pos})")

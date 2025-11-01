@@ -44,13 +44,17 @@ class GameInputProcessor(BasicInputProcessor):
             self.k_a_pressed = True
         elif event.key == py.K_d:
             self.k_d_pressed = True
+
         elif event.key == py.K_ESCAPE:
-            if not root.game_manager.gui.game.main_info_window_content.closed:
+            if root.game_manager.command_line.is_active:
+                root.game_manager.command_line.deactivete()
+            elif not root.game_manager.gui.game.main_info_window_content.closed:
                 root.game_manager.gui.game.main_info_window_content_close()
             elif root.game_manager.gui.game.sticked_object != None:
                 root.game_manager.gui.game.sticked_object = None
             elif any([root.game_manager.gui.game.jobs_list, root.game_manager.gui.game.buildings_types_list, root.game_manager.gui.game.action_list]):
                 root.game_manager.gui.close_all_extra_windows()
+
         elif event.key == py.K_UP:
             root.cell_size_scale += 1
             if root.cell_size_scale > len(root.cell_sizes)-1:
@@ -58,6 +62,7 @@ class GameInputProcessor(BasicInputProcessor):
             root.game_manager.world_map.resize()
             root.game_manager.gui.change_position_for_new_screen_sizes()
             root.update_gui()
+
         elif event.key == py.K_DOWN:
             root.cell_size_scale -= 1
             if root.cell_size_scale < 0:
@@ -65,7 +70,13 @@ class GameInputProcessor(BasicInputProcessor):
             root.game_manager.world_map.resize()
             root.game_manager.gui.change_position_for_new_screen_sizes()
             root.update_gui()
-    
+
+        elif event.key == py.K_CARET:
+            if root.game_manager.command_line.is_active:
+                root.game_manager.command_line.deactivete()
+            else:
+                root.game_manager.command_line.activete()
+
     #@logger
     def process_mousebuttondown(self, event:py.event.Event):
         if self.process_mousebutton_for_inputfield(event): return root.update_gui()
@@ -155,5 +166,7 @@ class GameInputProcessor(BasicInputProcessor):
         for cell in root.game_manager.world_map.cells_on_screen:
             if cell.rect.collidepoint(rel_mouse_pos):
                 self.cell_under_mouse = cell
+                return
 
+        self.cell_under_mouse = self._default_cell
         root.game_manager.gui.game.hide_info()

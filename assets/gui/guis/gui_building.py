@@ -6,7 +6,7 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 import assets.root as root
-from assets.decorators import timeit
+from assets.auxiliary_stuff.decorators import timeit
 
 class GUIBuildings:
     def __init__(self):
