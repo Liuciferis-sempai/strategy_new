@@ -76,7 +76,7 @@ class WorldMap(py.sprite.Sprite):
             chosen_cell.chosen_pawn_index = -1
             chosen_cell.unmark()
             self._draw_cell(chosen_cell)
-            root.game_manager.reset_chosen_cell()
+            root.game_manager.reset_chosen_cell(False)
             self.unmark_region("all")
 
     def move_map_up(self):
@@ -132,6 +132,29 @@ class WorldMap(py.sprite.Sprite):
         for cell in self.cells_on_screen:
             self._draw_cell(cell)
 
+    def open_area(self, area: tuple[tuple[int, int], tuple[int, int]]):
+        start_coord = area[0]
+        end_coord = area[1]
+
+        coord = [start_coord[0], start_coord[1]]
+        cell = self.get_cell_by_coord((coord[0], coord[1]))
+        cell.is_opened = True
+
+        while coord[0] != end_coord[0] or coord[1] != end_coord[1]:
+            if coord[1] != end_coord[1]:
+                if coord[1] > end_coord[1]:
+                    coord[1] -= 1
+                else:
+                    coord[1] += 1
+            elif coord[0] != end_coord[0]:
+                coord[1] = start_coord[1]
+                if coord[0] > end_coord[0]:
+                    coord[0] -= 1
+                else:
+                    coord[0] += 1
+            cell = self.get_cell_by_coord((coord[0], coord[1]))
+            cell.is_opened = True
+
     #@timeit
     def draw(self):
         self.cells_on_screen = []
@@ -150,8 +173,9 @@ class WorldMap(py.sprite.Sprite):
         for row in range(start_row, end_row):
             for col in range(start_col, end_col):
                 cell = self.terrain[row][col]
-                self.cells_on_screen.append(cell)
-                self._draw_cell(cell)
+                if cell.is_opened:
+                    self.cells_on_screen.append(cell)
+                    self._draw_cell(cell)
 
         root.screen.blit(self.image, self.rect)
         #root.game_manager.gui.game.main_info_window_content.draw()
@@ -163,15 +187,15 @@ class WorldMap(py.sprite.Sprite):
         self.image.blit(cell.mark_image, (cell_position[0]-5, cell_position[1]-5))
         self.image.blit(cell.bg_image, cell_position)
 
-    def mark_region(self, coord: tuple[int, int], color: tuple[int, int, int, int]=(255, 0, 0, 100), radius:int=1, mark_type:str="for_move"):
-        for y in range(coord[0]-radius, coord[0]+radius+1):
-            for x in range(coord[1]-radius, coord[1]+radius+1):
-                if 0 <= x < root.world_map_size[0] and 0 <= y < root.world_map_size[1]:
-                    cell = self.get_cell_by_coord((x, y))
-                    if cell:
-                        cell.mark(color)
-                        self._draw_cell(cell)
-                        self._add_mark(cell, mark_type)
+    #def mark_region(self, coord: tuple[int, int], color: tuple[int, int, int, int]=(255, 0, 0, 100), radius:int=1, mark_type:str="for_move"):
+    #    for y in range(coord[0]-radius, coord[0]+radius+1):
+    #        for x in range(coord[1]-radius, coord[1]+radius+1):
+    #            if 0 <= x < root.world_map_size[0] and 0 <= y < root.world_map_size[1]:
+    #                cell = self.get_cell_by_coord((x, y))
+    #                if cell:
+    #                    cell.mark(color)
+    #                    self._draw_cell(cell)
+    #                    self._add_mark(cell, mark_type)
     
     def mark_movement_region(self, start_coord: tuple[int, int], movement_points: int=1, color: tuple[int, int, int, int]=(0, 0, 255, 100)):
         width, height = root.world_map_size
@@ -182,6 +206,8 @@ class WorldMap(py.sprite.Sprite):
         for nx in range(start_coord[0]-1, start_coord[0]+2):
             for ny in range(start_coord[1]-1, start_coord[1]+2):
                 if (nx, ny) != (start_coord[0], start_coord[1]):
+                    cell = self.get_cell_by_coord((nx, ny))
+                    cell.is_opened = True
                     queue.append(((nx, ny), movement_points))
 
         while queue:
@@ -202,6 +228,7 @@ class WorldMap(py.sprite.Sprite):
 
             visited[(x, y)] = remaining
             cell.data["subdata"]["movement_points"] = remaining
+            cell.is_opened = True
             cell.mark(color)
             self._add_mark(cell, "for_move")
 
@@ -287,6 +314,8 @@ class WorldMap(py.sprite.Sprite):
                 data["humidity"] = cell.data["humidity"]
                 data["soil_fertility"] = cell.data["soil_fertility"]
                 data["subdata"] = type["subdata"]
+                data["pawns"] = cell.pawns
+                data["buildings"] = cell.buildings
 
                 if type.get("frame_modification", False):
                     for modification_type, modification in type["frame_modification"].items():

@@ -8,6 +8,7 @@ class Cell(py.sprite.Sprite):
         self.data = data
         self.position = position
         self.coord = coord
+        self.is_opened = False
 
         self.is_default = is_default
         if is_default:
@@ -17,8 +18,8 @@ class Cell(py.sprite.Sprite):
         self.land = data.get("img", "field.png")
         self.flora = data.get("flora", {})
         self.fauna = data.get("fauna", {})
-        self.buildings = {}
-        self.pawns = []
+        self.buildings = data.get("buildings", {})
+        self.pawns = data.get("pawns", [])
         self.chosen_pawn_index = -1
 
         self.mark_image = py.Surface((root.cell_sizes[root.cell_size_scale][0]+10, root.cell_sizes[root.cell_size_scale][1]+10), py.SRCALPHA)

@@ -17,7 +17,8 @@ class EffectManager:
             "build_scheme": {"target_building_str": str, "building_coord": tuple[int, int], "building_fraction": int},
             "spawn": {"coord": tuple[int, int], "type": str, "fraction_id": int},
             "build": {"coord": tuple[int, int], "type": str, "fraction_id": int},
-            "change_cell": {"cell": Cell, "coord": tuple[int, int], "new_type": str} #cell and coord are mutually exclusive
+            "change_cell": {"cell": Cell, "coord": tuple[int, int], "new_type": str}, #cell and coord are mutually exclusive
+            "open_area": {"start_coord": tuple[int, int], "end_coord": tuple[int, int]}
         }
 
     def translate(self, entry: str) -> str:
@@ -36,7 +37,7 @@ class EffectManager:
         
     def do(self, effect_type: str, effect_data: dict) -> str:
         do_answer = f"execution the effect {effect_type} with data: {[f"{key}: {value}" for key, value in effect_data.items()]}"
-        logger.info(do_answer, f"EffectManager.do({effect_type}, {effect_data})")
+        #logger.info(do_answer, f"EffectManager.do({effect_type}, {effect_data})")
         match effect_type:
             case "clear_the_queue":
                 do_answer = self.cleat_the_queue(effect_data["building"], effect_data["reciept"])
@@ -67,6 +68,8 @@ class EffectManager:
                     do_answer = self.change_cell_by_coord(effect_data["coord"], effect_data["new_type"])
                 else:
                     do_answer = self.change_cell_by_coord(effect_data["cell"].coord, effect_data["new_type"])
+            case "open_area":
+                do_answer = self.open_area(effect_data["start_coord"], effect_data["end_coord"])
             case _:
                 do_answer = f"can not do {effect_type}"
                 logger.error(f"effect {effect_type} not found", f"EffectManager.do({effect_type}, {effect_data})")
@@ -119,3 +122,7 @@ class EffectManager:
     
     def change_cell_by_coord(self, coord: tuple[int, int], new_type: str) -> str:
         return root.game_manager.world_map.change_cell_by_coord(coord, new_type)
+
+    def open_area(self, start_coord: tuple[int, int], end_coord: tuple[int, int]) -> str:
+        root.game_manager.world_map.open_area((start_coord, end_coord))
+        return f"successfully opened area from {start_coord} to {end_coord}"

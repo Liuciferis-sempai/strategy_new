@@ -22,6 +22,8 @@ from assets.command_line.command_line import CommandLine
 class GameManager:
     def __init__(self):
         loading.draw("Loading game manager...")
+        self.game_name = "Noname"
+
         self._default_cell = Cell()
         self._default_pawn = Pawn()
         self._default_chosen_inputfield = InputField()
@@ -77,8 +79,10 @@ class GameManager:
         #    logger.info(f"query chosen cell: {self.chosen_cell}", "Game.get_chosen_cell()")
         return self.chosen_cell
     
-    def reset_chosen_cell(self):
+    def reset_chosen_cell(self, call_uncose_cell: bool = True):
         logger.info("chosen cell reset", "Game.reset_chosen_cell()")
+        if call_uncose_cell:
+            self.world_map.unchose_cell()
         self.chosen_cell = self._default_cell
         self.chosen_cell_coord = self.chosen_cell.coord
     

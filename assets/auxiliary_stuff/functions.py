@@ -1,3 +1,4 @@
+import pygame as py
 from .. import root
 from assets.root import loading, logger
 
@@ -6,6 +7,13 @@ def update_gui():
     update all gui element
     '''
     root.need_update_gui = True
+
+def can_be_int(value: str) -> bool:
+    try:
+        int(value)
+        return True
+    except:
+        return False
 
 def change_window_state(new_state:str):
     root.last_window_state = root.window_state
@@ -70,7 +78,7 @@ def back_window_state():
 def start_the_game(game_name: str="New Game", game_seed: int=9999):
     loading.draw("Starting the game...")
     #Initialize game state
-    root.game_name = game_name
+    root.game_manager.game_name = game_name
     root.game_manager.world_map.map_generate(game_seed)
 
     loading.draw("Set initial GUI state...")
@@ -83,17 +91,21 @@ def start_the_game(game_name: str="New Game", game_seed: int=9999):
     root.game_manager.gui.fraction.open_player_fraction()
 
     loading.draw("Loading preset stuff...")
+    with open("data/preset.txt", "r") as f:
+        for line in f.readlines():
+            root.game_manager.command_line.process_input(line)
     #For the testrun
-    root.game_manager.buildings_manager.build("manufactory", (0, 1), root.player_id)
-    root.game_manager.buildings_manager.build("storage", (0, 2), root.player_id)
-    root.game_manager.buildings_manager.build("lumberjack", (0, 3), root.player_id)
-    root.game_manager.pawns_manager.spawn("pawn_0", (1, 0), root.player_id)
-    root.game_manager.pawns_manager.spawn("pawn_1", (2, 0), root.player_id)
-    root.game_manager.pawns_manager.spawn("pawn_2", (3, 0), root.player_id)
-    root.game_manager.pawns_manager.spawn("pawn_3", (4, 0), root.player_id)
+    #root.game_manager.buildings_manager.build("manufactory", (0, 1), root.player_id)
+    #root.game_manager.buildings_manager.build("storage", (0, 2), root.player_id)
+    #root.game_manager.buildings_manager.build("lumberjack", (0, 3), root.player_id)
+    #root.game_manager.pawns_manager.spawn("pawn_0", (1, 0), root.player_id)
+    #root.game_manager.pawns_manager.spawn("pawn_1", (2, 0), root.player_id)
+    #root.game_manager.pawns_manager.spawn("pawn_2", (3, 0), root.player_id)
+    #root.game_manager.pawns_manager.spawn("pawn_3", (4, 0), root.player_id)
     #root.game_manager.pawns_manager.add_resource(0, "resource_0", 2)
 
     #from assets.gui.inputfield import InputField
     #root.game_manager.add_inputfield(InputField(width=200, height=50, bg_color=(100, 100, 100, 255), font_size=50))
 
+    py.display.set_caption(game_name)
     logger.info("game started", f"start_the_game({game_name}, {game_seed})")

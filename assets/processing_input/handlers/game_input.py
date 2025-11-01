@@ -48,6 +48,8 @@ class GameInputProcessor(BasicInputProcessor):
         elif event.key == py.K_ESCAPE:
             if root.game_manager.command_line.is_active:
                 root.game_manager.command_line.deactivete()
+            elif not root.game_manager.is_chosen_cell_default():
+                root.game_manager.reset_chosen_cell()
             elif not root.game_manager.gui.game.main_info_window_content.closed:
                 root.game_manager.gui.game.main_info_window_content_close()
             elif root.game_manager.gui.game.sticked_object != None:
@@ -76,6 +78,7 @@ class GameInputProcessor(BasicInputProcessor):
                 root.game_manager.command_line.deactivete()
             else:
                 root.game_manager.command_line.activete()
+            root.update_gui()
 
     #@logger
     def process_mousebuttondown(self, event:py.event.Event):

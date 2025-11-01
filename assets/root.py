@@ -31,10 +31,7 @@ time_for_show_info = 30
 #Variables
 window_state = "game"
 last_window_state = "game"
-game_name = ""
 player_id = 1
-input = ""
-all_input = []
 input_field_active = False
 
 #Boolean

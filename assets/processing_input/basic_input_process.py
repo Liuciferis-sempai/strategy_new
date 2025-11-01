@@ -16,8 +16,9 @@ class BasicInputProcessor:
 
     def process_keydown_for_inputfield(self, event:py.event.Event) -> bool:
         if root.input_field_active:
-            root.game_manager.get_chosen_inputfield().key_down(event)
-            return True
+            if event.key != py.K_CARET:
+                root.game_manager.get_chosen_inputfield().key_down(event)
+                return True
         return False
 
     def process_mousebutton_for_inputfield(self, event:py.event.Event) -> bool:

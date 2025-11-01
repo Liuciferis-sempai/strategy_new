@@ -30,14 +30,16 @@ class CommandLine(py.sprite.Sprite):
         self.lines: list[TextField] = []
 
     def add_answer(self, answer: str):
-        print(answer)
-        self.lines.append(TextField(self.width, self.font_size, text=answer, font_size=self.font_size, color=self.color))
+        #print(answer)
+        self.lines.append(TextField(self.width, self.font_size, text=answer, font_size=self.font_size, color=self.color, translate=False))
         if len(self.lines) > 5:
             self.lines.pop(0)
         update_gui()
 
     def process_input(self, value: str):
+        value = value.replace("\n", "")
         self.inputfield.value = ""
+
         input_list: list[str] = value.split(" ")
         inputs: list = []
         input = self._generator_for_input_value(value)
@@ -85,17 +87,25 @@ class CommandLine(py.sprite.Sprite):
         tail = " ".join(input_list)+f" {coord[0]},{coord[1]}"
         input = self._generator_for_input_value(tail)
         inputs.append(input)
-        print(tail)
+        #print(tail)
 
         return inputs, input
 
     def _process_entry(self, input, entry: str, effect_name: str, effect_data: dict) -> dict|None:
         if entry.count(",") == 1:
-            result = self._coord_process(effect_name, entry, effect_data)
-            if result == None:
-                logger.error(f"coord {entry} does not exist", f"CommandLine._process_entry({input}, {entry}, {effect_name}, {effect_data})")
-                return None
-            else: effect_data = result
+            if effect_name != "open_area":
+                result = self._coord_process(effect_name, entry, effect_data)
+                if result == None:
+                    logger.error(f"coord {entry} does not exist", f"CommandLine._process_entry({input}, {entry}, {effect_name}, {effect_data})")
+                    return None
+                else: effect_data = result
+            else:
+                if effect_data.get("start_coord"):
+                    pos =  entry.split(",")
+                    effect_data["end_coord"] = (int(pos[0]), int(pos[1]))
+                else:
+                    pos =  entry.split(",")
+                    effect_data["start_coord"] = (int(pos[0]), int(pos[1]))
         elif effect_name in ["spawn", "build"]:
             effect_data = self._object_process(entry, effect_data)
         elif effect_name == "clear_the_queue":
@@ -107,6 +117,8 @@ class CommandLine(py.sprite.Sprite):
         return effect_data
     
     def _object_process(self, entry: str|int, effect_data: dict) -> dict:
+        if entry in ["pl", "player"]:
+            entry = root.player_id
         try:
             entry = int(entry)
             effect_data["fraction_id"] = entry
@@ -160,13 +172,11 @@ class CommandLine(py.sprite.Sprite):
         self.inputfield.hidden = False
         self.inputfield.value = ""
         self.inputfield.click()
-        update_gui()
 
     def deactivete(self):
         self.is_active = False
         self.inputfield.hidden = True
         root.input_field_active = False
-        update_gui()
 
     def change_position_for_new_screen_sizes(self):
         self.width = root.window_size[0]

@@ -1,6 +1,7 @@
-from assets.auxiliary_stuff.work_with_files import read_json_file
+from .work_with_files import read_json_file
 #from random import choice
 from assets.root import logger
+from .functions import can_be_int
 
 class Language:
     def __init__(self, language:str):
@@ -10,37 +11,28 @@ class Language:
         self.language_name = language
         self.language = read_json_file(f"data/languages/{language}.json")
     
-    def get(self, key: str) -> str:
+    def get(self, value: str) -> str:
+        if value == "":
+            return value
+
+        data = ""
+        for key in value.split(" "):
+            translate = self._translate_key(key)
+            data += f"{translate} "
+        return data
+    
+    def _translate_key(self, key: str) -> str:
         if key == "":
             return key
-
-        if " " in key:
-            return self._translate_multiple_keys(key.split(" "))
+        elif key[0] == "*":
+            return key[1:]
+        elif can_be_int(key):
+            return key
         else:
-            if key[0] == "*":
-                return key[1:]
-            translate = self.language.get(key, None)
-            if translate is None:
+            translate = self.language.get(key, "__unknow__")
+            if translate == "__unknow__":
                 self.language[key] = key
                 logger.error(f"Key '{key}' not found in language '{self.language_name}'", f"Language.get({key})")
                 return key
             else:
                 return translate
-    
-    def _translate_multiple_keys(self, keys: list) -> str:
-        data = ""
-        for key in keys:
-            if key == "":
-                translate = key
-            elif key[0] == "*":
-                translate = key[1:]
-            else:
-                translate = self.language.get(key, None)
-
-            if translate is None:
-                logger.error(f"Key '{key}' not found in language '{self.language_name}'", f"Language._translate_multiple_keys({keys})")
-                self.language[key] = key
-                data += f" {key}"
-            else:
-                data += f" {translate}"
-        return data

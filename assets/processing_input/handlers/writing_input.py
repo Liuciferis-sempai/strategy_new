@@ -14,12 +14,12 @@ class WritingInputProcessor(BasicInputProcessor):
         if event.key == py.K_RETURN:
             root.game_manager.gui.writing.submit_input()
         elif event.key == py.K_BACKSPACE:
-            root.input = root.input[:-1]
+            root.game_manager.gui.writing.input = root.game_manager.gui.writing.input[:-1]
         elif event.key == py.K_ESCAPE:
             root.game_manager.gui.writing.close(False)
         else:
-            if len(root.input) < 20:
-                root.input += event.unicode
+            if len(root.game_manager.gui.writing.input) < 20:
+                root.game_manager.gui.writing.input += event.unicode
         root.game_manager.gui.writing.update_input_field()
     
     #@logger
