@@ -10,7 +10,7 @@ class EffectManager:
         self.effects: dict[str, dict[str, Any]] = {
             "clear_the_queue": {"building": Building, "reciept": dict},
             "restore_movement_points": {"pawn": Pawn},
-            "add_resource": {"pawn": Pawn, "building": Building, "resource": str, "amout": int}, #pawn and building are mutually exclusive
+            "add_resource": {"pawn": Pawn, "building": Building, "resource": str, "amount": int}, #pawn and building are mutually exclusive
             "take_resource": {"pawn": Pawn, "building": Building, "resource": str, "anout": int}, #pawn and building are mutually exclusive
             "open_share_menu": {"target": str},
             "stand_here": {"pawn": Pawn, "target_cell": Cell},
@@ -18,7 +18,8 @@ class EffectManager:
             "spawn": {"coord": tuple[int, int], "type": str, "fraction_id": int},
             "build": {"coord": tuple[int, int], "type": str, "fraction_id": int},
             "change_cell": {"cell": Cell, "coord": tuple[int, int], "new_type": str}, #cell and coord are mutually exclusive
-            "open_area": {"start_coord": tuple[int, int], "end_coord": tuple[int, int]}
+            "open_area": {"start_coord": tuple[int, int], "end_coord": tuple[int, int]},
+            "show_statistic": {"coord": tuple[int, int]}
         }
 
     def translate(self, entry: str) -> str:
@@ -45,14 +46,14 @@ class EffectManager:
                 do_answer = self.restore_movement_points(effect_data["pawn"])
             case "add_resource":
                 if effect_data.get("pawn"):
-                    do_answer = self.add_resource_to_pawn(effect_data["pawn"], effect_data["resource"], effect_data["amout"])
+                    do_answer = self.add_resource_to_pawn(effect_data["pawn"], effect_data["resource"], effect_data["amount"])
                 else:
-                    do_answer = self.add_resource_to_building(effect_data["building"], effect_data["resource"], effect_data["amout"])
+                    do_answer = self.add_resource_to_building(effect_data["building"], effect_data["resource"], effect_data["amount"])
             case "take_resource":
                 if effect_data.get("pawn"):
-                    do_answer = self.remove_resource_from_pawn(effect_data["pawn"], effect_data["resource"], effect_data["amout"])
+                    do_answer = self.remove_resource_from_pawn(effect_data["pawn"], effect_data["resource"], effect_data["amount"])
                 else:
-                    do_answer = self.remove_resource_from_building(effect_data["building"], effect_data["resource"], effect_data["amout"])
+                    do_answer = self.remove_resource_from_building(effect_data["building"], effect_data["resource"], effect_data["amount"])
             case "open_share_menu":
                 do_answer = self.open_share_menu(effect_data["target_of_action"])
             case "stand_here":
@@ -70,6 +71,8 @@ class EffectManager:
                     do_answer = self.change_cell_by_coord(effect_data["cell"].coord, effect_data["new_type"])
             case "open_area":
                 do_answer = self.open_area(effect_data["start_coord"], effect_data["end_coord"])
+            case "show_statistic":
+                do_answer = self.show_statistic(effect_data["coord"])
             case _:
                 do_answer = f"can not do {effect_type}"
                 logger.error(f"effect {effect_type} not found", f"EffectManager.do({effect_type}, {effect_data})")
@@ -82,17 +85,17 @@ class EffectManager:
     def restore_movement_points(self, pawn: Pawn) -> str:
         return root.game_manager.pawns_manager.restore_movement_points(pawn)
     
-    def add_resource_to_pawn(self, pawn: Pawn, resource: str, amout: int) -> str:
-        return root.game_manager.pawns_manager.add_resource(pawn, resource, amout)
+    def add_resource_to_pawn(self, pawn: Pawn, resource: str, amount: int) -> str:
+        return root.game_manager.pawns_manager.add_resource(pawn, resource, amount)
 
-    def add_resource_to_building(self, building: Building, resource: str, amout: int) -> str:
-        return root.game_manager.buildings_manager.add_resources(building, resource, amout)
+    def add_resource_to_building(self, building: Building, resource: str, amount: int) -> str:
+        return root.game_manager.buildings_manager.add_resources(building, resource, amount)
 
-    def remove_resource_from_pawn(self, pawn: Pawn, resource: str, amout: int) -> str:
-        return root.game_manager.pawns_manager.remove_resource(pawn, resource, amout)
+    def remove_resource_from_pawn(self, pawn: Pawn, resource: str, amount: int) -> str:
+        return root.game_manager.pawns_manager.remove_resource(pawn, resource, amount)
     
-    def remove_resource_from_building(self, building: Building, resource: str, amout: int) -> str:
-        return root.game_manager.buildings_manager.remove_resource(building, resource, amout)
+    def remove_resource_from_building(self, building: Building, resource: str, amount: int) -> str:
+        return root.game_manager.buildings_manager.remove_resource(building, resource, amount)
     
     def open_share_menu(self, target_of_action: str) -> str:
         root.change_window_state("share_menu")
@@ -126,3 +129,10 @@ class EffectManager:
     def open_area(self, start_coord: tuple[int, int], end_coord: tuple[int, int]) -> str:
         root.game_manager.world_map.open_area((start_coord, end_coord))
         return f"successfully opened area from {start_coord} to {end_coord}"
+
+    def show_statistic(self, coord: tuple[int, int]) -> str:
+        building = root.game_manager.buildings_manager.get_building_by_coord(coord)
+        if building.is_town:
+            building.town.show_statistic()
+            return f"successfully showed statistic for town {building.town.name}"
+        return f"there are no town or any other structer that have statistic at coord {coord}"

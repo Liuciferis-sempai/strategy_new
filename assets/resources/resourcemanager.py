@@ -18,12 +18,12 @@ class ResourceManager:
                 type = read_json_file(f"data/resources/data/{resourcefile}")
                 self.types_of_resources.append(type)
 
-    def create(self, name:str, amout:int=0) -> ResourceType:
+    def create(self, name:str, amount:int=0) -> ResourceType:
         for type in self.types_of_resources:
             if type["name"] == name:
-                return ResourceType(type, amout)
-        logger.warning(f"Resource type '{name}' not found. Creating default resource.", f"ResourceManager.create({name}, {amout})")
-        return ResourceType({"name": name}, amout)
+                return ResourceType(type, amount)
+        logger.warning(f"Resource type '{name}' not found. Creating default resource.", f"ResourceManager.create({name}, {amount})")
+        return ResourceType({"name": name}, amount)
 
     def get_resource_data(self, resource_name: str) -> dict|None:
         for type in self.types_of_resources:

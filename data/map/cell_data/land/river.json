@@ -14,6 +14,7 @@
         "height": [0.1, 0.3]
     },
     "subdata":{
-        "difficulty": 5
+        "difficulty": 5,
+        "translucent": true
     }
 }

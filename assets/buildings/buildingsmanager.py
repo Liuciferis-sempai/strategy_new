@@ -1,6 +1,6 @@
 import os
 from assets.auxiliary_stuff.work_with_files import read_json_file
-from .building import *
+from .building import Building
 from assets import root
 from assets.world.cell import Cell
 from assets.root import loading, logger
@@ -112,6 +112,15 @@ class BuildingsManager:
         except:
             return Building()
         
+    def get_building_in_area(self, start_coord: tuple[int, int], end_coord: tuple[int, int], center_coord: tuple[int, int] = (-1, -1)) -> list:
+        buildings = []
+        for nx in range(start_coord[0], end_coord[0]):
+            for ny in range(start_coord[1], end_coord[1]):
+                if (nx, ny) != (center_coord[0], center_coord[1]):
+                    if self.buildings.get(str((nx, ny))):
+                        buildings.append(self.buildings[str((nx, ny))])
+        return buildings
+        
     def get_all_unique_buildings_sorted_by_types(self, only_allowed_for_players_fraction: bool=True) -> dict:
         buildings_by_types = {}
         uniqu_buildings = []
@@ -125,6 +134,9 @@ class BuildingsManager:
             if only_allowed_for_players_fraction:
                 if building.name not in player_fraction.allowed_buildings: #type: ignore
                     continue
+            if not building.data.get("can_be_builded", True):
+                continue
+
             if building.name not in uniqu_buildings:
                 uniqu_buildings.append(building.name)
             else:
@@ -142,16 +154,16 @@ class BuildingsManager:
         if self.buildings.get(str(cell.coord), None) == None:
             self.build_scheme(root.game_manager.gui.game.sticked_object.img.replace(".png", ""), cell.coord, root.player_id) #type: ignore
         
-    def remove_resource(self, target: Cell|Building, resource: str, amout: int, inv_type: str = "input") -> str:
+    def remove_resource(self, target: Cell|Building, resource: str, amount: int, inv_type: str = "input") -> str:
         if isinstance(target, Cell):
             building = self.buildings[str(target.coord)]
         else:
             building = target
-        return building.remove_resource(resource, amout, inv_type)
+        return building.remove_resource(resource, amount, inv_type)
 
-    def add_resources(self, target: Cell|Building, resource: str, amout: int, inv_type: str = "output") -> str:
+    def add_resources(self, target: Cell|Building, resource: str, amount: int, inv_type: str = "output") -> str:
         if isinstance(target, Cell):
             building = self.buildings[str(target.coord)]
         else:
             building = target
-        return building.add_resource(resource, amout, inv_type)
+        return building.add_resource(resource, amount, inv_type)

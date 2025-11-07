@@ -1,5 +1,8 @@
 import random
 from assets.root import logger
+from assets.pawns.pawn import Pawn
+from assets.buildings.building import Building
+from assets.towns.town import Town
 
 class Fraction:
     def __init__(self, name:str="New Fraction", type_:str="bot", id: int=-1, data:dict={}, is_default: bool=True):
@@ -29,11 +32,21 @@ class Fraction:
         self.allowed_buildings =  data.get("allowed_buildings", ["manufactory"]) #id (name) only
         self.allowed_pawns = data.get("allowed_pawns", []) #id (name) only
 
-        self.pawns = []
-        self.buildings = []
+        self.pawns: list[Pawn] = []
+        self.buildings: list[Building] = []
+        self.towns: list[Town] = []
 
     def __repr__(self) -> str:
-        return f"<Fraction {self.name} with id {self.id}. Is {"not" if self.is_default else ""} default>"
+        if self.is_default:
+            return f"<Fraction is default>"
+        else:
+            return f"<Fraction {self.name} with id {self.id}>"
+
+    def get_base_growth_modifier(self):
+        return 1 #must be difined by policy
+    
+    def get_adulthood_age(self) -> int:
+        return 16 #must be difined by policy
 
     def edit(self, data:dict={}):
         if data.get("set", False):

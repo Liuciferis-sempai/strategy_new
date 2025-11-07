@@ -80,6 +80,25 @@ class GameInputProcessor(BasicInputProcessor):
                 root.game_manager.command_line.activete()
             root.update_gui()
 
+        elif event.key == py.K_F1:
+            root.game_manager.world_map.display_mode = "normal"
+            root.update_gui()
+        elif event.key == py.K_F2:
+            root.game_manager.world_map.display_mode = "temperature"
+            root.update_gui()
+        elif event.key == py.K_F3:
+            root.game_manager.world_map.display_mode = "humidity"
+            root.update_gui()
+        elif event.key == py.K_F4:
+            root.game_manager.world_map.display_mode = "height"
+            root.update_gui()
+        elif event.key == py.K_F5:
+            root.game_manager.world_map.display_mode = "soil_fertility"
+            root.update_gui()
+        elif event.key == py.K_F6:
+            root.game_manager.world_map.display_mode = "difficulty"
+            root.update_gui()
+
     #@logger
     def process_mousebuttondown(self, event:py.event.Event):
         if self.process_mousebutton_for_inputfield(event): return root.update_gui()

@@ -8,7 +8,7 @@ class Statistikbox(py.sprite.Sprite):
         self.height = height if height > 0 else root.interface_size*2
         self.color = color
         self.position = position
-        self.data = data
+        self.data = data.copy()
         self.font_size = font_size
 
         self.image = py.Surface((self.width, self.height))

@@ -10,6 +10,25 @@ from assets.gui.inputfield import InputField
 from assets.gui.textfield import TextField
 
 class CommandLine(py.sprite.Sprite):
+    _translate = {
+            "pl": "player_id",
+            "player": "player_id",
+            "ch_cell": "chosen_cell",
+            "ch_cell_c": "chosen_cell_coord",
+            "ch_pawn": "chosen_pawn",
+            "ch_pawn_c": "chosen_pawn_coord",
+            "op_pawn": "opened_pawn",
+            "op_pawn_c": "opened_pawn_coord",
+            "window": "window_size",
+            "world": "world_map_size",
+            "food_frame": "food_sufficiency_factor_frame",
+            "food_center": "food_sufficiency_factor_center",
+            "time": "time_for_show_info",
+            "year": "year_length",
+            "growth_rate": "base_growth_rate",
+            "food_cons": "food_valued_consumption_per_person_factor"
+        }
+
     def __init__(self, color:tuple[int, int, int, int]=(100, 100, 100, 255), font_size:int=30, line_color:tuple[int, int, int, int]=(150, 150, 150, 255)):
         super().__init__()
         self.width = root.window_size[0]
@@ -42,10 +61,48 @@ class CommandLine(py.sprite.Sprite):
 
         input_list: list[str] = value.split(" ")
         inputs: list = []
-        input = self._generator_for_input_value(value)
         effect_name = ""
         effect_data = {}
 
+        if input_list[0] == "set":
+            self._process_set_variable(input_list[1], input_list[2:])
+            return
+        elif input_list[0] == "get":
+            self._process_get_variable(input_list[1])
+            return
+        elif input_list[0] == "show":
+            effect_name = "show_statistic"
+            inputs.append(input_list[1:])
+        
+        self._process_regular_command(value, input_list, inputs, effect_name, effect_data)
+    
+    def _process_get_variable(self, value: str):
+        value = self._translate_input_value(value)
+        for object in [root, root.game_manager]:
+            if hasattr(object, value):
+                self.add_answer(f"{value} is {getattr(object, value)}")
+        self.add_answer(f"can nor find a {value}")
+
+    def _process_set_variable(self, attribute: str, new_value: Any):
+        attribute = self._translate_input_value(attribute)
+        for object in [root, root.game_manager]:
+            if hasattr(object, attribute):
+                if len(new_value) < 2:
+                    new_value = new_value[0]
+                    if isinstance(new_value, str):
+                        if new_value.count(",") == 1:
+                            tuple_ =  new_value.split(",")
+                            new_value = (int(tuple_[0]), int(tuple_[1]))
+                        elif new_value.count(",") > 1:
+                            list_ = new_value.split(",")
+                            new_value = [int(i) for i in list_]
+                setattr(object, attribute, new_value)
+                self.add_answer(f"{attribute} has new value {new_value}")
+                return
+        self.add_answer(f"can nor find a {attribute}")
+    
+    def _process_regular_command(self, value: str, input_list: list[str], inputs: list, effect_name: str, effect_data: dict):
+        input = self._generator_for_input_value(value)
         if input_list[0] == "from" and input_list[2] == "to":
             start_pos = input_list[1].split(",")
             start_coord = (int(start_pos[0]), int(start_pos[1]))
@@ -79,9 +136,12 @@ class CommandLine(py.sprite.Sprite):
                 if word in root.game_manager.effect_manager.effects.keys():
                     effect_name = word
                 else:
-                    effect_data = self._process_entry(input, entry, effect_name, effect_data)
+                    effect_data = self._process_entry(input, entry, effect_name, effect_data) #type: ignore
                     if effect_data == None: return logger.error(f"false processed entry {entry} by {input}", f"CommandLine.process_input({value})")
             self.add_answer(root.game_manager.effect_manager.do(effect_name, effect_data))
+    
+    def _translate_input_value(self, value: str) -> str:
+        return self._translate.get(value, value)
     
     def _generate_input_for_coord(self, coord: list[int], input_list: list[str], inputs: list) -> tuple[list, Any]:
         tail = " ".join(input_list)+f" {coord[0]},{coord[1]}"
@@ -112,6 +172,11 @@ class CommandLine(py.sprite.Sprite):
             effect_data["reciept"] = root.game_manager.reciept_manager.get_reciept_by_id(entry)
         elif effect_name == "change_cell":
             effect_data["new_type"] = entry
+        elif effect_name == "add_resource":
+            try:
+                effect_data["amount"] = int(entry)
+            except:
+                effect_data["resource"] = entry
         else:
             effect_data[entry] = next(input)
         return effect_data

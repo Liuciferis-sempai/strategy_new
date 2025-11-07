@@ -1,0 +1,19 @@
+{
+    "name": "town",
+    "desc": "town_desc",
+    "img": "town.png",
+    "can_be_builded": false,
+    "level": 0,
+    "max_hp": 800,
+    "max_service": 250,
+    "repair_cost": {
+        "resource_0": 5
+    },
+    "service_cost": {
+        "resource_0": 5
+    },
+    "type": "town",
+    "storage_type": "list",
+    "storage": [],
+    "storage_size": 25
+}

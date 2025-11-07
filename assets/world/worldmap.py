@@ -13,6 +13,7 @@ from assets.root import loading, logger
 class WorldMap(py.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        self.display_mode = "normal"
          
         self.width = root.window_size[0]
         self.height = root.window_size[1]-root.button_standard_size[1]-50
@@ -66,6 +67,10 @@ class WorldMap(py.sprite.Sprite):
                     cell.mark((255, 0, 0, 100))
                     self._draw_cell(cell)
                 return
+        if not root.game_manager.is_chosen_cell_default():
+            if root.game_manager.get_chosen_cell_coord() != cell.coord:
+                root.game_manager.reset_chosen_cell()
+                self.unchose_cell()
         cell.click(rel_mouse_pos)
         cell.mark((255, 0, 0, 100))
         self._draw_cell(cell)
@@ -173,9 +178,8 @@ class WorldMap(py.sprite.Sprite):
         for row in range(start_row, end_row):
             for col in range(start_col, end_col):
                 cell = self.terrain[row][col]
-                if cell.is_opened:
-                    self.cells_on_screen.append(cell)
-                    self._draw_cell(cell)
+                self.cells_on_screen.append(cell)
+                self._draw_cell(cell)
 
         root.screen.blit(self.image, self.rect)
         #root.game_manager.gui.game.main_info_window_content.draw()
@@ -184,8 +188,7 @@ class WorldMap(py.sprite.Sprite):
     def _draw_cell(self, cell: Cell):
         cell_position = cell.rect.topleft
         cell_position = (cell_position[0] + self.x_offset, cell_position[1] + self.y_offset)
-        self.image.blit(cell.mark_image, (cell_position[0]-5, cell_position[1]-5))
-        self.image.blit(cell.bg_image, cell_position)
+        cell.draw(cell_position, self.image, self.display_mode)
 
     #def mark_region(self, coord: tuple[int, int], color: tuple[int, int, int, int]=(255, 0, 0, 100), radius:int=1, mark_type:str="for_move"):
     #    for y in range(coord[0]-radius, coord[0]+radius+1):
@@ -196,18 +199,28 @@ class WorldMap(py.sprite.Sprite):
     #                    cell.mark(color)
     #                    self._draw_cell(cell)
     #                    self._add_mark(cell, mark_type)
-    
+
     def mark_movement_region(self, start_coord: tuple[int, int], movement_points: int=1, color: tuple[int, int, int, int]=(0, 0, 255, 100)):
+        cells = self.get_travel_region(start_coord, movement_points, True)
+
+        for cell, remaining in cells.values():
+            cell.data["subdata"]["movement_points"] = remaining
+            cell.mark(color)
+            self._add_mark(cell, "for_move")
+            if cell in self.cells_on_screen:
+                self._draw_cell(cell)
+    
+    def get_travel_region(self, start_coord: tuple[int, int], movement_points: int=1, set_open: bool = False) -> dict[tuple[int, int], tuple[Cell, float]]:
         width, height = root.world_map_size
 
-        visited = {}
+        visited: dict[tuple[int, int], tuple[Cell, float]] = {}
         queue = []
 
         for nx in range(start_coord[0]-1, start_coord[0]+2):
             for ny in range(start_coord[1]-1, start_coord[1]+2):
                 if (nx, ny) != (start_coord[0], start_coord[1]):
                     cell = self.get_cell_by_coord((nx, ny))
-                    cell.is_opened = True
+                    if set_open: cell.is_opened = True
                     queue.append(((nx, ny), movement_points))
 
         while queue:
@@ -221,24 +234,28 @@ class WorldMap(py.sprite.Sprite):
             remaining = points_left - difficulty
 
             if remaining < 0:
+                if set_open and cell.data["subdata"].get("translucent"):
+                    cell.is_opened = True
+                    for nx in range(x-1, x+2):
+                        for ny in range(y-1, y+2):
+                            if (nx, ny) != (x, y):
+                                cell = self.get_cell_by_coord((nx, ny))
+                                cell.is_opened = True
                 continue
 
-            if (x, y) in visited and visited[(x, y)] >= remaining:
+            if (x, y) in visited and visited[(x, y)][1] >= remaining:
                 continue
 
-            visited[(x, y)] = remaining
-            cell.data["subdata"]["movement_points"] = remaining
-            cell.is_opened = True
-            cell.mark(color)
-            self._add_mark(cell, "for_move")
+            if set_open: cell.is_opened = True
 
-            if cell in self.cells_on_screen:
-                self._draw_cell(cell)
+            visited[(x, y)] = (cell, remaining)
 
             for nx in range(x-1, x+2):
                 for ny in range(y-1, y+2):
                     if (nx, ny) != (x, y):
                         queue.append(((nx, ny), remaining))
+            
+        return visited
     
     def _add_mark(self, cell: Cell, type_:str):
         if type_ not in self.marked_region:
@@ -301,7 +318,7 @@ class WorldMap(py.sprite.Sprite):
             logger.warning(f"Cell coord {coord} is not founded", f"WorldMap.get_cell_by_coord({coord})")
             return Cell()
 
-    def change_cell_by_coord(self, coord: tuple[int, int], new_type: str):
+    def change_cell_by_coord(self, coord: tuple[int, int], new_type: str, change_cell_modifications: bool = True):
         cell = self.terrain[coord[1]][coord[0]]
         old_type = cell.type
         data = {}
@@ -317,12 +334,13 @@ class WorldMap(py.sprite.Sprite):
                 data["pawns"] = cell.pawns
                 data["buildings"] = cell.buildings
 
-                if type.get("frame_modification", False):
-                    for modification_type, modification in type["frame_modification"].items():
-                        if modification[0] != modification[1]:
-                            data[modification_type] = uniform(modification[0], modification[1])
-                        else:
-                            data[modification_type] = modification[0]
+                if change_cell_modifications:
+                    if type.get("frame_modification", False):
+                        for modification_type, modification in type["frame_modification"].items():
+                            if modification[0] != modification[1]:
+                                data[modification_type] = uniform(modification[0], modification[1])
+                            else:
+                                data[modification_type] = modification[0]
                 break
 
         self.terrain[coord[1]][coord[0]] = Cell(position=cell.position, coord=cell.coord, data=data, is_default=False)

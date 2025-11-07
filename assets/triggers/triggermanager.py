@@ -32,18 +32,18 @@ class TriggerManager:
                     for resource in resources:
                         if resource == item.name:
                             if sum_of.get(resource, False):
-                                sum_of[resource] = item.amout
+                                sum_of[resource] = item.amount
                             else:
-                                sum_of[resource] += item.amout
+                                sum_of[resource] += item.amount
             elif isinstance(building.inventory, dict):
                 for category in building.inventory:
                     for item in building.inventory[category]:
                         for resource in resources:
                             if resource == item.name:
                                 if sum_of.get(resource, False):
-                                    sum_of[resource] = item.amout
+                                    sum_of[resource] = item.amount
                                 else:
-                                    sum_of[resource] += item.amout
+                                    sum_of[resource] += item.amount
             for resource in sum_of:
                 if sum_of[resource] < resources[resource]:
                     return False
@@ -96,13 +96,13 @@ class TriggerManager:
             total = {}
             for resource in building.scheme_inventory[args["pay_inv"]]:
                 if total.get(resource, False):
-                    total[resource.name] += resource.amout
+                    total[resource.name] += resource.amount
                 else:
-                    total[resource.name] = resource.amout
-            for resource, amout in building.data["cost"].items():
+                    total[resource.name] = resource.amount
+            for resource, amount in building.data["cost"].items():
                 if total.get(resource, False):
-                    if total[resource] < amout:
-                        logger.warning(f"not enought of resource {resource}. required: {amout}, available: {total[resource]}", f"TriggerManager.compare_inventory({pawn}, {args})")
+                    if total[resource] < amount:
+                        logger.warning(f"not enought of resource {resource}. required: {amount}, available: {total[resource]}", f"TriggerManager.compare_inventory({pawn}, {args})")
                         return False
                 else:
                     logger.warning(f"scheme has no resource {resource}", f"TriggerManager.compare_inventory({pawn}, {args})")

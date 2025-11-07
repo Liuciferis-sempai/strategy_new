@@ -2,6 +2,7 @@
     "name": "lumberjack",
     "desc": "lumberjack_desc",
     "img": "lumberjack.png",
+    "can_be_builded": true,
     "level": 0,
     "max_hp": 250,
     "max_service": 200,

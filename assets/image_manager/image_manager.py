@@ -55,6 +55,8 @@ class ImageManager:
                     except Exception as e:
                         logger.error(f"Failed to load none image '{none_path}': {e}", f"ImageManager.get_image(...)")
                         return py.image.load("data/icons/none.png")
+            else:
+                self.images[image_path] = py.image.load(none_path)
         return image.copy()
     
     def get_worldcell_image(self, image_name: str, none_cat: str) -> py.Surface:

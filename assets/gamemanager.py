@@ -18,6 +18,7 @@ from assets.jobs.jobmanager import JobManager
 from assets.resources.resourcemanager import ResourceManager
 from assets.processing_input.proccessing_input import InputKeyProcessor
 from assets.command_line.command_line import CommandLine
+from assets.towns.towns_manager import TownManager
 
 class GameManager:
     def __init__(self):
@@ -51,6 +52,7 @@ class GameManager:
         self.job_manager = JobManager()
         self.resource_manager = ResourceManager()
         self.input_processor = InputKeyProcessor()
+        self.town_manager = TownManager()
 
         self.command_line = CommandLine()
         self.input_fields.append(self.command_line.inputfield)

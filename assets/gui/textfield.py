@@ -29,7 +29,7 @@ class TextField(py.sprite.Sprite):
         if self.translate:
             self.text = root.language.get(new_text)
         else:
-            self.text = new_text
+            self.text = str(new_text)
         self.update_text_surface()
     
     def draw(self):

@@ -25,6 +25,8 @@ cell_sizes = [(20, 20), (50, 50), (75, 75), (100, 100), (125, 125), (150, 150), 
 button_standard_size = (150, 50)
 info_box_size = (75, 25)
 world_map_size = (150, 150)
+food_sufficiency_factor_frame = (-0.8, 1.2)
+food_sufficiency_factor_center = 0.6
 river_count = 10
 time_for_show_info = 30
 
@@ -33,6 +35,9 @@ window_state = "game"
 last_window_state = "game"
 player_id = 1
 input_field_active = False
+year_length = 1
+base_growth_rate = 0.5
+food_valued_consumption_per_person_factor = 1
 
 #Boolean
 need_update_gui = True

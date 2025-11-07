@@ -5,7 +5,7 @@ from assets.root import logger
 class Cell(py.sprite.Sprite):
     def __init__(self, position: tuple[int, int]=(-1, -1), coord: tuple[int, int]=(-1, -1), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
         super().__init__()
-        self.data = data
+        self.data = data.copy()
         self.position = position
         self.coord = coord
         self.is_opened = False
@@ -24,10 +24,15 @@ class Cell(py.sprite.Sprite):
 
         self.mark_image = py.Surface((root.cell_sizes[root.cell_size_scale][0]+10, root.cell_sizes[root.cell_size_scale][1]+10), py.SRCALPHA)
         self.mark_image.fill((0, 0, 0, 0))
+        self.surface = py.Surface((root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1]), py.SRCALPHA)
+        self.surface.fill((180, 180, 180))
         self._set_graph()
     
     def __repr__(self) -> str:
-        return f"<Cell {self.type} on coord {self.coord} has {len(self.pawns)} pawns and {0 if self.buildings == {} else 1} buildings>"
+        if self.is_default:
+            return f"<Cell is default>"
+        else:
+            return f"<Cell {self.type} on coord {self.coord} has {len(self.pawns)} pawns and {0 if self.buildings == {} else 1} buildings>"
 
     def click(self, mouse_pos: tuple[int, int]):
         root.game_manager.set_chosen_cell(self)
@@ -108,6 +113,26 @@ class Cell(py.sprite.Sprite):
     
     def unmark(self):
         self.mark_image.fill((0, 0, 0, 0))
+
+    def draw(self, position: tuple[int, int], image: py.surface.Surface, display_mode: str = "normal"):
+        image.blit(self.mark_image, (position[0]-5, position[1]-5))
+        if self.is_opened and display_mode == "normal":
+            image.blit(self.bg_image, position)
+        else:
+            if display_mode == "temperature":
+                self.surface.fill((255*self.data["temperature"], 0, 0))
+            elif display_mode == "humidity":
+                self.surface.fill((0, 0, 255*self.data["humidity"]))
+            elif display_mode == "height":
+                self.surface.fill((255*self.data["height"], 255*self.data["height"], 255*self.data["height"]))
+            elif display_mode == "soil_fertility":
+                self.surface.fill((255*self.data["soil_fertility"], 255*self.data["soil_fertility"]/2, 0))
+            elif display_mode == "difficulty":
+                diff = self.data["subdata"]["difficulty"] / 10
+                self.surface.fill((255*diff, 0, 255*diff))
+            elif display_mode == "normal":
+                self.surface.fill((180, 180, 180))
+            image.blit(self.surface, position)
 
     def _set_graph(self):
         self.bg_image = root.image_manager.get_worldcell_image(f"land/{self.land}", "land")

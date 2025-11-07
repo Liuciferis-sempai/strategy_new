@@ -89,30 +89,30 @@ class PawnsManager:
                 pawn_["movement_points"] = pawn.data["movement_points"]
         return f"movement points by pawn {pawn.name} [{pawn.type} {pawn.id}] successfully restored to {pawn.data["movement_points"]}"
     
-    def add_resource(self, pawn_:int|Pawn, resource:str, amout:int) -> str:
+    def add_resource(self, pawn_:int|Pawn, resource:str, amount:int) -> str:
         if isinstance(pawn_, int):
             for pawn in self.pawns:
                 if pawn_ == pawn.id:
-                    pawn.add_resource(resource, amout)
-                    return f"pawn {pawn.id} received {resource} in quantity {amout}"
+                    pawn.add_resource(resource, amount)
+                    return f"pawn {pawn.id} received {resource} in quantity {amount}"
         elif isinstance(pawn_, Pawn):
             for pawn in self.pawns:
                 if pawn_ == pawn:
-                    pawn.add_resource(resource, amout)
-                    return f"pawn {pawn.id} received {resource} in quantity {amout}"
+                    pawn.add_resource(resource, amount)
+                    return f"pawn {pawn.id} received {resource} in quantity {amount}"
         return f"pawn {pawn_} not found"
     
-    def remove_resource(self, pawn_:int|Pawn, resource:str, amout:int):
+    def remove_resource(self, pawn_:int|Pawn, resource:str, amount:int):
         if isinstance(pawn_, int):
             for pawn in self.pawns:
                 if pawn_ == pawn.id:
-                    pawn.remove_resource(resource, amout)
-                    return f"pawn {pawn.id} lost {resource} in quantity {amout}"
+                    pawn.remove_resource(resource, amount)
+                    return f"pawn {pawn.id} lost {resource} in quantity {amount}"
         elif isinstance(pawn_, Pawn):
             for pawn in self.pawns:
                 if pawn_ == pawn:
-                    pawn.remove_resource(resource, amout)
-                    return f"pawn {pawn.id} lost {resource} in quantity {amout}"
+                    pawn.remove_resource(resource, amount)
+                    return f"pawn {pawn.id} lost {resource} in quantity {amount}"
         return f"pawn {pawn_} not found"
 
     def move_pawn(self, pawn: Pawn, new_cell: Cell):

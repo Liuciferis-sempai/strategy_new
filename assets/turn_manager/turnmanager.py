@@ -20,6 +20,8 @@ class TurnManager:
                 if self.turn >= producer.last_prodaction_at + producer.prodaction_time:
                     producer.last_prodaction_at = self.turn
                     producer.produce(producer)
+            for town in fraction.towns:
+                town.simulation()
 
     def add_event_in_queue(self, time: int, event: dict):
         '''

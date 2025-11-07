@@ -167,20 +167,21 @@ class GUIGame:
         self.cell_info = []
         y_offset = 0
 
-        terrain = TextField(text=cell.type + f" *[{cell.coord[0]} *{cell.coord[1]}]",
+        tettain_name = cell.type if cell.is_opened else "not researched cell"
+        terrain = TextField(text=tettain_name + f" *[{cell.coord[0]} *{cell.coord[1]}]",
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+10
                                 ), font_size=20)
         cell_info[-1].append(terrain)
-        if cell.flora != {}:
+        if cell.flora != {} and cell.is_opened:
             flora = TextField(text=cell.flora["name"],
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+terrain.text_rect.height+10
                                 ), font_size=20)
             cell_info[-1].append(flora)
-        if cell.fauna != {}:
+        if cell.fauna != {} and cell.is_opened:
             fauna = TextField(text=cell.fauna["name"],
                                 position=(
                                     mouse_pos[0]+10,
@@ -213,6 +214,17 @@ class GUIGame:
             cell_info[-1].append(building_name)
             cell_info[-1].append(building_service)
             cell_info[-1].append(building_hp)
+
+            if building.type == "town":
+                population = building.town.get_population()
+                for group, pop in population.items():
+                    town_pop = TextField(text=f"{group} *: *{pop}",
+                                        position=(
+                                            mouse_pos[0]+10,
+                                            mouse_pos[1]+y_offset+building_name.text_rect.height+building_hp.text_rect.height+building_service.text_rect.height+10
+                                        ), font_size=20)
+                    cell_info[-1].append(town_pop)
+                    y_offset += town_pop.text_rect.height
 
             y_offset += sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height])+10
 

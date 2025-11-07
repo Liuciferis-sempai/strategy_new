@@ -42,7 +42,7 @@ class GUIInventory:
             self.owner_inventory = []
             for i in range(max_inventory): #type: ignore
                 if i < len(inventory):
-                    self.owner_inventory.append([Icon(self.cell_size, self.cell_size, img=inventory[i].name), TextField(text=str(inventory[i].amout), font_size=50, width=0, height=0)]) #type: ignore
+                    self.owner_inventory.append([Icon(self.cell_size, self.cell_size, img=inventory[i].name), TextField(text=str(inventory[i].amount), font_size=50, width=0, height=0)]) #type: ignore
                 else:
                     self.owner_inventory.append([Icon(self.cell_size, self.cell_size, img="empty_inventory_cell.png"), TextField(text="", font_size=50, width=0, height=0)]) #type: ignore
         else:
@@ -53,7 +53,7 @@ class GUIInventory:
                 self.owner_inventory[inventory_type] = []
                 for i in range(max_inventory[inventory_type]): #type: ignore
                     if i < len(inventory[inventory_type]):
-                        self.owner_inventory[inventory_type].append([Icon(self.cell_size, self.cell_size, img=inventory[inventory_type][i].name), TextField(text=str(inventory[inventory_type][i].amout), font_size=50, width=0, height=0)]) #type: ignore
+                        self.owner_inventory[inventory_type].append([Icon(self.cell_size, self.cell_size, img=inventory[inventory_type][i].name), TextField(text=str(inventory[inventory_type][i].amount), font_size=50, width=0, height=0)]) #type: ignore
                     else:
                         self.owner_inventory[inventory_type].append([Icon(self.cell_size, self.cell_size, img="empty_inventory_cell.png"), TextField(text="", font_size=50, width=0, height=0)]) #type: ignore
 
@@ -89,7 +89,7 @@ class GUIInventory:
             y_offset = 0
             x_offset = 0
             if isinstance(self.owner_inventory, list):
-                for cell, amout in self.owner_inventory:
+                for cell, amount in self.owner_inventory:
                     x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
                     if  x_pos + cell.width > root.window_size[0]-self.cell_size//4:
                         y_offset += 1
@@ -98,14 +98,14 @@ class GUIInventory:
                     y_pos = ico_y + (cell.height+10)*y_offset
 
                     cell.change_position((x_pos, y_pos))
-                    amout.change_position((x_pos + (cell.width - amout.text_rect.width - 5), y_pos + amout.text_rect.height//2))
+                    amount.change_position((x_pos + (cell.width - amount.text_rect.width - 5), y_pos + amount.text_rect.height//2))
                     x_offset += 1
 
             elif isinstance(self.owner_inventory, dict):
                 for i, inventory_type in enumerate(self.owner_inventory_org.keys()): #type: ignore
                     self.owner_inventory_names[i].change_position((ico_x + self.owner_ico.width + 10, ico_y + (self.cell_size + 10)*y_offset))
                     y_offset += 1
-                    for cell, amout in self.owner_inventory[inventory_type]:
+                    for cell, amount in self.owner_inventory[inventory_type]:
                         x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
                         if x_pos + cell.width > root.window_size[0]-self.cell_size//4:
                             y_offset += 1
@@ -114,7 +114,7 @@ class GUIInventory:
                         y_pos = ico_y + (cell.height+10)*y_offset
 
                         cell.change_position((x_pos, y_pos)) 
-                        amout.change_position((x_pos + (cell.width - amout.text_rect.width - 5), y_pos + amout.text_rect.height//2))
+                        amount.change_position((x_pos + (cell.width - amount.text_rect.width - 5), y_pos + amount.text_rect.height//2))
                         x_offset += 1
                     y_offset += 1
                     x_offset = 0

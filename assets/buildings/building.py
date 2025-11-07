@@ -2,7 +2,9 @@ from assets import root
 from assets.root import logger
 from assets.auxiliary_stuff.functions import update_gui
 from assets.world.cell import Cell
+from assets.towns.town import Town
 from typing import Any
+import math
 
 class Building:
     def __init__(self, coord: tuple[int, int] = (0, 0), cell: Cell = Cell(), data: dict = {"name": "unknow", "type": "unknow"}, is_default: bool = True):
@@ -12,8 +14,11 @@ class Building:
         self.coord = coord
         self.name = data["name"]
         self.type = data["type"]
-        self.data = data
+        self.data = data.copy()
         self.cell = cell
+        self.conected_with: Town|None
+        if data.get("conected_with"):
+            self.conected_with = root.game_manager.town_manager.get_town_by_id(data["conected_with"])
 
         self.fraction_id = data.get("fraction_id", -1)
         if self.fraction_id == -1:
@@ -27,16 +32,18 @@ class Building:
         self.max_service_mod = data.get("max_service_mod", {})
         self.service = data.get("max_service", 50)
         self.service_mod = data.get("service_mod", {})
+        self.necessary_workers = data.get("necessary_workers", {})
+        self.workers = data.get("workers", {})
 
         self.set_type(self.data)
         
         if self.data.get("scheme", False):
             self.is_scheme = True
-            self.scheme_inventory = {"cost": [root.game_manager.resource_manager.create(name, amout) for name, amout in self.data["cost"].items()], "inventory": []}
+            self.scheme_inventory = {"cost": [root.game_manager.resource_manager.create(name, amount) for name, amount in self.data["cost"].items()], "inventory": []}
             self.scheme_inventory_size = 0
-            for resource, amout in self.data["cost"].items():
-                self.scheme_inventory_size += int(amout / root.game_manager.resource_manager.get_resource_data(resource)["max_amout"]) #type: ignore
-                if amout % root.game_manager.resource_manager.get_resource_data(resource)["max_amout"] != 0:#type: ignore
+            for resource, amount in self.data["cost"].items():
+                self.scheme_inventory_size += int(amount / root.game_manager.resource_manager.get_resource_data(resource)["max_amount"]) #type: ignore
+                if amount % root.game_manager.resource_manager.get_resource_data(resource)["max_amount"] != 0:#type: ignore
                     self.scheme_inventory_size += 1
             self.scheme_inventory_size = {"cost": self.scheme_inventory_size, "inventory": self.scheme_inventory_size}
         else:
@@ -47,7 +54,9 @@ class Building:
     def set_type(self, data: dict):
         self.is_workbench = False
         self.is_producer = False
+        self.is_town = False
         if data.get("type", False) == "workbench":
+            if self.is_workbench: return
             self.is_workbench = True
             self.max_queue = data.get("max_queue", 1)
             self.queue = data.get("queue", [])
@@ -56,14 +65,20 @@ class Building:
                     self.add_in_queue(item)
 
         elif data.get("type", False) == "producer":
+            if self.is_producer: return
             self.is_producer = True
             self.prodaction_time = data.get("prodaction_time", 1)
             self.last_prodaction_at = data.get("last_prodaction_at", root.game_manager.turn_manager.turn)
             self.prodaction = data.get("prodaction", {})
             def produce(self: Building):
-                for resource, amout in self.prodaction.items():
-                    self.add_resource(resource, amout, "output")
+                for resource, amount in self.prodaction.items():
+                    self.add_resource(resource, amount, "output")
             self.produce = produce
+
+        elif data.get("type", False) == "town":
+            if self.is_town: return
+            self.is_town = True
+            self.town: Town = root.game_manager.town_manager.build_town(self.name, self.coord, self.fraction_id)
 
     def set_inventory(self, data: dict):
         if data.get("storage_type") == "dict":
@@ -71,7 +86,7 @@ class Building:
             self.inventory_size = data.get("storage_size", {"input": 5, "output": 2})
             
             self.data["inventory_size"] = self.inventory_size
-            def add_resource_(resource: str, amout: int, type_: str="none", *args) -> str:
+            def add_resource_(resource: str, amount: int, type_: str="none", *args) -> str:
                 '''
                 type: str -> type of storage
                 For Example: type="input"
@@ -80,30 +95,32 @@ class Building:
                 if type == "none":
                     return f"building {self.name} has no {type_} for {resource}"
                 if self.is_scheme:
-                    if len(self.scheme_inventory[type]) < self.scheme_inventory_size[type]: #type: ignore
-                        remainder = amout
+                    remainder = amount
+                    while len(self.scheme_inventory[type]) < self.scheme_inventory_size[type] and remainder > 0: #type: ignore
                         if self.scheme_inventory[type] != []: #type: ignore
                             for item in self.scheme_inventory[type]: #type: ignore
                                 if item.name == resource:
-                                    remainder = item.add(amout)
+                                    remainder = item.add(amount)
                         if remainder > 0:
                             self.scheme_inventory[type].append(root.game_manager.resource_manager.create(resource, remainder)) #type: ignore
+                            remainder -= self.scheme_inventory[type][-1].max_amount
                         self.optimize_inventory(type)
-                        return f"building '{self.name}' received {resource} in quantity {amout} to storage {type}"
+                        return f"building '{self.name}' received {resource} in quantity {amount} to storage {type}"
                 else:
-                    if len(self.inventory[type]) < self.inventory_size[type]: #type: ignore
-                        remainder = amout
+                    remainder = amount
+                    while len(self.inventory[type]) < self.inventory_size[type] and remainder > 0: #type: ignore
                         if self.inventory[type] != []: #type: ignore
                             for item in self.inventory[type]: #type: ignore
                                 if item.name == resource:
-                                    remainder = item.add(amout)
+                                    remainder = item.add(remainder)
                         if remainder > 0:
                             self.inventory[type].append(root.game_manager.resource_manager.create(resource, remainder)) #type: ignore
+                            remainder -= self.inventory[type][-1].max_amount
                         self.optimize_inventory(type)
-                        return f"building '{self.name}' received {resource} in quantity {amout} to storage {type}"
+                        return f"building '{self.name}' received {resource} in quantity {amount} to storage {type}"
                 return f"building {self.name} can not receiv {resource} in {type} ({type_})"
 
-            def remove_resource_(resource: str, amout: int, type_: str="none", *args) -> str:
+            def remove_resource_(resource: str, amount: int, type_: str="none", *args) -> str:
                 '''
                 type: str -> type of storage
                 For Example: type="input"
@@ -114,19 +131,19 @@ class Building:
                 if self.is_scheme:
                     for item in self.scheme_inventory[type]: #type: ignore
                         if item.name == resource:
-                            if item.take(amout):
-                                if item.amout <= 0:
+                            if item.take(amount):
+                                if item.amount <= 0:
                                     self.scheme_inventory[type].remove(item) #type: ignore
                                 self.optimize_inventory(type)
-                                return f"building '{self.name}' gave {resource} in quantity {amout} from storage {type}"
+                                return f"building '{self.name}' gave {resource} in quantity {amount} from storage {type}"
                 else:
                     for item in self.inventory[type]: #type: ignore
                         if item.name == resource:
-                            if item.take(amout):
-                                if item.amout <= 0:
+                            if item.take(amount):
+                                if item.amount <= 0:
                                     self.inventory[type].remove(item) #type: ignore
                                 self.optimize_inventory(type)
-                                return f"building '{self.name}' gave {resource} in quantity {amout} from storage {type}"
+                                return f"building '{self.name}' gave {resource} in quantity {amount} from storage {type}"
                 return f"building {self.name} can not give {resource} from {type} ({type_})"
 
             def optimize_inventory_(type: str, *args):
@@ -134,20 +151,20 @@ class Building:
                     for j, item in enumerate(self.scheme_inventory[type]): #type: ignore
                         for i, item_ in enumerate(self.scheme_inventory[type]): #type: ignore
                             if item.name == item_.name and i != j:
-                                remainder = item.add(item_.amout)
+                                remainder = item.add(item_.amount)
                                 if remainder == 0:
                                     self.scheme_inventory[type].remove(item_) #type: ignore
                                 else:
-                                    item_.amout = remainder
+                                    item_.amount = remainder
                 else:
                     for j, item in enumerate(self.inventory[type]): #type: ignore
                         for i, item_ in enumerate(self.inventory[type]): #type: ignore
                             if item.name == item_.name and i != j:
-                                remainder = item.add(item_.amout)
+                                remainder = item.add(item_.amount)
                                 if remainder == 0:
                                     self.inventory[type].remove(item_) #type: ignore
                                 else:
-                                    item_.amout = remainder
+                                    item_.amount = remainder
 
             self.add_resource = add_resource_
             self.remove_resource = remove_resource_
@@ -157,50 +174,53 @@ class Building:
                 for key in self.inventory_size.keys():
                     self.inventory[key] = []
             for type in data.get("storage", {}):
-                for resource, amout in data["storage"][type]:
-                    self.add_resource(resource, amout, type)
+                for resource, amount in data["storage"][type]:
+                    self.add_resource(resource, amount, type)
 
         else:
             self.inventory = data.get("storage", [])
-            self.inventory_size = data.get("storage", 1)
+            self.inventory_size = data.get("storage_size", 1)
 
-            def add_resource(resource: str, amout: int, *args) -> str:
-                if len(self.inventory) < self.inventory_size:
-                    remainder = amout
+            def add_resource(resource: str, amount: int, *args) -> str:
+                remainder = amount
+                while remainder > 0 and len(self.inventory) < self.inventory_size:
                     if self.inventory != []:
                         for item in self.inventory:
                             if item.name == resource:
-                                remainder = item.add(amout)
+                                remainder = item.add(remainder)
                     if remainder > 0:
                         self.inventory.append(root.game_manager.resource_manager.create(resource, remainder)) #type: ignore
+                        remainder -= self.inventory[-1].max_amount
                     self.optimize_inventory()
-                    return f"building '{self.name}' received {resource} in quantity {amout}"
-                return f"building {self.name} can not receiv {resource}"
-            def remove_resource(resource: str, amout: int, *args) -> str:
+                return f"building '{self.name}' received {resource} in quantity {amount} and left {remainder}"
+            def remove_resource(resource: str, amount: int, *args) -> str:
                 for item in self.inventory:
                     if item.name == resource:
-                        if item.take(amout):
-                            if item.amout <= 0:
+                        if item.take(amount):
+                            if item.amount <= 0:
                                 self.inventory.remove(item) #type: ignore
                             self.optimize_inventory()
-                            return f"building '{self.name}' gave {resource} in quantity {amout}"
+                            return f"building '{self.name}' gave {resource} in quantity {amount}"
                 return  f"building {self.name} can not give {resource}"
-            def optimize_inventory(self, *args):
+            def optimize_inventory(*args):
                 for j, item in enumerate(self.inventory):
                     for i, item_ in enumerate(self.inventory):
                         if item.name == item_.name and i != j:
-                            remainder = item.add(item_.amout)
+                            remainder = item.add(item_.amount)
                             if remainder == 0:
-                                self.inventory.remove(item_)
+                                self.inventory.remove(item_) #type: ignore
                             else:
-                                item_.amout = remainder
+                                item_.amount = remainder
 
             self.add_resource = add_resource
             self.remove_resource = remove_resource
             self.optimize_inventory = optimize_inventory
     
     def __repr__(self) -> str:
-        return f"<Building {self.name} on coord {self.coord}. Is {"not" if not self.is_default else ""} default>"
+        if self.is_default:
+            return f"<Building is default>"
+        else:
+            return f"<Building {self.name} on coord {self.coord}>"
 
     def add_resource(self, *args) -> str:
         return "add resource is not definded"
@@ -240,9 +260,60 @@ class Building:
         if self.get_hp() < 0:
             self.destroy()
 
+    def can_work(self) -> bool:
+        for necessary_worker_type, necessary_amount in self.necessary_workers.items():
+            if self.workers.get(necessary_worker_type):
+                if self.workers[necessary_worker_type] < necessary_amount:
+                    return False
+            else:
+                return False
+        return True
+
+    def conect(self, town: Town):
+        self.conected_with = town
+
+    def deconect(self):
+        self.conected_with = None
+        self.workers = {}
+
+    def get_food_value_in_storage(self) -> int:
+        food_value = 0
+        if isinstance(self.inventory, list):
+            for resource in self.inventory:
+                if resource.is_food:
+                    food_value += resource.food_value
+        elif isinstance(self.inventory, dict):
+            for storage in self.inventory.values():
+                for resorce in storage:
+                    if resorce.is_food:
+                        food_value += resorce.food_value
+        return food_value
+    
+    def remove_food_for_value(self, remainder: int|float) -> int|float:
+        if isinstance(self.inventory, list):
+            for resource in self.inventory:
+                if not resource.is_food:
+                    continue
+
+                needed_units = math.ceil(remainder / resource.food_value)
+                to_remove = min(needed_units, resource.amount)
+                self.remove_resource(resource.name, to_remove)
+
+                remainder -= to_remove * resource.food_value
+
+                if remainder <= 0:
+                    return 0
+
+        return remainder
+
     def destroy(self):
         fraction = root.game_manager.fraction_manager.get_fraction_by_id(self.fraction_id)
         fraction.statistics["building_count"] -= 1
+
+        if self.is_town:
+            fraction.statistics["town_count"] -= 1
+            fraction.towns.remove(self.town)
+
         fraction.buildings.remove(self)
 
         root.game_manager.buildings_manager.remove(self.coord)
@@ -290,7 +361,7 @@ class Building:
                         temp_inv = self.inventory.copy()
                         self.set_inventory(self.data)
                         for resource in temp_inv:
-                            self.add_resource(resource.name, resource.amout)
+                            self.add_resource(resource.name, resource.amount)
             case "change_storage_size":
                 self.inventory_size = args.get("new_size", self.inventory_size)
 
@@ -298,11 +369,11 @@ class Building:
         if mod:
             if self.can_be_upgraded():
                 self.is_scheme = True
-                self.scheme_inventory = {"cost": [root.game_manager.resource_manager.create(name, amout) for name, amout in self.data["upgrades"][str(self.level+1)]["cost"].items()], "inventory": []}
+                self.scheme_inventory = {"cost": [root.game_manager.resource_manager.create(name, amount) for name, amount in self.data["upgrades"][str(self.level+1)]["cost"].items()], "inventory": []}
                 self.scheme_inventory_size = 0
-                for resource, amout in self.data["cost"].items():
-                    self.scheme_inventory_size += int(amout / root.game_manager.resource_manager.get_resource_data(resource)["max_amout"]) #type: ignore
-                    if amout % root.game_manager.resource_manager.get_resource_data(resource)["max_amout"] != 0:#type: ignore
+                for resource, amount in self.data["cost"].items():
+                    self.scheme_inventory_size += int(amount / root.game_manager.resource_manager.get_resource_data(resource)["max_amount"]) #type: ignore
+                    if amount % root.game_manager.resource_manager.get_resource_data(resource)["max_amount"] != 0:#type: ignore
                         self.scheme_inventory_size += 1
                 self.scheme_inventory_size = {"cost": self.scheme_inventory_size, "inventory": self.scheme_inventory_size}
 

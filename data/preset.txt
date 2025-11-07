@@ -1,8 +1,5 @@
-spawn pawn_0 1,0 pl
-spawn pawn_1 2,0 pl
-spawn pawn_2 3,0 pl
-spawn pawn_3 4,0 pl
-build manufactory 0,1 pl
-build storage 0,2 pl
-build lumberjack 0,3 pl
-open_area 0,0 149,149
+build storage 2,1 pl
+build manufactory 4,1 pl
+spawn pawn_0 1,1 pl
+build town 3,1 pl
+add 3,1 resource_2 4

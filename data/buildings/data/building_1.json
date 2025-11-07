@@ -2,6 +2,7 @@
     "name": "storage",
     "desc": "storage_desc",
     "img": "storage.png",
+    "can_be_builded": true,
     "level": 0,
     "max_hp": 500,
     "max_service": 500,

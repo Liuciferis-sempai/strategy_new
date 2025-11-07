@@ -12,7 +12,7 @@ class Pawn:
         
         self.inventory_size = data.get("inventory_size", 1)
         self.inventory = []
-        self.data = data
+        self.data = data.copy()
 
         self.name = data.get("name", "unknow")
         self.fraction_id = data.get("fraction_id", -1)
@@ -23,24 +23,27 @@ class Pawn:
         self.max_hp_mod = data.get("hp_mod", {})
     
     def __repr__(self) -> str:
-        return f"<Pawn {self.type} with id {self.id} on coord {self.coord}>"
+        if self.is_default:
+            return f"<Pawn is default>"
+        else:
+            return f"<Pawn {self.type} with id {self.id} on coord {self.coord}>"
     
-    def add_resource(self, resource:str, amout:int):
+    def add_resource(self, resource:str, amount:int):
         if len(self.inventory) < self.inventory_size:
-            remainder = amout
+            remainder = amount
             if self.inventory != []:
                 for item in self.inventory:
                     if item.name == resource:
-                        remainder = item.add(amout)
+                        remainder = item.add(amount)
             if remainder > 0:
                 self.inventory.append(root.game_manager.resource_manager.create(resource, remainder))
             self.optimize_inventory()
     
-    def remove_resource(self, resource:str, amout:int) -> bool:
+    def remove_resource(self, resource:str, amount:int) -> bool:
         for item in self.inventory:
             if item.name == resource:
-                if item.take(amout):
-                    if item.amout <= 0:
+                if item.take(amount):
+                    if item.amount <= 0:
                         self.inventory.remove(item)
                     self.optimize_inventory()
                     return True
@@ -50,11 +53,11 @@ class Pawn:
         for j, item in enumerate(self.inventory):
             for i, item_ in enumerate(self.inventory):
                 if item.name == item_.name and i != j:
-                    remainder = item.add(item_.amout)
+                    remainder = item.add(item_.amount)
                     if remainder == 0:
                         self.inventory.remove(item_)
                     else:
-                        item_.amout = remainder
+                        item_.amount = remainder
 
     def has_free_space(self) -> bool:
         return len(self.inventory) < self.inventory_size
