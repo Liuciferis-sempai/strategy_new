@@ -1,5 +1,1 @@
-build storage 2,1 pl
-build manufactory 4,1 pl
-spawn pawn_0 1,1 pl
-build town 3,1 pl
-add 3,1 resource_2 4
+build 3,1 town 1

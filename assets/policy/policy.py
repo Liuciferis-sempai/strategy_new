@@ -4,6 +4,7 @@ import assets.root as root
 class PolicyCard(py.sprite.Sprite):
     def __init__(self, policy_data: dict, pos: tuple[int, int]=(0, 0)):
         super().__init__()
+        self.id = policy_data.get("id")
         self.data = policy_data
 
         self.name = policy_data.get("id", "Unknown Policy")

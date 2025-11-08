@@ -133,6 +133,9 @@ class WorldMap(py.sprite.Sprite):
                 type = read_json_file(f"data/map/cell_data/fauna/{cellfile}")
                 self.types_of_fauna.append(type)
 
+    def change_display_mode(self, display_mode: str):
+        self.display_mode = display_mode
+
     def redraw(self):
         for cell in self.cells_on_screen:
             self._draw_cell(cell)

@@ -1,6 +1,5 @@
 -add free space check for building
 -add grave (or something like that) after pawn death
 -add cancel for reciept
--rewrite the cell iteration script on the command line
 -add town destroy by building destroy
 -add name edit for building

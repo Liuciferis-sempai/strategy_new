@@ -1,6 +1,7 @@
 from .fraction import Fraction
 from assets import root
 from assets.root import logger
+from assets.policy.policy import PolicyCard
 
 class FractionManager:
     def __init__(self):
@@ -46,3 +47,28 @@ class FractionManager:
                 fraction.edit(data=data)
                 return True
         return False
+    
+    def add_policy_to_fraction(self, fraction: int|Fraction, policy: str|dict|PolicyCard) -> str:
+        if isinstance(fraction, int):
+            fraction = self.get_fraction_by_id(fraction)
+        
+        if isinstance(policy, str):
+            policy = root.game_manager.policy_table.get_policy_by_id(policy)
+        elif isinstance(policy, dict):
+            policy = root.game_manager.policy_table.get_policy_by_id(policy.get("id", "unknow"))
+        
+        fraction.policies.append(policy)
+        return f"added {policy.id} to {fraction.name} ({fraction.id})"
+    
+    def remove_policy_to_fraction(self, fraction: int|Fraction, policy: str|dict|PolicyCard) -> str:
+        if isinstance(fraction, int):
+            fraction = self.get_fraction_by_id(fraction)
+        
+        if isinstance(policy, str):
+            policy = root.game_manager.policy_table.get_policy_by_id(policy)
+        elif isinstance(policy, dict):
+            policy = root.game_manager.policy_table.get_policy_by_id(policy.get("id", "unknow"))
+        
+        print(fraction.policies)
+        fraction.policies.remove(policy)
+        return f"removed {policy.id} by {fraction.name} ({fraction.id})"

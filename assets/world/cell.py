@@ -9,6 +9,7 @@ class Cell(py.sprite.Sprite):
         self.position = position
         self.coord = coord
         self.is_opened = False
+        self.display_mode = "normal"
 
         self.is_default = is_default
         if is_default:
@@ -114,25 +115,30 @@ class Cell(py.sprite.Sprite):
     def unmark(self):
         self.mark_image.fill((0, 0, 0, 0))
 
-    def draw(self, position: tuple[int, int], image: py.surface.Surface, display_mode: str = "normal"):
+    def draw(self, position: tuple[int, int], image: py.surface.Surface, display_mode: str = "norlam"):
         image.blit(self.mark_image, (position[0]-5, position[1]-5))
         if self.is_opened and display_mode == "normal":
             image.blit(self.bg_image, position)
         else:
-            if display_mode == "temperature":
-                self.surface.fill((255*self.data["temperature"], 0, 0))
-            elif display_mode == "humidity":
-                self.surface.fill((0, 0, 255*self.data["humidity"]))
-            elif display_mode == "height":
-                self.surface.fill((255*self.data["height"], 255*self.data["height"], 255*self.data["height"]))
-            elif display_mode == "soil_fertility":
-                self.surface.fill((255*self.data["soil_fertility"], 255*self.data["soil_fertility"]/2, 0))
-            elif display_mode == "difficulty":
-                diff = self.data["subdata"]["difficulty"] / 10
-                self.surface.fill((255*diff, 0, 255*diff))
-            elif display_mode == "normal":
-                self.surface.fill((180, 180, 180))
+            if self.display_mode != display_mode:
+                self.change_display_mode(display_mode)
             image.blit(self.surface, position)
+    
+    def change_display_mode(self, display_mode: str):
+        self.display_mode = display_mode
+        if display_mode == "temperature":
+            self.surface.fill((255*self.data["temperature"], 0, 0))
+        elif display_mode == "humidity":
+            self.surface.fill((0, 0, 255*self.data["humidity"]))
+        elif display_mode == "height":
+            self.surface.fill((255*self.data["height"], 255*self.data["height"], 255*self.data["height"]))
+        elif display_mode == "soil_fertility":
+            self.surface.fill((255*self.data["soil_fertility"], 255*self.data["soil_fertility"]/2, 0))
+        elif display_mode == "difficulty":
+            diff = self.data["subdata"]["difficulty"] / 10
+            self.surface.fill((255*diff, 0, 255*diff))
+        else:
+            self.surface.fill((180, 180, 180))
 
     def _set_graph(self):
         self.bg_image = root.image_manager.get_worldcell_image(f"land/{self.land}", "land")

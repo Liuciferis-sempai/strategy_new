@@ -8,7 +8,8 @@ from assets.root import loading, logger
 class PawnsManager:
     def __init__(self):
         self.pawns: list[Pawn] = []
-        self.types_of_pawns = []
+        self.names: list[str] = []
+        self.types_of_pawns: list[dict] = []
         self.available_pawn_id = 0
 
         loading.draw("Loading pawn types...")
@@ -20,6 +21,12 @@ class PawnsManager:
             if pawnsfile.endswith(".json"):
                 type = read_json_file(f"data/pawns/data/{pawnsfile}")
                 self.types_of_pawns.append(type)
+        self.names = []
+        for pawntype in self.types_of_pawns:
+            self.names.append(pawntype.get("name", "unknow"))
+    
+    def get_all_pawns_names(self) -> list[str]:
+        return self.names
 
     def get_pawn_by_id(self, id: int) -> Pawn:
         for pawn in self.pawns:

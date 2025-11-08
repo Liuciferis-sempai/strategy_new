@@ -3,6 +3,7 @@ from assets.root import logger
 from assets.pawns.pawn import Pawn
 from assets.buildings.building import Building
 from assets.towns.town import Town
+from assets.policy.policy import PolicyCard
 
 class Fraction:
     def __init__(self, name:str="New Fraction", type_:str="bot", id: int=-1, data:dict={}, is_default: bool=True):
@@ -25,7 +26,7 @@ class Fraction:
             }
         self.production = data.get("production", {"buildings": []})
         self.technologies = data.get("technologies", []) #id only
-        self.policies = data.get("policies", []) #full dict data
+        self.policies: list[PolicyCard] = data.get("policies", []) #full policy
         self.research_technology = data.get("research_technology", "none_technology")
         self.achievements = data.get("achievements", []) #id only
         self.reciepts = data.get("reciepts", ["reciept_0", "reciept_1"]) #id only

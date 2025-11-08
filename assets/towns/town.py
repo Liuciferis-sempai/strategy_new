@@ -47,12 +47,38 @@ class Town:
             for popgroup in self.popgroups:
                 if popgroup.name == new_popgroup["name"]:
                     return
-            self.popgroups.append(PopGroup(new_popgroup["name"], new_popgroup, new_popgroup.get("size", 10)))
+            self.popgroups.append(PopGroup(new_popgroup["name"], new_popgroup, new_popgroup.get("size", {"aged": 1, "adult": 10, "children": 2})))
         else:
             for popgroup in self.popgroups:
                 if popgroup.name == new_popgroup:
                     return
             self.popgroups.append(root.game_manager.town_manager.create_pop_group(new_popgroup))
+        
+    def add_population(self, new_popgroup: str, popsize: dict) -> str:
+        for popgroup in self.popgroups:
+            if popgroup.name == new_popgroup:
+                popgroup.size["adult"] += popsize.get("adult", 0)
+                popgroup.size["aged"] += popsize.get("aged", 0)
+                if popsize.get("children"):
+                    popgroup.add_new_children(popsize["children"])
+                return f"successfully added new population to {self}"
+        self.append_popgroup({"name": new_popgroup, "size": popsize})
+        return f"successfully added new population to {self}"
+    
+    def remove_population(self, new_popgroup: str, popsize: dict|str) -> str:
+        if isinstance(popsize, dict):
+            for popgroup in self.popgroups:
+                if popgroup.name == new_popgroup:
+                    popgroup.size["adult"] -= popsize.get("adult", 0)
+                    popgroup.size["aged"] -= popsize.get("aged", 0)
+                    popgroup.size["children"] -= popsize.get("children", 0)
+                    if popgroup.size["adult"] < 0 or popgroup.size["aged"] < 0 or popgroup.size["children"]:
+                        self.remove_popgroup(popgroup.name)
+                    return f"successfully removed population from {self}"
+        elif popsize == "all":
+            self.remove_popgroup(new_popgroup)
+            return f"successfully removed population from {self}"
+        return f"can not remov population from {self}"
 
     def simulation(self):
         fraction = root.game_manager.fraction_manager.get_fraction_by_id(self.fraction_id)
@@ -72,7 +98,7 @@ class Town:
             #logger.info(f"{popgroup.name} in {self} growth up on {growth_rate_per_turn} rate ({popgroup.size * growth_rate_per_turn})", "Town.simulation()")
             popgroup.add_new_children(popgroup.size["adult"]/2 * growth_rate_per_turn)
             self.add_in_population_history(popgroup.name, popgroup.get_population())
-            if popgroup.get_population() < 1:
+            if popgroup.size["children"] < 0 or popgroup.size["adult"] < 0 or popgroup.size["aged"] < 0:
                 self.remove_popgroup(popgroup.name)
 
     def add_in_population_history(self, popgroup_name: str, popgroup_population: float):
@@ -93,6 +119,8 @@ class Town:
             if building.type == "storage":
                 food_value += building.get_food_value_in_storage()
         necessary_food_value = self.get_necessaty_food_value()
+
+        if necessary_food_value == 0: return 0
 
         food_ratio = food_value / necessary_food_value
         sigmoid = 1 / (1 + math.exp(-3 * (food_ratio - root.food_sufficiency_factor_center)))

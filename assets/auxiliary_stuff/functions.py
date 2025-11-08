@@ -16,8 +16,8 @@ def can_be_int(value: str) -> bool:
         return False
 
 def change_window_state(new_state:str):
-    root.last_window_state = root.window_state
-    root.window_state = new_state
+    root.last_window_state, root.window_state = root.window_state, new_state
+    logger.info(f"changed window state from '{root.last_window_state}' to '{root.window_size}'", f"change_window_state({new_state})")
     update_gui()
     root.game_manager.gui.close_all_extra_windows()
 

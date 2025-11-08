@@ -51,3 +51,9 @@ class TownManager:
             if town.id == town_id:
                 return town
         return Town()
+    
+    def get_town_by_coord(self, coord: tuple[int, int]) -> Town:
+        for town in self.towns:
+            if town.coord == coord:
+                return town
+        return Town()

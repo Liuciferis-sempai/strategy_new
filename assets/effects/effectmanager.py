@@ -2,6 +2,8 @@ from typing import Any
 from assets.world.cell import Cell
 from assets.pawns.pawn import Pawn
 from assets.buildings.building import Building
+from assets.policy.policytable import PolicyCard
+from assets.towns.town import Town
 from assets import root
 from assets.root import logger
 
@@ -19,22 +21,12 @@ class EffectManager:
             "build": {"coord": tuple[int, int], "type": str, "fraction_id": int},
             "change_cell": {"cell": Cell, "coord": tuple[int, int], "new_type": str}, #cell and coord are mutually exclusive
             "open_area": {"start_coord": tuple[int, int], "end_coord": tuple[int, int]},
-            "show_statistic": {"coord": tuple[int, int]}
+            "show_statistic": {"coord": tuple[int, int]},
+            "add_policy": {"fraction_id": int, "policy": str|dict|PolicyCard},
+            "remove_policy": {"fraction_id": int, "policy": str|dict|PolicyCard},
+            "add_popgroup": {"town": Town, "popgroup_name": str, "size": dict},
+            "remove_popgroup": {"town": Town, "popgroup_name": str, "size": dict|str}
         }
-
-    def translate(self, entry: str) -> str:
-        if entry == "move":
-            return "stand_here"
-        elif entry == "add":
-            return "add_resource"
-        elif entry == "take":
-            return "take_resource"
-        elif entry == "free":
-            return "clear_the_queue"
-        elif entry == "cell":
-            return "change_cell"
-
-        return entry
         
     def do(self, effect_type: str, effect_data: dict) -> str:
         do_answer = f"execution the effect {effect_type} with data: {[f"{key}: {value}" for key, value in effect_data.items()]}"
@@ -73,6 +65,14 @@ class EffectManager:
                 do_answer = self.open_area(effect_data["start_coord"], effect_data["end_coord"])
             case "show_statistic":
                 do_answer = self.show_statistic(effect_data["coord"])
+            case "add_policy":
+                do_answer = self.add_policy(effect_data["fraction_id"], effect_data["policy"])
+            case "remove_policy":
+                do_answer = self.remove_policy(effect_data["fraction_id"], effect_data["policy"])
+            case "add_popgroup":
+                do_answer = self.add_popgroup(effect_data["town"], effect_data["popgroup_name"], effect_data["size"])
+            case "remove_popgroup":
+                do_answer = self.remove_popgroup(effect_data["town"], effect_data["popgroup_name"], effect_data["size"])
             case _:
                 do_answer = f"can not do {effect_type}"
                 logger.error(f"effect {effect_type} not found", f"EffectManager.do({effect_type}, {effect_data})")
@@ -136,3 +136,15 @@ class EffectManager:
             building.town.show_statistic()
             return f"successfully showed statistic for town {building.town.name}"
         return f"there are no town or any other structer that have statistic at coord {coord}"
+
+    def add_policy(self, fraction_id: int, policy: str|dict|PolicyCard) -> str:
+        return root.game_manager.fraction_manager.add_policy_to_fraction(fraction_id, policy)
+
+    def remove_policy(self, fraction_id: int, policy: str|dict|PolicyCard) -> str:
+        return root.game_manager.fraction_manager.remove_policy_to_fraction(fraction_id, policy)
+    
+    def add_popgroup(self, town: Town, popgroup_name: str, popgroup_size: dict) -> str:
+        return town.add_population(popgroup_name, popgroup_size)
+    
+    def remove_popgroup(self, town: Town, popgroup_name: str, popgroup_size: dict|str) -> str:
+        return town.remove_population(popgroup_name, popgroup_size)

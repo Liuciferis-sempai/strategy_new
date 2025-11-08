@@ -9,7 +9,8 @@ class BuildingsManager:
     def __init__(self):
          
         self.buildings: dict[str, Building] = {}
-        self.types_of_buildings = []
+        self.types_of_buildings: list[dict] = []
+        self.names: list[str] = []
 
         loading.draw("Loading building types...")
         self.load_types_of_buildings()
@@ -20,6 +21,9 @@ class BuildingsManager:
             if buildingsfile.endswith(".json"):
                 type = read_json_file(f"data/buildings/data/{buildingsfile}")
                 self.types_of_buildings.append(type)
+        self.names = []
+        for building in self.types_of_buildings:
+            self.names.append(building.get("name", "unknow"))
 
     def build(self, data: str|dict, coord: tuple[int, int], fraction_id: int) -> bool:
         '''
@@ -107,6 +111,8 @@ class BuildingsManager:
             fraction.production["buildings"].remove(building)
 
     def get_building_by_coord(self, coord:tuple[int, int]) -> Building:
+        print(self.buildings)
+        print(self.buildings[str(coord)])
         try:
             return self.buildings[str(coord)]
         except:
@@ -120,6 +126,9 @@ class BuildingsManager:
                     if self.buildings.get(str((nx, ny))):
                         buildings.append(self.buildings[str((nx, ny))])
         return buildings
+    
+    def get_all_possible_buildings_names(self) -> list[str]:
+        return self.names
         
     def get_all_unique_buildings_sorted_by_types(self, only_allowed_for_players_fraction: bool=True) -> dict:
         buildings_by_types = {}

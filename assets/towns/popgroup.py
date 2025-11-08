@@ -4,9 +4,9 @@ class PopGroup:
     def __init__(self, name: str, data: dict, size: dict = {}):
         self.name = name
         self.size = {
-            "aged": size.get("aged", 1),
-            "adult": size.get("adult", 10),
-            "children": size.get("children", 2)
+            "aged": size.get("aged", 0),
+            "adult": size.get("adult", 0),
+            "children": size.get("children", 0)
         }
         self.children_groups = []
         self.data = data.copy()
