@@ -1,13 +1,16 @@
 from .fraction import Fraction
 from assets import root
 from assets.root import logger
-from assets.policy.policy import PolicyCard
+from assets.policy.policycard import PolicyCard
 
 class FractionManager:
     def __init__(self):
         self.fractions: list = []
+        self.allowed_fraction_ids: list[int] = []
 
-    def create_fraction(self, name: str, type: str, id: int, data: dict={}):
+    def create_fraction(self, name: str, type: str, id: int = 0, data: dict={}):
+        if id not in self.allowed_fraction_ids: self.allowed_fraction_ids.append(id)
+        else: return self.create_fraction(name, type, id+1)
         fraction = Fraction(name, type, id, data, False)
         self._add_fraction(fraction)
         return fraction

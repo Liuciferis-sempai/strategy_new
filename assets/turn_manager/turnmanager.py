@@ -3,7 +3,6 @@ from assets.root import logger
 
 class TurnManager:
     def __init__(self):
-         
         self.turn = 0
         self.events = []
 
@@ -31,10 +30,10 @@ class TurnManager:
         for example: {"do": event_type, "event_data": {"cell": root.game_manager.get_chosen_cell(), "resource": {"resource_0": 10, "resource_1": 5}}}
         '''
         if time == 0:
-            logger.info(f"event {event} has time {time} (0) and will be executed on this turn {self.turn}", f"TurnManager.add_event_in_queue({time}, {event})")
+            logger.info(f"event {event["do"]} has time {time} (0) and will be executed on this turn {self.turn}", f"TurnManager.add_event_in_queue(...)")
             root.game_manager.effect_manager.do(event["do"], event["event_data"])
         elif time < 0:
-            logger.error("Time for event must be a positive integer or zero", f"TurnManager.add_event_in_queue({time}, {event})")
+            logger.error(f"Time for event must be a positive integer or zero, event {event["do"]}", f"TurnManager.add_event_in_queue(...)")
         else:
             self.events.append({"turn": self.turn+time, "event": event})
-            logger.info(f"event {event} successfully added in qeue with time: {time} and will be executed on turn {self.turn+time}", f"TurnManager.add_event_in_queue({time}, {event})")
+            logger.info(f"event {event["do"]} successfully added in qeue with time: {time} and will be executed on turn {self.turn+time}", f"TurnManager.add_event_in_queue(...)")

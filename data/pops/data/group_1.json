@@ -1,4 +1,7 @@
 {
     "name": "workers",
-    "base_growth": 0.2
+    "base_growth": 0.2,
+    "quality": {
+        "education": 0.1
+    }
 }

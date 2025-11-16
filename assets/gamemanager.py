@@ -22,7 +22,6 @@ from assets.towns.towns_manager import TownManager
 
 class GameManager:
     def __init__(self):
-        loading.draw("Loading game manager...")
         self.game_name = "Noname"
 
         self._default_cell = Cell()
@@ -32,20 +31,19 @@ class GameManager:
         self.chosen_cell_coord = self.chosen_cell.coord
         self.opened_pawn = self._default_pawn
         self.opened_pawn_coord = self.opened_pawn.coord
-        self.targets_coord = (-1, -1)
+        self.targets_coord = (-1, -1, -1)
         self.chosen_inputfield = self._default_chosen_inputfield
 
         self.input_fields: list[InputField] = []
 
-        loading.draw("Loading other managers...")
         self.fraction_manager = FractionManager()
-        self.world_map = WorldMap()
         self.gui = GUI()
+        self.world_map = WorldMap()
         self.pawns_manager = PawnsManager()
         self.reciept_manager = RecieptsManager()
         self.turn_manager = TurnManager()
         self.trigger_manager = TriggerManager()
-        self.tech_tree = Techtree()
+        self.tech_tree = Techtree(self)
         self.buildings_manager = BuildingsManager()
         self.policy_table = PolicyTable()
         self.effect_manager = EffectManager()
@@ -61,9 +59,9 @@ class GameManager:
         self.gui.draw()
         if self.command_line.is_active:
             self.command_line.draw()
-        for input in self.input_fields:
-            if not input.hidden:
-                input.draw()
+        #for input in self.input_fields:
+        #    if not input.hidden:
+        #        input.draw()
     
     def update_positions(self):
         self.gui.change_position_for_new_screen_sizes()
@@ -75,7 +73,7 @@ class GameManager:
         self.chosen_cell_coord = self.chosen_cell.coord
     
     def get_chosen_cell(self) -> Cell:
-        if self.chosen_cell.is_default:
+        if not self.chosen_cell:
             logger.error(f"query chosen cell before it is defined", "Game.get_chosen_cell()")
         #else:
         #    logger.info(f"query chosen cell: {self.chosen_cell}", "Game.get_chosen_cell()")
@@ -88,8 +86,8 @@ class GameManager:
         self.chosen_cell = self._default_cell
         self.chosen_cell_coord = self.chosen_cell.coord
     
-    def get_chosen_cell_coord(self) -> tuple[int, int]:
-        if self.chosen_cell.is_default:
+    def get_chosen_cell_coord(self) -> tuple[int, int, int]:
+        if not self.chosen_cell:
             logger.error(f"query chosen cell coord before chosen cell is defined", "Game.get_chosen_cell_coord()")
         #else:
         #    logger.info(f"query chosen cell coord: {self.chosen_cell_coord}", "Game.get_chosen_cell_coord()")
@@ -99,22 +97,22 @@ class GameManager:
         return self.chosen_cell.is_default
     
     def get_opened_pawn(self) -> Pawn:
-        if self.opened_pawn.is_default:
+        if not self.opened_pawn:
             logger.error(f"query opened pawn before it is defined", "Game.get_opened_pawn()")
         #else:
         #    logger.info(f"query opened pawn: {self.opened_pawn}", "Game.get_opened_pawn()")
         return self.opened_pawn
     
-    def get_opened_pawn_coord(self) -> tuple[int, int]:
-        if self.opened_pawn.is_default:
+    def get_opened_pawn_coord(self) -> tuple[int, int, int]:
+        if not self.opened_pawn:
             logger.error(f"query opened pawn coord before it is defined", "Game.get_opened_pawn_coord()")
         #else:
         #    logger.info(f"query opened pawn: {self.opened_pawn_coord}", "Game.get_opened_pawn_coord()")
         return self.opened_pawn_coord
     
     def is_opened_pawn_default(self) -> bool:
-        if self.opened_pawn.is_default:
-            logger.warning("opened pawn is default", "Game.is_opened_pawn_default()")
+        if not self.opened_pawn:
+            logger.info("opened pawn is default", "Game.is_opened_pawn_default()")
         return self.opened_pawn.is_default
     
     def set_opened_pawn(self, new_pawn: Pawn|dict):
@@ -148,17 +146,17 @@ class GameManager:
             logger.error(f"query target coord before it is defined", "Game.get_target_coord()")
         return self.targets_coord
     
-    def set_target_coord(self, new_target_coord: tuple[int, int]):
+    def set_target_coord(self, new_target_coord: tuple[int, int, int]):
         logger.info(f"target coord changet from {self.targets_coord} to {new_target_coord}", f"GUIGame.set_target_coord({new_target_coord})")
         self.targets_coord = new_target_coord
 
     def reset_target_coord(self):
         logger.info(f"target coord reset", "GUIGame.set_target_coord_null()")
-        self.targets_coord = (-1, -1)
+        self.targets_coord = (-1, -1, -1)
     
     def is_target_coord_default(self):
-        if self.targets_coord == (-1, -1):
-            logger.warning("target coord is default", "Game.is_target_coord_default()")
+        if self.targets_coord == (-1, -1, -1):
+            logger.info("target coord is default", "Game.is_target_coord_default()")
             return True
         return False
     
@@ -168,7 +166,11 @@ class GameManager:
         return self.chosen_inputfield
 
     def is_chosen_inputfield_default(self):
-        return self.chosen_inputfield == self._default_chosen_inputfield
+        if self.chosen_inputfield == self._default_chosen_inputfield:
+            logger.info("chosen inputfield is default", "Game.is_chosen_inputfield_default()")
+            return True
+        else:
+            return False
     
     def chose_input_field(self, inputfield: InputField):
         self.chosen_inputfield = inputfield

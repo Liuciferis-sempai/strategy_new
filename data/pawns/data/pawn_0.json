@@ -1,9 +1,27 @@
 {
-    "name": "pawn_0",
+    "type": "pawn_0",
     "desc": "pawn_0_desc",
     "img": "pawn_0.png",
     "ico": "pawn_0.png",
-    "type": "pawn_type_0",
+    "category": "pawn_category_0",
+    "necessary_buildings": [],
+    "cost": {
+        "time": 1,
+        "people": {
+            "amout": 2,
+            "quality": {
+                "education": 0.05
+            }
+        },
+        "resources": {
+        }
+    },
+    "attack": {
+        "type": "melee",
+        "distance": 1,
+        "damage": 15,
+        "mods": []
+    },
     "movement_points": 2,
     "movement_points_max": 2,
     "inventory_size": 10,

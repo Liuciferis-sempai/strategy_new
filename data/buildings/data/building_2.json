@@ -1,7 +1,9 @@
 {
     "name": "lumberjack",
+    "type": "lumberjack",
     "desc": "lumberjack_desc",
     "img": "lumberjack.png",
+    "category": "producer",
     "can_be_builded": true,
     "level": 0,
     "max_hp": 250,
@@ -12,7 +14,6 @@
     "service_cost": {
         "resource_0": 1
     },
-    "type": "producer",
     "prodaction_time": 1,
     "prodaction": {
         "resource_0": 1

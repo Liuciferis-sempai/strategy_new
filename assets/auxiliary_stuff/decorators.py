@@ -1,6 +1,5 @@
 import datetime
 import time
-from assets.root import logger as logger_
 import assets.root as root
 import pygame as py
 
@@ -29,7 +28,7 @@ def timeit(func):
         # Only log timing info if it exceeds the threshold
         if execution_time >= TIMEIT_THRESHOLD:
             try:
-                logger_.time(f"function '{func.__name__}' executed in {execution_time:.6f} seconds.", f"{func.__module__}.{func.__name__}")
+                root.logger.time(f"function '{func.__name__}' executed in {execution_time:.6f} seconds.", f"{func.__module__}.{func.__name__}")
             except Exception:
                 pass
         return result

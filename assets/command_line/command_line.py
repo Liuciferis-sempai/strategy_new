@@ -5,7 +5,7 @@ from assets.root import logger
 from assets.pawns.pawn import Pawn
 from assets.buildings.building import Building
 from assets.world.cell import Cell
-from assets.auxiliary_stuff.functions import update_gui, can_be_int
+from assets.auxiliary_stuff import update_gui, can_be_int
 from assets.gui.inputfield import InputField
 from assets.gui.textfield import TextField
 
@@ -45,7 +45,7 @@ class CommandLine(py.sprite.Sprite):
         self.rect = py.Rect(self.position[0], self.position[1], self.width, self.height)
 
         self.font = py.font.Font(None, 20)
-        self.inputfield = InputField(self.width, self.font_size, (0, self.height-self.font_size), "", self.font_size, self.line_color, self, True)
+        self.inputfield = InputField(self.width, self.font_size, (0, self.height-self.font_size), "", self.font_size, self.line_color, (0, 0, 0, 0), input_processor=self, hidden=True)
 
         self.lines: list[TextField] = []
 
@@ -94,6 +94,10 @@ class CommandLine(py.sprite.Sprite):
                     self._process_open_command(command[1:])
                 elif command_type == "show":
                     self._process_show_command(command[1:])
+                elif command_type == "create":
+                    self._process_create_command(command[1:])
+                elif command_type == "damage":
+                    self._process_attack_command(command[1:])
                 else:
                     self._process_usual_command(command[0], command[1:])
             except Exception as e:
@@ -114,18 +118,41 @@ class CommandLine(py.sprite.Sprite):
                 self.add_answer(f"{attribute} new value is '{new_value}'")
                 return
 
-    def _process_get_command(self, splited_command: list[str]):
+    def _finde_attribute(self, splited_command: list[str]) -> tuple[str, Pawn|Building|Cell|None]:
         attribute = self._translate_value(splited_command[0])
         if splited_command[0].count(",") == 1:
             coord_data = self._process_coord({"cell": "cell", "pawn": "pawn", "building": "building"}, splited_command[0], {})
             for key, val in coord_data.items():
-                self.add_answer(f"{key}: {val}")
-            return
+                return (f"{key}: {val}", val)
         for storage in [root, root.game_manager]:
             if hasattr(storage, attribute):
                 value = getattr(storage, attribute)
-                self.add_answer(f"{attribute} has value '{value}'")
+                return (f"{attribute} has value '{value}'", None)
+        return (f"no attribute {splited_command[0]}", None)
+    
+    def _get_attribute(self, storage, data: str) -> str:
+        if "." in data:
+            data_list = data.split(".")
+            if hasattr(storage, data_list[0]):
+                att = getattr(storage, data_list[0])
+                att = self._get_attribute(att, ".".join(data_list[1:]))
+                return f"{storage}.{data} is {att}"
+            return f"{storage} has no {data_list[0]}"
+        else:
+            if hasattr(storage, data):
+                value = getattr(storage, data)
+                return str(value)
+            return f"{storage} has no {data}"
+    
+    def _process_get_command(self, splited_command: list[str]):
+        attribute = self._finde_attribute(splited_command)
+
+        if isinstance(attribute[1], Pawn|Building|Cell):
+            if len(splited_command) > 1:
+                answer = self._get_attribute(attribute[1], splited_command[1])
+                self.add_answer(answer)
                 return
+        self.add_answer(attribute[0])
 
     def _process_add_command(self, splited_command: list[str]):
         command_target = splited_command[0]
@@ -172,10 +199,16 @@ class CommandLine(py.sprite.Sprite):
         effect_data = {}
         if splited_command[0] == "area":
             start_coord = splited_command[1].split(",")
-            effect_data["start_coord"] = (int(start_coord[0]), int(start_coord[1]))
+            if len(start_coord) == 2:
+                effect_data["start_coord"] = (int(start_coord[0]), int(start_coord[1]), 0)
+            else:
+                effect_data["start_coord"] = (int(start_coord[0]), int(start_coord[1], int(start_coord[2])))
 
             end_coord = splited_command[2].split(",")
-            effect_data["end_coord"] = (int(end_coord[0]), int(end_coord[1]))
+            if len(end_coord) == 2:
+                effect_data["end_coord"] = (int(end_coord[0]), int(end_coord[1]), 0)
+            else:
+                effect_data["end_coord"] = (int(end_coord[0]), int(end_coord[1]), int(end_coord[2]))
 
             self.add_answer(root.game_manager.effect_manager.do("open_area", effect_data))
         else:
@@ -184,6 +217,30 @@ class CommandLine(py.sprite.Sprite):
     def _process_show_command(self, splited_command: list[str]):
         coord = self._process_coord({"coord": "coord"}, splited_command[0], {})["coord"]
         self.add_answer(root.game_manager.effect_manager.do("show_statistic", {"coord": coord}))
+
+    def _process_create_command(self, splited_command: list[str]):
+        target_of_creation = splited_command[0]
+        if target_of_creation == "fraction":
+            effect = "create_fraction"
+        else:
+            raise Exception("second argument must be name of object to create")
+        effect_data = {}
+        command = self._generate_command(splited_command[1:])
+
+        for entry in command:
+            if not effect_data.get("name"):
+                effect_data["name"] = entry
+            elif not effect_data.get("type"):
+                effect_data["type"] = entry
+            else:
+                effect_data[entry] = next(command)
+
+        self.add_answer(root.game_manager.effect_manager.do(effect, effect_data))
+
+    def _process_attack_command(self, splited_command: list[str]):
+        coord_data = self._process_coord({"pawn": "pawn", "building": "building"}, splited_command[0], {})
+        for _, val in coord_data.items():
+            self.add_answer(root.game_manager.effect_manager.do("attack", {"target": val, "data": {"damage": int(splited_command[1]), "type": splited_command[2] if len(splited_command)>2 else "none"}}))
 
     def _process_popgroup_command(self, effect_name: str, splited_command: list[str]):
         town = root.game_manager.town_manager.get_town_by_coord(self._process_coord({"coord": "coord"}, splited_command[0], {})["coord"])
@@ -214,35 +271,42 @@ class CommandLine(py.sprite.Sprite):
                     effect_data["size"] = int(entry)
             elif "fraction_id" in keys and entry == "player_id" and not effect_data.get("fraction_id"):
                 effect_data["fraction_id"] = root.player_id
-            elif "type" in keys and (entry in root.game_manager.buildings_manager.get_all_possible_buildings_names() or entry in root.game_manager.pawns_manager.get_all_pawns_names()):
+            elif "type" in keys and (entry in root.game_manager.buildings_manager.get_all_possible_buildings_names() or entry in root.game_manager.pawns_manager.get_all_pawns_types()):
                 effect_data["type"] = entry
+            elif "add_resource" == effect_name and not effect_data.get("resource"):
+                effect_data["resource"] = entry
             else:
                 effect_data[entry] = next(command)
+
         self.add_answer(root.game_manager.effect_manager.do(effect_name, effect_data))
 
     def _process_coord(self, effect: dict[str, Any], entry: str, effect_data: dict) -> dict:
-        if entry.count(",") != 1:
+        if entry.count(",") == 1:
+            target_coord = entry.split(",")
+            target_coord = (int(target_coord[0]), int(target_coord[1]), 0)
+        elif entry.count(",") == 2:
+            target_coord = entry.split(",")
+            target_coord = (int(target_coord[0]), int(target_coord[1]), int(target_coord[2]))
+        else:
             raise Exception(f"incorrect coordinate entry ({entry}) exp: 1,7")
-        target_coord = entry.split(",")
-        target_coord = (int(target_coord[0]), int(target_coord[1]))
 
         keys = effect.keys()
         if "coord" in keys:
             effect_data["coord"] = target_coord
             return effect_data
         
-        pawn = root.game_manager.pawns_manager.get_pawn_by_coord(target_coord)
-        if "pawn" in keys and not pawn.is_default:
-            effect_data["pawn"] = pawn
+        pawns = root.game_manager.pawns_manager.get_pawns_by_coord(target_coord)
+        if "pawn" in keys and pawns != [] and pawns[0]:
+            effect_data["pawn"] = pawns[0]
             return effect_data
 
         building = root.game_manager.buildings_manager.get_building_by_coord(target_coord)
-        if "building" in keys and not building.is_default:
+        if "building" in keys and building:
             effect_data["building"] = building
             return effect_data
     
         cell = root.game_manager.world_map.get_cell_by_coord(target_coord)
-        if "cell" in keys and not cell.is_default:
+        if "cell" in keys and cell:
             effect_data["cell"] = root.game_manager.world_map.get_cell_by_coord(target_coord)
             return effect_data
 
@@ -252,8 +316,11 @@ class CommandLine(py.sprite.Sprite):
         for value in splited_command:
             if value.count(",") == 1:
                value = value.split(",")
-               value = (int(value[0]), int(value[1]))
-            elif value.count(",") > 1:
+               value = (int(value[0]), int(value[1]), 0)
+            elif value.count(",") == 2:
+                value = value.split(",")
+                value = (int(value[0]), int(value[1]), int(value[2]))
+            elif value.count(",") > 2:
                 value = value.split(",")
                 value = [int(v) for v in value]
         return splited_command
@@ -292,4 +359,4 @@ class CommandLine(py.sprite.Sprite):
         for i, line in enumerate(self.lines[::-1]):
             line.change_position((0, self.inputfield.rect.top-self.font_size*(i+1)))
             line.draw()
-        #self.inputfield.draw()
+        self.inputfield.draw()

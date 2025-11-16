@@ -9,8 +9,7 @@ class InventoryInputProcessor(BasicInputProcessor):
     #@logger
     def process_keydown(self, event:py.event.Event):
         if self.process_keydown_for_inputfield(event): return root.update_gui()
-        if self.process_keydown_base(event):
-            return
+        if self.process_keydown_base(event): return
 
         if event.key == py.K_ESCAPE:
             root.change_window_state("game")

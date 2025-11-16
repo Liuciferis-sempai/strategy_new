@@ -1,4 +1,7 @@
 {
     "name": "peasants",
-    "base_growth": 0.3
+    "base_growth": 0.3,
+    "quality": {
+        "education": 0.05
+    }
 }

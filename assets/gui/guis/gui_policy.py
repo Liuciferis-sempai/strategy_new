@@ -6,7 +6,7 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 import assets.root as root
-from assets.policy.policy import PolicyCard
+from assets.policy.policycard import PolicyCard
 
 class GUIGPolicy:
     def __init__(self):
@@ -41,3 +41,15 @@ class GUIGPolicy:
         for policy in self.policies:
             policy.rect.y -= root.interface_size//2
         update_gui()
+    
+    def move_up(self):
+        self.scroll_up()
+
+    def move_down(self):
+        self.scroll_down()
+
+    def move_left(self):
+        pass
+
+    def move_right(self):
+        pass

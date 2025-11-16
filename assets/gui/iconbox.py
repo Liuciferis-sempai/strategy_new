@@ -9,6 +9,7 @@ class Icon(py.sprite.Sprite):
         self.img = img
         self.color = color
         self.position = position
+        self.spec_path = spec_path
         
         if img != "":
             self.image = root.image_manager.get_image(f"{spec_path}/{img}", f"{spec_path}/none.png")
@@ -25,6 +26,16 @@ class Icon(py.sprite.Sprite):
     def draw(self):
         self.bg_image.blit(self.image, (0, 0))
         root.screen.blit(self.bg_image, self.bg_rect)
+    
+    def update_image(self, new_img: str, new_width: int = -1, new_height: int = -1, spec_path: str="data/icons"):
+        self.spec_path = spec_path
+        self.image = root.image_manager.get_image(f"{self.spec_path}/{new_img}", f"{self.spec_path}/none.png")
+        if new_width < 0:
+            new_width = self.width
+        if new_height < 0:
+            new_height = self.height
+        self.image = py.transform.scale(self.image, (new_width, new_height))
+        self.rect = self.image.get_rect(topleft=self.position)
 
     def change_position(self, position: tuple[int, int]):
         self.position = position

@@ -1,4 +1,7 @@
 {
     "name": "educated",
-    "base_growth": 0.1
+    "base_growth": 0.1,
+    "quality": {
+        "education": 0.25
+    }
 }

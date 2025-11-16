@@ -1,5 +1,4 @@
 -add free space check for building
 -add grave (or something like that) after pawn death
 -add cancel for reciept
--add town destroy by building destroy
--add name edit for building
+-rewrite fraction edit (writing) code

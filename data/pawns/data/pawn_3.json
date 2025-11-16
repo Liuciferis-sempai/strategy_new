@@ -1,9 +1,9 @@
 {
-    "name": "pawn_3",
+    "type": "pawn_3",
     "desc": "pawn_1_desc",
     "img": "pawn_1.png",
     "ico": "pawn_1.png",
-    "type": "pawn_type_1",
+    "category": "pawn_category_1",
     "movement_points": 0.5,
     "movement_points_max": 0.5,
     "inventory_size": 5,

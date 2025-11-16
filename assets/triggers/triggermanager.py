@@ -3,6 +3,7 @@ from assets.pawns.pawn import Pawn
 from assets import root
 from assets.root import logger
 from assets.buildings.building import Building
+from assets.towns.town import Town
 
 class TriggerManager:
     def __init__(self):
@@ -21,34 +22,35 @@ class TriggerManager:
     def has_no_tech(self, tech_id: str, fraction_id: int=-1) -> bool:
         return not self.has_tech(tech_id, fraction_id)
 
-    def building_has_resources(self, resources: dict, building: Building) -> bool:
-        if building:
+    def target_has_resources(self, resources: dict, target: Building|Town|Pawn) -> bool:
+        if target:
+            if isinstance(target, Town): target = root.game_manager.buildings_manager.get_building_by_coord(target.coord)
+
             sum_of = {}
             for resource in resources:
                 sum_of[resource] = 0
 
-            if isinstance(building.inventory, list):
-                for item in building.inventory:
+            if isinstance(target.inventory, list):
+                for item in target.inventory:
                     for resource in resources:
                         if resource == item.name:
                             if sum_of.get(resource, False):
-                                sum_of[resource] = item.amount
+                                sum_of[resource] = item.amout
                             else:
-                                sum_of[resource] += item.amount
-            elif isinstance(building.inventory, dict):
-                for category in building.inventory:
-                    for item in building.inventory[category]:
+                                sum_of[resource] += item.amout
+            elif isinstance(target.inventory, dict):
+                for category in target.inventory:
+                    for item in target.inventory[category]:
                         for resource in resources:
                             if resource == item.name:
                                 if sum_of.get(resource, False):
-                                    sum_of[resource] = item.amount
+                                    sum_of[resource] = item.amout
                                 else:
-                                    sum_of[resource] += item.amount
+                                    sum_of[resource] += item.amout
             for resource in sum_of:
                 if sum_of[resource] < resources[resource]:
                     return False
         return True
-
 
     def _check_for_resourse_in_storage(self, resource: str, resources: dict, building: dict) -> bool:
         for r in building["storage"]:
@@ -78,16 +80,18 @@ class TriggerManager:
         return result
     
     def target_is_near(self, pawn: Pawn, args: dict) -> bool:
-        target = root.game_manager.buildings_manager.get_building_by_coord(args["coord"])
-        if not target:
-            target = root.game_manager.pawns_manager.get_pawn_by_name(args["target_of_action"], args["coord"])
+        target = root.game_manager.world_map.get_cell_by_coord(args["coord"])
+        distance = args["distance"]
+
+        if isinstance(distance, str):
+            distance = int(pawn.data.get("distance", 1))
 
         if target:
-            if abs(pawn.coord[0]-target.coord[0]) <= args["distance"] and abs(pawn.coord[1]-target.coord[1]) <= args["distance"]:
+            if abs(pawn.coord[0]-target.coord[0]) <= distance and abs(pawn.coord[1]-target.coord[1]) <= distance:
                 return True
-            logger.warning(f"target is too far. pawn stand on {pawn.coord}, target stand on {target.coord}. distance must be {args["distance"]} or less", f"TriggerManager.compare_inventory({pawn}, {args})")
+            logger.warning(f"target is too far. pawn stand on {pawn.coord}, target stand on {target.coord}. distance must be {args["distance"]} or less", f"TriggerManager.target_is_near({pawn}, {args})")
         else:
-            logger.warning(f"target is not recognized. target coord {args['coord']}", f"TriggerManager.compare_inventory({pawn}, {args})")
+            logger.warning(f"target is not recognized. target coord {args['coord']}", f"TriggerManager.target_is_near({pawn}, {args})")
         return False
 
     def compare_inventory(self, pawn: Pawn, args: dict) -> bool:
@@ -96,13 +100,13 @@ class TriggerManager:
             total = {}
             for resource in building.scheme_inventory[args["pay_inv"]]:
                 if total.get(resource, False):
-                    total[resource.name] += resource.amount
+                    total[resource.name] += resource.amout
                 else:
-                    total[resource.name] = resource.amount
-            for resource, amount in building.data["cost"].items():
+                    total[resource.name] = resource.amout
+            for resource, amout in building.data["cost"].items():
                 if total.get(resource, False):
-                    if total[resource] < amount:
-                        logger.warning(f"not enought of resource {resource}. required: {amount}, available: {total[resource]}", f"TriggerManager.compare_inventory({pawn}, {args})")
+                    if total[resource] < amout:
+                        logger.warning(f"not enought of resource {resource}. required: {amout}, available: {total[resource]}", f"TriggerManager.compare_inventory({pawn}, {args})")
                         return False
                 else:
                     logger.warning(f"scheme has no resource {resource}", f"TriggerManager.compare_inventory({pawn}, {args})")

@@ -10,26 +10,6 @@ class GameInputProcessor(BasicInputProcessor):
         self._default_cell = Cell()
         self.cell_under_mouse = self._default_cell
 
-    def is_move_button_pressed(self):
-        if any([self.k_a_pressed, self.k_d_pressed, self.k_s_pressed, self.k_w_pressed]):
-            return True
-
-    def move(self):
-        if root.window_state == "game" and not root.input_field_active:
-            if self.k_w_pressed:
-                root.game_manager.gui.game.world_map.move_map_up()
-            elif self.k_s_pressed:
-                root.game_manager.gui.game.world_map.move_map_down()
-            if self.k_a_pressed:
-                root.game_manager.gui.game.world_map.move_map_left()
-            elif self.k_d_pressed:
-                root.game_manager.gui.game.world_map.move_map_right()
-        else:
-            self.k_a_pressed = False
-            self.k_d_pressed = False
-            self.k_s_pressed = False
-            self.k_w_pressed = False
-
     #@logger
     def process_keydown(self, event:py.event.Event):
         if self.process_keydown_for_inputfield(event): return root.update_gui()
@@ -50,8 +30,9 @@ class GameInputProcessor(BasicInputProcessor):
                 root.game_manager.command_line.deactivete()
             elif not root.game_manager.is_chosen_cell_default():
                 root.game_manager.reset_chosen_cell()
-            elif not root.game_manager.gui.game.main_info_window_content.closed:
-                root.game_manager.gui.game.main_info_window_content_close()
+                root.game_manager.gui.game.close_main_info_window()
+            #elif root.game_manager.gui.game.main_info_window_content.text != "":
+            #    root.game_manager.gui.game.close_main_info_window()
             elif root.game_manager.gui.game.sticked_object != None:
                 root.game_manager.gui.game.sticked_object = None
             elif any([root.game_manager.gui.game.jobs_list, root.game_manager.gui.game.buildings_types_list, root.game_manager.gui.game.action_list]):
@@ -124,10 +105,10 @@ class GameInputProcessor(BasicInputProcessor):
                         root.game_manager.gui.game.choise_scheme(scheme)
                         return
 
-            if root.game_manager.gui.game.world_map:
-                if root.game_manager.gui.game.world_map.rect.collidepoint(mouse_pos):
+            if root.game_manager.world_map:
+                if root.game_manager.world_map.rect.collidepoint(mouse_pos):
                     root.game_manager.gui.close_all_extra_windows()
-                    root.game_manager.gui.game.world_map.click(mouse_pos, 1)
+                    root.game_manager.world_map.click(mouse_pos, 1)
                     return
 
             screen_middle = (root.window_size[0] // 2, root.window_size[1] // 2)
@@ -148,16 +129,16 @@ class GameInputProcessor(BasicInputProcessor):
             #            gui.main_info_window_content.click()
             #            return
 
-            root.game_manager.gui.game.main_info_window_content_close()
+            root.game_manager.gui.game.close_main_info_window()
             root.game_manager.world_map.unchose_cell()
             root.game_manager.gui.close_all_extra_windows()
             root.update_gui()
             
         elif event.button == 3:
-            if root.game_manager.gui.game.world_map:
-                if root.game_manager.gui.game.world_map.rect.collidepoint(mouse_pos):
+            if root.game_manager.world_map:
+                if root.game_manager.world_map.rect.collidepoint(mouse_pos):
                     root.game_manager.gui.close_all_extra_windows()
-                    root.game_manager.gui.game.world_map.click(mouse_pos, 3)
+                    root.game_manager.world_map.click(mouse_pos, 3)
                     return
 
         elif event.button == 4:

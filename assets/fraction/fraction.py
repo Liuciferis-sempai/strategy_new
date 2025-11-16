@@ -3,7 +3,7 @@ from assets.root import logger
 from assets.pawns.pawn import Pawn
 from assets.buildings.building import Building
 from assets.towns.town import Town
-from assets.policy.policy import PolicyCard
+from assets.policy.policycard import PolicyCard
 
 class Fraction:
     def __init__(self, name:str="New Fraction", type_:str="bot", id: int=-1, data:dict={}, is_default: bool=True):
@@ -38,16 +38,25 @@ class Fraction:
         self.towns: list[Town] = []
 
     def __repr__(self) -> str:
-        if self.is_default:
+        if not self:
             return f"<Fraction is default>"
         else:
             return f"<Fraction {self.name} with id {self.id}>"
+    
+    def __bool__(self) -> bool:
+        return not self.is_default
 
-    def get_base_growth_modifier(self):
+    def get_base_growth_modifier(self) -> float:
         return 1 #must be difined by policy
     
     def get_adulthood_age(self) -> int:
         return 16 #must be difined by policy
+    
+    def get_retirement_age(self) -> int:
+        return 30 #must be difined by policy
+    
+    def get_mortality_modifier_aged(self) -> float:
+        return 1 #must be difined by policy
 
     def edit(self, data:dict={}):
         if data.get("set", False):

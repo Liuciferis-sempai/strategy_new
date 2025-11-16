@@ -1,7 +1,9 @@
 {
     "name": "manufactory",
+    "type": "manufactory",
     "desc": "manufactory_desc",
     "img": "manufactory.png",
+    "category": "workbench",
     "can_be_builded": true,
     "level": 0,
     "max_hp": 300,
@@ -12,11 +14,15 @@
     "service_cost": {
         "resource_0": 1
     },
-    "type": "workbench",
     "speed_of_work_mod": 1,
     "max_queue": 2,
     "queue": [],
-    "necessary_workers": {"workers": 5},
+    "necessary_workers": {
+        "amout": 5,
+        "quality": {
+            "education": 0.2
+        }
+    },
     "storage_type": "dict",
     "storage": {"input": [], "output": []},
     "storage_size": {"input": 5, "output": 2},

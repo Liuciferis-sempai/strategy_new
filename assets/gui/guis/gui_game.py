@@ -9,7 +9,7 @@ import assets.root as root
 from assets.root import logger
 from assets.pawns.pawn import Pawn
 from assets.world.cell import Cell
-from assets.auxiliary_stuff.decorators import timeit
+from assets.auxiliary_stuff import timeit
 
 class GUIGame:
     def __init__(self):
@@ -25,6 +25,7 @@ class GUIGame:
         self.open_reciept_button = RecieptButton()
         self.open_inventory_button = OpenInventoryButton()
         self.open_scheme_button = OpenInventoryButton()
+        self.open_spawn_button = OpneSpawnButton()
 
         self.jobs_list = None
         self.action_list = None
@@ -35,8 +36,7 @@ class GUIGame:
 
         self.set_standard_footer()
 
-        self.main_info_window_content = InfoBox(title="Info Box", text="Description", position=(root.window_size[0]-root.interface_size*2, 20))
-        self.world_map = root.game_manager.world_map
+        self.main_info_window_content = TextField(int(root.interface_size*1.5), 40)
 
         self.sticked_object = None
 
@@ -100,25 +100,20 @@ class GUIGame:
         
         # Main info window
         if self.main_info_window_content:
-            item_position = (root.window_size[0]-self.main_info_window_content.width, 20)
+            item_position = (root.window_size[0]-self.main_info_window_content.rect.width, root.window_size[1]-self.main_info_window_content.rect.height-(root.button_standard_size[1]+20)*(footer_tab+1)-10)
             self.main_info_window_content.change_position(item_position)
     
         # World map
-        if self.world_map:
-            self.world_map.change_position(header_tab, footer_tab, header_info_tab)
+        if root.game_manager.world_map:
+            root.game_manager.world_map.change_position(header_tab, footer_tab, header_info_tab)
 
         #self.building_reciept_button.change_position((root.window_size[0]-110, 10))
     
-    def open_main_info_window(self, data:dict):
-        '''
-        {"title": title, "text": text}
-        '''
-        main_info = InfoBox(data.get("title", "unknow_title"), data.get("text", "unknow_text"), position=(root.window_size[0]-root.interface_size*2, 20))
-        self.main_info_window_content = main_info
+    def open_main_info_window(self, text: str):
+        self.main_info_window_content.set_text(text)
     
-    def main_info_window_content_close(self):
-        self.main_info_window_content.close()
-        self.set_standard_footer()
+    def close_main_info_window(self):
+        self.main_info_window_content.set_text("")
         update_gui()
 
     def choise_scheme(self, scheme: Icon):
@@ -144,8 +139,10 @@ class GUIGame:
     def open_building(self, buildings_dict: dict):
         buildings = root.game_manager.buildings_manager.get_building_by_coord(buildings_dict["coord"])
         self.footer_content = [self.next_turn_button, self.open_building_interface_button, self.open_inventory_button]
-        if buildings.is_workbench: #type: ignore
+        if buildings.is_workbench:
             self.footer_content.append(self.open_reciept_button)
+        if buildings.is_town:
+            self.footer_content.append(self.open_spawn_button)
         self.update_footer_tab_content()
         update_gui()
 
@@ -168,7 +165,7 @@ class GUIGame:
         y_offset = 0
 
         tettain_name = cell.type if cell.is_opened else "not researched cell"
-        terrain = TextField(text=tettain_name + f" *[{cell.coord[0]} *{cell.coord[1]}]",
+        terrain = TextField(text=tettain_name + f" *[{cell.coord[0]}|{cell.coord[1]}]",
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+10
@@ -215,7 +212,7 @@ class GUIGame:
             cell_info[-1].append(building_service)
             cell_info[-1].append(building_hp)
 
-            if building.type == "town":
+            if building.category == "town":
                 population = building.town.get_population()
                 for group, pop in population.items():
                     town_pop = TextField(text=f"{group} *: *{pop}",
@@ -305,9 +302,9 @@ class GUIGame:
             action_list = []
             for pawn in pawns:
                 if pawn["fraction_id"] != root.player_id:
-                    action_list.append(f"attack.{pawn["name"]}")
+                    action_list.append(f"attack.{pawn["type"]}")
                 else:
-                    action_list.append(f"share.with_{pawn["name"]}")
+                    action_list.append(f"share.with_{pawn["type"]}")
                     if pawn["type"] != root.game_manager.get_opened_pawn().type and "stand_here" not in action_list:
                         action_list.append("stand_here")
             if buildings.get("fraction_id") == root.player_id:
@@ -323,8 +320,8 @@ class GUIGame:
     def draw(self):
         root.screen.fill((0, 0, 0))
         # Draw world map
-        if self.world_map:
-            self.world_map.draw()
+        if root.game_manager.world_map:
+            root.game_manager.world_map.draw()
 
         # Draw header info content
         for item in self.header_info_content:
@@ -342,8 +339,8 @@ class GUIGame:
             self.jobs_list.draw()
 
         # Draw main info window
-        if self.main_info_window_content:
-            #self.main_info_window_content.draw()
+        if self.main_info_window_content.text != "":
+            self.main_info_window_content.draw()
             pass
 
         if self.action_list:
@@ -363,3 +360,15 @@ class GUIGame:
                 info.draw()
 
         root.need_update_gui = False
+    
+    def move_up(self):
+        root.game_manager.world_map.move_map_up()
+
+    def move_down(self):
+        root.game_manager.world_map.move_map_down()
+
+    def move_left(self):
+        root.game_manager.world_map.move_map_left()
+
+    def move_right(self):
+        root.game_manager.world_map.move_map_right()

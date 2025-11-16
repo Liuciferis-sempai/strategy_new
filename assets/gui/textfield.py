@@ -22,7 +22,7 @@ class TextField(py.sprite.Sprite):
         self.update_text_surface()
     
     def update_text_surface(self):
-        self.text_surface = self.font.render(self.text, True, (0, 0, 0))
+        self.text_surface = self.font.render(str(self.text), True, (0, 0, 0))
         self.text_rect = self.text_surface.get_rect(topleft=(self.position[0] + 5, self.position[1] + (self.height - self.text_surface.get_height()) // 2))
     
     def set_text(self, new_text:str):

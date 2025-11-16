@@ -3,11 +3,11 @@ import assets.root as root
 from assets.root import logger
 
 class Cell(py.sprite.Sprite):
-    def __init__(self, position: tuple[int, int]=(-1, -1), coord: tuple[int, int]=(-1, -1), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
+    def __init__(self, position: tuple[int, int]=(-1, -1), coord: tuple[int, int, int]=(-1, -1, 0), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
         super().__init__()
         self.data = data.copy()
         self.position = position
-        self.coord = coord
+        self.coord: tuple[int, int, int] = coord
         self.is_opened = False
         self.display_mode = "normal"
 
@@ -30,10 +30,13 @@ class Cell(py.sprite.Sprite):
         self._set_graph()
     
     def __repr__(self) -> str:
-        if self.is_default:
+        if not self:
             return f"<Cell is default>"
         else:
             return f"<Cell {self.type} on coord {self.coord} has {len(self.pawns)} pawns and {0 if self.buildings == {} else 1} buildings>"
+    
+    def __bool__(self) -> bool:
+        return not self.is_default
 
     def click(self, mouse_pos: tuple[int, int]):
         root.game_manager.set_chosen_cell(self)
@@ -58,28 +61,27 @@ class Cell(py.sprite.Sprite):
             self._open_land()
 
     def _open_land(self):
-        title = self.type
-        if self.flora != {}:
-            title += f":with_{self.flora.get("name")}"
-        if self.fauna != {}:
-            if self.flora != {}:
-                title += ":and:"
-            title += f":with_{self.fauna.get("name")}"
-        #root.game_manager.gui.game.open_main_info_window({"title": title, "text": self.data["desc"]})
+        title = self.type if self.is_opened else "not_researched"
+        #if self.flora != {}:
+        #    title += f":with_{self.flora.get("name")}"
+        #if self.fauna != {}:
+        #    if self.flora != {}:
+        #        title += ":and"
+        #    title += f":with_{self.fauna.get("name")}"
+        root.game_manager.gui.game.open_main_info_window(title)
     
     def _open_pawn(self):
-        title = self.pawns[self.chosen_pawn_index].get("name")
-        desc = self.pawns[self.chosen_pawn_index].get("desc")
-        #root.game_manager.gui.game.open_main_info_window({"title": title, "text": desc})
-        root.game_manager.gui.game.open_pawn()
-        root.game_manager.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), self.pawns[self.chosen_pawn_index].get("movement_points", 1), (0, 0, 255, 100))
+        pawn = root.game_manager.pawns_manager.get_pawn_by_id(self.pawns[self.chosen_pawn_index]["id"])
+        root.game_manager.gui.game.open_main_info_window(pawn.name)
         if root.player_id == self.pawns[self.chosen_pawn_index].get("fraction_id"):
             root.game_manager.set_opened_pawn(self.pawns[self.chosen_pawn_index])
+            root.game_manager.gui.game.open_pawn()
+            root.game_manager.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), self.pawns[self.chosen_pawn_index].get("movement_points", 1), (0, 0, 255, 100))
 
     def _open_building(self):
         if self.buildings.get("fraction_id") == root.player_id:
             root.game_manager.gui.game.open_building(self.buildings)
-        #root.game_manager.gui.game.open_main_info_window({"title": self.buildings.get("name"), "text": self.buildings.get("desc")})
+        root.game_manager.gui.game.open_main_info_window(self.buildings.get("name", "unknow"))
 
     def change_type(self, new_type: str):
         self.type = new_type
@@ -107,6 +109,9 @@ class Cell(py.sprite.Sprite):
 
     def resize(self):
         self.position = (self.coord[0]*root.cell_sizes[root.cell_size_scale][0]+5*self.coord[0], self.coord[1]*root.cell_sizes[root.cell_size_scale][1]+5*self.coord[1])
+        self.surface = py.Surface((root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1]), py.SRCALPHA)
+        self.change_display_mode(self.display_mode)
+        self.mark_image = py.Surface((root.cell_sizes[root.cell_size_scale][0]+10, root.cell_sizes[root.cell_size_scale][1]+10), py.SRCALPHA)
         self._set_graph()
 
     def mark(self, color: tuple[int, int, int, int]=(255, 0, 0, 100)):

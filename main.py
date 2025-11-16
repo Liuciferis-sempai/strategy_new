@@ -5,19 +5,18 @@ py.font.init()
 
 import assets.root as root
 from assets.root import logger
-from assets.auxiliary_stuff.functions import update_gui
+from assets.auxiliary_stuff import update_gui
 
 def main():
     clock = py.time.Clock()
 
     time_withoute_mouse_moving = 0
 
-    running = True
-    while running:
+    while root.running:
         for event in py.event.get():
             if event.type == py.QUIT:
                 logger.write_down()
-                running = False
+                root.running = False
             elif event.type == py.VIDEORESIZE:
                 root.window_size = event.w, event.h
                 root.screen = py.display.set_mode(root.window_size, py.RESIZABLE)
@@ -35,14 +34,13 @@ def main():
             elif event.type == py.MOUSEBUTTONUP:
                 root.game_manager.input_processor.process_mousebuttonup(event)
 
-        if root.window_state == "game":
-            if time_withoute_mouse_moving >= root.time_for_show_info and not root.game_manager.input_processor.game_input.cell_under_mouse.is_default and root.game_manager.gui.game.cell_info == []:
-                root.game_manager.gui.game.show_info_about_cell_under_mouse()
-            else:
-                time_withoute_mouse_moving += 1
+        if time_withoute_mouse_moving >= root.time_for_show_info and not root.game_manager.input_processor.game_input.cell_under_mouse.is_default and root.game_manager.gui.game.cell_info == []:
+            root.game_manager.gui.show_info_under_mouse()
+        else:
+            time_withoute_mouse_moving += 1
             
-            if root.game_manager.input_processor.game_input.is_move_button_pressed():
-                root.game_manager.input_processor.game_input.move()
+        if root.game_manager.input_processor.is_move_button_pressed():
+            root.game_manager.input_processor.move()
 
         if root.need_update_gui:
             root.game_manager.draw()

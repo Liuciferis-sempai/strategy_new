@@ -34,3 +34,15 @@ class GUIFraction:
         self.research_field.draw()
 
         root.need_update_gui = False
+    
+    def move_up(self):
+        pass
+
+    def move_down(self):
+        pass
+
+    def move_left(self):
+        pass
+
+    def move_right(self):
+        pass

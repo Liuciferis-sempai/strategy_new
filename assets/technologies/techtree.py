@@ -1,10 +1,9 @@
-from assets.auxiliary_stuff.work_with_files import read_json_file
+from assets.auxiliary_stuff import read_json_file, update_gui
 import pygame as py
 import os
 import assets.root as root
 from .tech import Tech
 from assets.root import loading
-from assets.auxiliary_stuff.functions import update_gui
 
 class Link(py.sprite.Sprite):
     def __init__(self, prerequisite: Tech, tech: Tech):
@@ -19,7 +18,8 @@ class Link(py.sprite.Sprite):
         py.draw.line(root.screen, (255, 0, 0), (self.prerequisite.rect.right, self.prerequisite.rect.centery), (self.tech.rect.left, self.tech.rect.centery))
 
 class Techtree:
-    def __init__(self):
+    def __init__(self, game_manager):
+        
         #self.scale = 1.0
 
         self.techs = []

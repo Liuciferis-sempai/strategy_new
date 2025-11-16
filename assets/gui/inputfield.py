@@ -3,7 +3,7 @@ import assets.root as root
 from assets.root import loading, logger, language
 
 class InputField(py.sprite.Sprite):
-    def __init__(self, width: int = 0, height: int = 0, position: tuple[int, int] = (10, 10), place_holder: str = "", font_size: int = 20, bg_color: tuple[int, int, int, int] = (0, 0, 0, 0), input_processor=None, hidden: bool = False):
+    def __init__(self, width: int = 0, height: int = 0, position: tuple[int, int] = (10, 10), place_holder: str = "", font_size: int = 20, bg_color: tuple[int, int, int, int] = (0, 0, 0, 0), ch_color: tuple[int, int, int, int] = (0, 255, 0, 255), input_processor=None, hidden: bool = False):
         super().__init__()
         self.width = width
         self.height = height
@@ -19,6 +19,12 @@ class InputField(py.sprite.Sprite):
         self.image = py.Surface((width, height))
         self.image.fill(self.bg_color)
 
+        self.ch_image = py.Surface((width+10, height+10))
+        self.ch_image.fill(ch_color)
+
+        self.ch_rect = self.ch_image.get_rect()
+        self.ch_rect.topleft = (self.position[0]-5, self.position[1]-5)
+
         self.rect = self.image.get_rect()
         self.rect.topleft = self.position
 
@@ -27,16 +33,20 @@ class InputField(py.sprite.Sprite):
 
     def update_text_surface(self):
         text = self.value if self.value != "" else self.place_holder
+        if root.input_field_active: text += "<"
         self.text_surface = self.font.render(text, True, (0, 0, 0))
         self.text_rect = self.text_surface.get_rect(topleft=(self.position[0] + 5, self.position[1] + (self.height - self.text_surface.get_height()) // 2))
     
     def draw(self):
+        if root.input_field_active:
+            root.screen.blit(self.ch_image, self.ch_rect)
         root.screen.blit(self.image, self.rect)
         root.screen.blit(self.text_surface, self.text_rect)
 
     def click(self):
         root.game_manager.chose_input_field(self)
         root.input_field_active = True
+        self.update_text_surface()
     
     def key_down(self, event: py.event.Event):
         if event.key == py.K_ESCAPE:
@@ -61,3 +71,10 @@ class InputField(py.sprite.Sprite):
         self.rect.topleft = self.position
 
         self.update_text_surface()
+    
+    def change_position(self, new_position: tuple[int, int]):
+        self.position = new_position
+        self.rect.topleft = new_position
+        self.ch_rect.topleft = (new_position[0]-5, new_position[1]-5)
+        self.text_rect.topleft = new_position
+        self.draw()

@@ -12,6 +12,7 @@ class BuildingInputProcessor(BasicInputProcessor):
         if self.process_keydown_base(event):
             return
         if event.key == py.K_ESCAPE:
+                root.game_manager.gui.building.close()
                 root.change_window_state("game")
     
     #@logger
@@ -19,8 +20,10 @@ class BuildingInputProcessor(BasicInputProcessor):
         if self.process_mousebutton_for_inputfield(event): return root.update_gui()
         mouse_pos = event.pos
         if event.button == 1:
-            if root.game_manager.gui.building.building_reciept_button.rect.collidepoint(mouse_pos):
-                root.game_manager.gui.building.building_reciept_button.click()
-            if root.game_manager.gui.building.upgrade_building_button.rect.collidepoint(mouse_pos):
-                root.game_manager.gui.building.upgrade_building_button.click()
+            if root.game_manager.gui.building.building.is_workbench:
+                if root.game_manager.gui.building.building_reciept_button.rect.collidepoint(mouse_pos):
+                    root.game_manager.gui.building.building_reciept_button.click()
+            if root.game_manager.gui.building.building.can_be_upgraded():
+                if root.game_manager.gui.building.upgrade_building_button.rect.collidepoint(mouse_pos):
+                    root.game_manager.gui.building.upgrade_building_button.click()
         root.update_gui()

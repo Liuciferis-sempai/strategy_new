@@ -5,83 +5,119 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
+from ..inputfield import *
 import assets.root as root
-from assets.auxiliary_stuff.decorators import timeit
+from assets.auxiliary_stuff import timeit
 from assets.buildings.building import Building
 
 class GUIBuildings:
     def __init__(self):
-        self.building_ico = None
-        self.building_name = None
-        self.building_level = None
-        self.building_info = None
-        self.buildings_queue_name = None
+        cell_size = root.cell_sizes[root.cell_size_scale][0]
+        self._default_building = Building()
+        self.building = self._default_building
+
+        self.building_ico = Icon(cell_size, cell_size, img=f"data/buildings/img/none")
+        self.building_name = InputField(root.interface_size*2, 60, place_holder=f"unknow", bg_color=(255, 255, 255, 255), font_size=40, hidden=True)
+        root.game_manager.add_inputfield(self.building_name)
+        self.building_level = TextField(root.interface_size//2, root.interface_size//3, text=f"lvl unknow")
+        self.buildings_queue_name = TextField(root.interface_size//2, root.interface_size//4, text="Queue")
+        self.building_town_population_name = TextField(int(root.interface_size*1.2), root.interface_size//4, text="population *:")
         self.buildings_queue: list[TextField] = []
         self.buildings_town_population: list[TextField] = []
         self.building_reciept_button = WorkbenchButton()
         self.upgrade_building_button = UpgradeBuildingButton(root.interface_size, root.interface_size//3)
+
+        self.y_global_offset = 0
     
     def change_position_for_new_screen_sizes(self):
-        self.building_reciept_button.change_position((root.window_size[0]-self.building_reciept_button.width-10, root.window_size[1]-self.building_reciept_button.height-10))
+        cell_size = root.cell_sizes[root.cell_size_scale][0]
+
+        self.building_ico.change_position((10, 10+self.y_global_offset))
+        self.building_name.change_position((cell_size+20, 10+self.y_global_offset))
+        self.building_level.change_position((10, self.building_ico.rect.height+20+self.y_global_offset))
+
+        y_offset = self.building_ico.rect.height+self.building_level.rect.height+self.y_global_offset+20
+        if self.building.can_be_upgraded():
+            self.upgrade_building_button.change_position((root.interface_size//2+20, self.building_ico.rect.height+self.y_global_offset+20))
+            y_offset += self.upgrade_building_button.rect.height+10
+
+        if self.building.is_workbench or self.building.is_town:
+            if self.building.is_workbench:
+                self.building_reciept_button.change_position((root.window_size[0]-self.building_reciept_button.width-10, root.window_size[1]-self.building_reciept_button.height-10))
+            self.buildings_queue_name.change_position((10, y_offset+10))
+            y_offset += self.buildings_queue_name.rect.height + 10
+            for i, qeue_ico in enumerate(self.buildings_queue):
+                position = (10+(cell_size+10)*i, y_offset+10)
+                qeue_ico.change_position(position)
+            y_offset += self.buildings_queue[-1].rect.height+10
+        
+        if self.building.is_town:
+            self.building_town_population_name.change_position((10, y_offset+10))
+            y_offset += self.building_town_population_name.rect.height + 10
+            x = [root.interface_size//2, root.interface_size, root.interface_size, root.interface_size]
+            xi = 0
+            for i, pop in enumerate(self.buildings_town_population):
+                pop.change_position((x[xi], y_offset+10))
+                xi += 1
+                if xi > len(x)-1: xi = 0
+                y_offset += pop.rect.height+10
 
     def open(self):
-        cell_size = root.cell_sizes[root.cell_size_scale][0]
+        self.y_global_offset = 0
         building = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
+        self.building = building
 
-        self.building_ico = Icon(cell_size, cell_size, position=(10, 10), img=f"data/buildings/img/{building.data["img"]}")
-        self.building_name = TextField(root.interface_size*2, 60, position=(cell_size+20, 10), text=f"{building.name}") #type: ignore
-        self.building_level = TextField(root.interface_size//2, root.interface_size//3, position=(10, self.building_ico.rect.height+20), text=f"lvl {building.level}") #type: ignore
+        self.building_ico.update_image(f"data/buildings/img/{building.data["img"]}")
+        self.building_ico.change_position((10, 10+self.y_global_offset))
+        
+        self.building_name.place_holder = f"{building.type}"
+        self.building_name.hidden = False
+        self.building_name.update_text_surface()
 
-        y_offset = self.building_ico.rect.height+self.building_level.rect.height
-        self._set_upgrade_button(self.building_ico.rect.height)
-        y_offset += self._set_building_queue(building, y_offset, cell_size)
-        y_offset += self._set_population(building, y_offset, cell_size)
+        self.building_level.text = f"lvl {building.level}"
+        self.building_level.update_text_surface()
 
-    def _set_upgrade_button(self, y_pos: int) -> int:
-        if root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord()).can_be_upgraded():
-            self.upgrade_building_button.change_position((root.interface_size//2+20, y_pos+20))
-            return self.upgrade_building_button.rect.height
-        return 0
+        self._set_building_queue()
+        self._set_population()
+        self.change_position_for_new_screen_sizes()
+
+    def close(self):
+        self.building_name.hidden = True
+        if self.building_name.value != "":
+            self.building.name = self.building_name.value
+            self.building_name.value = ""
     
-    def _set_building_queue(self, building: Building, y_pos: int, cell_size: int) -> int:
+    def _set_building_queue(self):
+        cell_size = root.cell_sizes[root.cell_size_scale][0]
+
         self.buildings_queue = []
         y_offset = 0
 
-        if building.data.get("max_queue", False):
-            self.buildings_queue_name = TextField(root.interface_size//2, root.interface_size//4, position=(10, y_pos+30), text="Queue") #type: ignore
+        if self.building.data.get("max_queue", False):
             y_offset += 2
-            for i in range(building.max_queue): #type: ignore
-                position = (10+(cell_size+10)*i, y_pos+self.buildings_queue_name.rect.height+40)
-                if i < len(building.queue): #type: ignore
-                    self.buildings_queue.append(Icon(cell_size, cell_size, position=position, img=f"data/reciepts/img/{building.queue[i]["img"]}")) #type: ignore
+            for i in range(self.building.max_queue): #type: ignore
+                if i < len(self.building.queue): #type: ignore
+                    self.buildings_queue.append(Icon(cell_size, cell_size, img=f"{self.building.queue[i]["img"]}", spec_path="data/reciepts/img")) #type: ignore
                 else:
-                    self.buildings_queue.append(Icon(cell_size, cell_size, position=position, img="data/reciepts/img/empty.png")) #type: ignore
-            return self.buildings_queue_name.rect.height+40
+                    self.buildings_queue.append(Icon(cell_size, cell_size, img="empty.png", spec_path="data/reciepts/img")) #type: ignore
 
-        self.buildings_queue_name = None
-        return 0
-
-    def _set_population(self, building: Building, y_pos: int, cell_size: int) -> int:
+    def _set_population(self) :
+        cell_size = root.cell_sizes[root.cell_size_scale][0]
         self.buildings_town_population = []
 
-        if building.is_town:
-            self.building_town_population_name = TextField(root.interface_size, root.interface_size//4, text="population *:", position=(10, y_pos+30))
-            y = y_pos+self.building_town_population_name.rect.height+40
-            for group, size in building.town.get_population().items():
-                if len(self.buildings_town_population) > 0:
-                    y += self.buildings_town_population[0].rect.height+10
+        if self.building.is_town:
+            self.building_town_population_name.set_text(f"population *: *{self.building.town.get_sum_population()}")
+            self.building_town_population_name.update_text_surface()
+            for group, size in self.building.town.get_population().items():
                 self.buildings_town_population.append(
-                    TextField(root.interface_size, cell_size, position=(root.interface_size//2, y), text=f"{group} *: *{size}")
+                    TextField(root.interface_size, cell_size, text=f"{group} *: *{size}")
                 )
-            return self.building_town_population_name.rect.height+y
-        self.building_town_population_name = None
-        return 0
-    
-    def open_name_edit(self):
-        pass
-
-    def close_name_edit(self):
-        pass
+                popgroup = self.building.town.get_popgroup(group)
+                if popgroup == None: continue
+                for subgroup, subsize in popgroup.get_population().items():
+                    self.buildings_town_population.append(
+                        TextField(root.interface_size, cell_size, text=f"{subgroup} *: *{sum(subsize)}")
+                    )
 
     #@timeit
     def draw(self):
@@ -93,15 +129,32 @@ class GUIBuildings:
         if root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord()).can_be_upgraded():
             self.upgrade_building_button.draw()
 
-        if self.buildings_queue_name:
+        if self.building.is_workbench or self.building.is_town:
             self.buildings_queue_name.draw()
+            if self.building.is_workbench:
+                self.building_reciept_button.draw()
         for reciept in self.buildings_queue:
             reciept.draw()
-        if root.game_manager.get_chosen_cell().buildings.get("type", False) == "workbench": #type: ignore
-            self.building_reciept_button.draw()
-        if self.building_town_population_name:
+        if self.building.is_town:
             self.building_town_population_name.draw()
             for population in self.buildings_town_population:
                 population.draw()
         
         root.need_update_gui = False
+
+    def move_up(self):
+        if self.y_global_offset < 0:
+            self.y_global_offset += 10
+            self.change_position_for_new_screen_sizes()
+            update_gui()
+
+    def move_down(self):
+        self.y_global_offset -= 10
+        self.change_position_for_new_screen_sizes()
+        update_gui()
+
+    def move_left(self):
+        pass
+
+    def move_right(self):
+        pass

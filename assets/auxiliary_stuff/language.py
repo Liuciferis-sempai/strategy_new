@@ -1,7 +1,6 @@
 from .work_with_files import read_json_file
-#from random import choice
-from assets.root import logger
 from .functions import can_be_int
+import assets.root as root
 
 class Language:
     def __init__(self, language:str):
@@ -12,7 +11,7 @@ class Language:
         self.language = read_json_file(f"data/languages/{language}.json")
     
     def get(self, value: str) -> str:
-        if value == "":
+        if value == "" or can_be_int(value):
             return value
 
         data = ""
@@ -32,7 +31,7 @@ class Language:
             translate = self.language.get(key, "__unknow__")
             if translate == "__unknow__":
                 self.language[key] = key
-                logger.error(f"Key '{key}' not found in language '{self.language_name}'", f"Language.get({key})")
+                root.logger.error(f"Key '{key}' not found in language '{self.language_name}'", f"Language.get({key})")
                 return key
             else:
                 return translate

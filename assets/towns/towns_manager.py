@@ -4,9 +4,15 @@ import assets.root as root
 from assets.root import logger, read_json_file
 from .town import Town
 from .popgroup import PopGroup
+import copy
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from assets.gamemanager import GameManager
 
 class TownManager:
-    def __init__(self):
+    def __init__(self,):
+        
         self.grouptypes: list[dict] = []
         self.towns: list[Town] = []
         self.allowed_town_id = 0
@@ -19,7 +25,7 @@ class TownManager:
                 type = read_json_file(f"data/pops/data/{pawnsfile}")
                 self.grouptypes.append(type)
 
-    def build_town(self, town_: str|dict|Town, coord: tuple[int, int], fraction_id: int) -> Town:
+    def build_town(self, town_: str|dict|Town, coord: tuple[int, int, int], fraction_id: int) -> Town:
         if isinstance(town_, str):
             town = Town(self.allowed_town_id, town_, coord, fraction_id, is_default=False)
         elif isinstance(town_, dict):
@@ -38,10 +44,10 @@ class TownManager:
             logger.error(f"can not create town", f"TownManager.build_town({town_}, {coord}, {fraction_id})")
             return Town()
     
-    def create_pop_group(self, popgroup: str, pop_size: dict = {"aged": 1, "adult": 10, "children": 2}) -> PopGroup:
+    def create_pop_group(self, popgroup: str, pop_size: dict = {"aged": [1], "adult": [2, 5, 3], "children": [1, 1]}) -> PopGroup:
         for group in self.grouptypes:
             if group["name"] == popgroup:
-                return PopGroup(group["name"], group, pop_size.copy())
+                return PopGroup(group["name"], copy.deepcopy(group), pop_size.copy())
 
         logger.error(f"unknow popgroup {popgroup}", f"TownManager.create_pop_group({popgroup}, {pop_size})")
         return PopGroup("unknow", {})
@@ -52,7 +58,7 @@ class TownManager:
                 return town
         return Town()
     
-    def get_town_by_coord(self, coord: tuple[int, int]) -> Town:
+    def get_town_by_coord(self, coord: tuple[int, int, int]) -> Town:
         for town in self.towns:
             if town.coord == coord:
                 return town

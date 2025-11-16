@@ -1,12 +1,13 @@
 import pygame as py
 import assets.root as root
-from assets.auxiliary_stuff.functions import update_gui
+from assets.auxiliary_stuff import update_gui
 
 class ContentBox(py.sprite.Sprite):
-    def __init__(self, width:int=0, height:int=0, color:tuple[int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), value:int=0, img:str="", allowed_range:list[int]|None=[0, 100]):
+    def __init__(self, width:int=0, height:int=0, color:tuple[int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), value:int=0, img:str="", allowed_range:list[int]|None=[0, 100], font_size: int = 20):
         super().__init__()
         self.width = width if width > 0 else root.info_box_size[0]
         self.height = height if height > 0 else root.info_box_size[1]
+        self.font_size = font_size
         self.color = color
         self.position = position
         self.value = value
@@ -28,7 +29,7 @@ class ContentBox(py.sprite.Sprite):
             self.image = py.transform.scale(self.image, (self.width, self.height))
         self.rect = py.Rect(position[0], position[1], self.width, self.height)
 
-        self.font = py.font.Font(None, 20)
+        self.font = py.font.Font(None, font_size)
 
         self.value_surface = self.font.render(str(value), False, (0, 255, 0))
         self.value_rect = self.value_surface.get_rect(topleft=(position[0] - 5, 10))

@@ -1,7 +1,9 @@
 {
     "name": "town",
+    "type": "town",
     "desc": "town_desc",
     "img": "town.png",
+    "category": "town",
     "can_be_builded": false,
     "level": 0,
     "max_hp": 800,
@@ -12,7 +14,9 @@
     "service_cost": {
         "resource_0": 5
     },
-    "type": "town",
+    "speed_of_work_mod": 1,
+    "max_queue": 2,
+    "queue": [],
     "storage_type": "list",
     "storage": [],
     "storage_size": 25

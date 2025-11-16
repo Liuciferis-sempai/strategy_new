@@ -88,3 +88,15 @@ class GUIWriting:
         root.screen.blit(self.submit_button.image, self.submit_button.rect)
 
         root.need_update_gui = False
+    
+    def move_up(self):
+        pass
+
+    def move_down(self):
+        pass
+
+    def move_left(self):
+        pass
+
+    def move_right(self):
+        pass

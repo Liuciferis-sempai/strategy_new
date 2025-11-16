@@ -1,7 +1,9 @@
 {
     "name": "storage",
+    "type": "storage",
     "desc": "storage_desc",
     "img": "storage.png",
+    "category": "storage",
     "can_be_builded": true,
     "level": 0,
     "max_hp": 500,
@@ -12,7 +14,6 @@
     "service_cost": {
         "resource_0": 1
     },
-    "type": "storage",
     "storage_type": "list",
     "storage": [],
     "storage_size": 20,

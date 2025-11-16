@@ -1,6 +1,6 @@
 import os
 import json
-import assets.triggers as tm
+import copy
 from assets.pawns.pawn import Pawn
 from assets import root
 from assets.root import loading, logger
@@ -34,12 +34,57 @@ class JobManager:
                     if job.get("pawn_ids", []) == [] or "any" in job.get("pawn_ids", []) or pawn.id in job.get("pawn_ids", []):
                         return True
         return False
+    
+    def _procces_trigger(self, trigger: dict, job_name: str) -> dict:
+        chosen_cell_coord = root.game_manager.get_chosen_cell_coord()
+        target_coord = root.game_manager.get_target_coord()
 
-    def _replace_target_in_args(self, job: dict, job_id: str, i: int = 0) -> dict:
+        if trigger["args"].get("target_of_action", None) != None:
+            trigger["args"]["target_of_action"] = job_name.replace("with_", "")
+            trigger["args"]["coord"] = target_coord
+        
+        if trigger["args"].get("target_building_coord", None) != None:
+            trigger["args"]["target_building_coord"] = chosen_cell_coord
+
+        return trigger
+    
+    def procces_result(self, job: dict, job_name: str) -> dict:
+        chosen_cell_coord = root.game_manager.get_chosen_cell_coord()
+        target_coord = root.game_manager.get_target_coord()
+    
+        if job["result"]["args"].get("target_building_coord", None) != None:
+            job["result"]["args"]["target_building_coord"] = chosen_cell_coord
+
+        if job["result"]["type"] == "attack":
+            target_name = job_name.split(".")[-1]
+            if target_name in root.game_manager.buildings_manager.get_all_possible_buildings_names():
+                target = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_target_coord())
+            else:
+                target = root.game_manager.pawns_manager.get_pawn_by_coord(target_name, root.game_manager.get_target_coord())
+            job["result"]["args"]["target"] = target
+            job["result"]["args"]["data"] = root.game_manager.get_opened_pawn().attack
+
+        if job["result"]["args"].get("target_of_action", None) != None:
+            target_of_action = job_name.split(".")[-1]
+            job["result"]["args"]["target_of_action"] = target_of_action.replace("with_", "")
+
+        if job["result"]["args"].get("target_cell", None) != None:
+            job["result"]["args"]["target_cell"] = root.game_manager.world_map.get_cell_by_coord(target_coord)
+
+        if job["result"]["args"].get("target_building_str", None) != None:
+            building = root.game_manager.world_map.get_cell_by_coord(chosen_cell_coord).buildings
+            job["result"]["args"]["target_building_str"] = building.get("name", "").replace("scheme:of_", "")
+            job["result"]["args"]["building_coord"] = chosen_cell_coord
+            job["result"]["args"]["building_fraction"] = building.get("fraction_id", -1)
+
+        if "pawn" in root.game_manager.effect_manager.effects[job["result"]["type"]].keys():
+            job["result"]["args"]["pawn"] = root.game_manager.get_opened_pawn()
+
+        return job
+
+    def _replace_target_in_args(self, job: dict, job_id: str) -> dict:
         '''
-        replacing str "target_of_action" in actual target pawn's name and add coord of target pawn's cell
-        if there is no target pawn, then job will return without changes
-        coord can be (-1, -1) if there is no target cell in root file. check it in this case
+        prepares the work result for processing by the effects manager, replacing placeholders with game objects
         '''
         chosen_cell_coord = root.game_manager.get_chosen_cell_coord()
         target_coord = root.game_manager.get_target_coord()
@@ -51,10 +96,19 @@ class JobManager:
         
         if job["trigger"]["args"].get("target_building_coord", None) != None:
             job["result"]["args"]["target_building_coord"] = chosen_cell_coord
+        
+        if job["result"]["type"] == "attack":
+            target_name = job_id.split(".")[-1]
+            if target_name in root.game_manager.buildings_manager.get_all_possible_buildings_names():
+                target = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_target_coord())
+            else:
+                target = root.game_manager.pawns_manager.get_pawn_by_coord(target_name, root.game_manager.get_target_coord())
+            job["result"]["args"]["target"] = target
+            job["result"]["args"]["data"] = root.game_manager.get_opened_pawn().attack
 
         if job["result"]["args"].get("target_of_action", None) != None:
-            job["result"]["args"]["target_of_action"] = job_id.split(".")[-1]
-            job["result"]["args"]["target_of_action"] = job["result"]["args"]["target_of_action"].replace("with_", "")
+            target_of_action = job_id.split(".")[-1]
+            job["result"]["args"]["target_of_action"] = target_of_action.replace("with_", "")
 
         if job["result"]["args"].get("target_cell", None) != None:
             job["result"]["args"]["target_cell"] = root.game_manager.world_map.get_cell_by_coord(target_coord)
@@ -76,16 +130,16 @@ class JobManager:
     def get_job_by_id(self, job_id: str) -> dict:
         job = self.jobs.get(job_id, None)
         if job:
-            return job.copy()
+            return copy.deepcopy(job)
         logger.error(f"job id is not founded {job_id}", f"JobManager.get_job_by_id({job_id})")
-        return {}
+        return {}.copy()
     
     def get_jobs_for_pawn(self, pawn: Pawn) -> list:
         jobs = []
         for job in self.jobs.values():
             if job.get("type", "work") == "work":
                 if self._are_type_or_id_there(job, pawn):
-                    jobs.append(job.copy())
+                    jobs.append(copy.deepcopy(job))
 
         return jobs
 
@@ -99,28 +153,54 @@ class JobManager:
 
         return jobs
     
-    def is_job_available(self, job_id: str, pawn: Pawn) -> bool:
-        job = self.get_job_by_id(self.get_job_id_from_name(job_id))
-        if job:
+    #def is_job_available(self, job_name: str, pawn: Pawn) -> bool:
+    #    job = self.get_job_by_id(self.get_job_id_from_name(job_name))
+    #    if job:
+    #        if self._are_type_or_id_there(job, pawn):
+    #            if isinstance(job["trigger"], dict):
+    #                return self._is_job_available(job, job_name, pawn)
+    #            elif isinstance(job["trigger"], list):
+    #                result = []
+    #                for trigger in job["trigger"]:
+    #                    temp_job = job
+    #                    temp_job["trigger"] = trigger
+    #                    result.append(self._is_job_available(temp_job, job_name, pawn))
+    #                return all(result)
+    #        else:
+    #            logger.warning(f"job type or id is not enable for this job.", f"JobManager.is_job_availible({job_name}, {pawn})")
+    #    else:
+    #        logger.warning(f"job id is not recognized '{self.get_job_id_from_name(job_name)}'", f"JobManager.is_job_available({job_name}, {pawn})")
+    #    return False
+    
+    #def _is_job_available(self, job: dict, job_name: str, pawn: Pawn) -> bool:
+    #    if hasattr(root.game_manager.trigger_manager, job["trigger"]["type"]):
+    #        job = self._replace_target_in_args(job, job_name)
+    #        trigger_func = getattr(root.game_manager.trigger_manager, job["trigger"]["type"])
+    #        return trigger_func(pawn, job["trigger"].get("args", {})) #type: ignore
+    #    return False
+    
+
+    def is_job_available(self, job_name: str, pawn: Pawn) -> bool:
+        job_id = self.get_job_id_from_name(job_name)
+        job = self.get_job_by_id(job_id)
+        if job != {}:
             if self._are_type_or_id_there(job, pawn):
                 if isinstance(job["trigger"], dict):
-                    return self._is_job_available(job, job_id, pawn)
+                    return self._check_job_trigger(job["trigger"], job_name, pawn)
                 elif isinstance(job["trigger"], list):
                     result = []
                     for trigger in job["trigger"]:
-                        temp_job = job
-                        temp_job["trigger"] = trigger
-                        result.append(self._is_job_available(temp_job, job_id, pawn))
+                        result.append(self._check_job_trigger(trigger, job_name, pawn))
                     return all(result)
             else:
-                logger.warning(f"job type or id is not enable for this job.", f"JobManager.is_job_availible({job_id}, {pawn})")
+                logger.warning(f"job type or id is not enable for job {job_id}.", f"JobManager.is_job_availible({job_id}, {pawn})")
         else:
-            logger.warning(f"job id is not recognized '{self.get_job_id_from_name(job_id)}'", f"JobManager.is_job_available({job_id}, {pawn})")
+            logger.warning(f"job id is not recognized '{job_id}'", f"JobManager.is_job_available({job_id}, {pawn})")
         return False
     
-    def _is_job_available(self, job: dict, job_id: str, pawn: Pawn) -> bool:
-        if hasattr(root.game_manager.trigger_manager, job["trigger"]["type"]):
-            job = self._replace_target_in_args(job, job_id)
-            trigger_func = getattr(root.game_manager.trigger_manager, job["trigger"]["type"])
-            return trigger_func(pawn, job["trigger"].get("args", {})) #type: ignore
+    def _check_job_trigger(self, trigger: dict, job_name: str, pawn: Pawn) -> bool:
+        if hasattr(root.game_manager.trigger_manager, trigger["type"]):
+            trigger = self._procces_trigger(trigger, job_name)
+            trigger_func = getattr(root.game_manager.trigger_manager, trigger["type"])
+            return trigger_func(pawn, trigger["args"])
         return False

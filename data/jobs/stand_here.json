@@ -2,10 +2,10 @@
     "id": "stand_here",
     "desc": "",
     "type": "action",
-    "movement_points_cost": 0,
+    "movement_points_cost": "all",
     "pawn_types": ["any"],
     "pawn_ids": ["any"],
     "work_time": 0,
-    "trigger": {"type": "true", "args": {}},
+    "trigger": {"type": "target_is_near", "args": {"target_of_action": "target_of_action", "distance": 1}},
     "result": {"type": "stand_here", "args": {"target_cell": "target_cell"}}
 }

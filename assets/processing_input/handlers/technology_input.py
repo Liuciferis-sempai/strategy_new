@@ -12,15 +12,7 @@ class TechnologyInputProcessor(BasicInputProcessor):
         if self.process_keydown_base(event):
             return
 
-        if event.key == py.K_w:
-            root.game_manager.tech_tree.scroll_up()
-        elif event.key == py.K_s:
-            root.game_manager.tech_tree.scroll_down()
-        elif event.key == py.K_a:
-            root.game_manager.tech_tree.scroll_left()
-        elif event.key == py.K_d:
-            root.game_manager.tech_tree.scroll_right()
-        elif event.key == py.K_ESCAPE:
+        if event.key == py.K_ESCAPE:
             root.change_window_state("game")
     
     #@logger
@@ -32,12 +24,12 @@ class TechnologyInputProcessor(BasicInputProcessor):
         elif event.button == 3:
             root.game_manager.tech_tree.set_none_tech()
         elif event.button == 4:
-            if self.is_shift_pressed:
+            if self.root_processor.is_shift_pressed:
                 root.game_manager.tech_tree.scroll_left()
             else:
                 root.game_manager.tech_tree.scroll_up()
         elif event.button == 5:
-            if self.is_shift_pressed:
+            if self.root_processor.is_shift_pressed:
                 root.game_manager.tech_tree.scroll_right()
             else:
                 root.game_manager.tech_tree.scroll_down()

@@ -5,10 +5,10 @@ import math
 import matplotlib.pyplot as plt
 
 class Town:
-    def __init__(self, id: int = -1, name: str = "Unknow", coord: tuple[int, int] = (-1, -1), fraction_id: int = -1, data: dict = {}, is_default: bool = True):
+    def __init__(self, id: int = -1, name: str = "Unknow", coord: tuple[int, int, int] = (-1, -1, 0), fraction_id: int = -1, data: dict = {}, is_default: bool = True):
         self.id = id
         self.name = name
-        self.coord: tuple[int, int] = coord
+        self.coord: tuple[int, int, int] = coord
         self.is_default = is_default
         if is_default:
             logger.error("created default town", f"Town.__init__({name}, {coord}, {fraction_id}, {data}, {is_default})")
@@ -26,28 +26,41 @@ class Town:
 
         self.population_history: dict[str, list[float]] = {}
         for popgroup in self.popgroups:
-            self.population_history[popgroup.name] = [popgroup.get_population()]
+            self.population_history[popgroup.name] = [popgroup.get_sum_population()]
 
     def __repr__(self):
-        if self.is_default:
+        if not self:
             return f"<Town is default>"
         else:
             return f"<Town {self.name} at {self.coord} | pop: {self.get_sum_population()}>"
+    
+    def __bool__(self) -> bool:
+        return not self.is_default
+    
+    def destroy(self):
+        for building in self.conection:
+            building.deconect()
 
     def check_conection(self):
+        for conection in self.conection:
+            conection.deconect()
         self.conection = []
-        cells = root.game_manager.world_map.get_travel_region(self.coord, self.conection_lenght, True)
+        for group in self.popgroups:
+            group.set_workers(0)
+        cells = root.game_manager.world_map.get_travel_region(self.coord, self.conection_lenght, root.player_id==self.fraction_id)
         for cell, _ in cells.values():
             if cell.buildings != {}:
-                if cell.buildings["fraction_id"] == root.player_id:
-                    self.conection.append(root.game_manager.buildings_manager.get_building_by_coord(cell.coord))
+                if cell.buildings["fraction_id"] == self.fraction_id:
+                    building = root.game_manager.buildings_manager.get_building_by_coord(cell.coord)
+                    self.conection.append(building)
+                    building.conect(self)
 
     def append_popgroup(self, new_popgroup: str|dict):
         if isinstance(new_popgroup, dict):
             for popgroup in self.popgroups:
                 if popgroup.name == new_popgroup["name"]:
                     return
-            self.popgroups.append(PopGroup(new_popgroup["name"], new_popgroup, new_popgroup.get("size", {"aged": 1, "adult": 10, "children": 2})))
+            self.popgroups.append(PopGroup(new_popgroup["name"], new_popgroup, new_popgroup.get("size", {"aged": [1], "adult": [2, 5, 3], "children": [2]})))
         else:
             for popgroup in self.popgroups:
                 if popgroup.name == new_popgroup:
@@ -60,7 +73,7 @@ class Town:
                 popgroup.size["adult"] += popsize.get("adult", 0)
                 popgroup.size["aged"] += popsize.get("aged", 0)
                 if popsize.get("children"):
-                    popgroup.add_new_children(popsize["children"])
+                    popgroup.new_generation(popsize["children"])
                 return f"successfully added new population to {self}"
         self.append_popgroup({"name": new_popgroup, "size": popsize})
         return f"successfully added new population to {self}"
@@ -96,10 +109,8 @@ class Town:
             growth_rate_per_turn = (1 + growth_factor) ** time_factor - 1
             #print(growth_rate_per_turn)
             #logger.info(f"{popgroup.name} in {self} growth up on {growth_rate_per_turn} rate ({popgroup.size * growth_rate_per_turn})", "Town.simulation()")
-            popgroup.add_new_children(popgroup.size["adult"]/2 * growth_rate_per_turn)
-            self.add_in_population_history(popgroup.name, popgroup.get_population())
-            if popgroup.size["children"] < 0 or popgroup.size["adult"] < 0 or popgroup.size["aged"] < 0:
-                self.remove_popgroup(popgroup.name)
+            popgroup.new_generation(sum(popgroup.size["adult"])/2 * growth_rate_per_turn)
+            self.add_in_population_history(popgroup.name, popgroup.get_sum_population())
 
     def add_in_population_history(self, popgroup_name: str, popgroup_population: float):
         self.population_history[popgroup_name].append(popgroup_population)
@@ -116,13 +127,14 @@ class Town:
         
         food_value = self_building.get_food_value_in_storage()
         for building in self.conection:
-            if building.type == "storage":
+            if building.category == "storage":
                 food_value += building.get_food_value_in_storage()
         necessary_food_value = self.get_necessaty_food_value()
 
         if necessary_food_value == 0: return 0
 
         food_ratio = food_value / necessary_food_value
+        if food_ratio == 0: return root.food_sufficiency_factor_frame[0]
         sigmoid = 1 / (1 + math.exp(-3 * (food_ratio - root.food_sufficiency_factor_center)))
         #print("r", food_ratio, food_value, round(necessary_food_value, 4))
         #print("s", sigmoid)
@@ -144,20 +156,39 @@ class Town:
         necessary_food_value = self_building.remove_food_for_value(necessary_food_value)
         if necessary_food_value > 0:
             for building in self.conection:
-                if building.type == "storage":
+                if building.category == "storage":
                     necessary_food_value = building.remove_food_for_value(necessary_food_value)
+                if necessary_food_value <= 0:
+                    return
+    
+    def spawn(self, pawn_type: str):
+        building = root.game_manager.buildings_manager.get_building_by_coord(self.coord)
+        pawn_sample = root.game_manager.pawns_manager.get_pawn_sample_by_type(pawn_type)
+        if len(building.queue) < building.max_queue:
+            time = pawn_sample["cost"]["time"] // building.data["speed_of_work_mod"]
+            if time < 0:
+                time = 1
+            building.add_in_queue(pawn_sample)
+            root.game_manager.turn_manager.add_event_in_queue(time, {"do": "spawn", "event_data": {"type": pawn_type, "coord": self.coord, "fraction_id": self.fraction_id}})
+            root.game_manager.turn_manager.add_event_in_queue(time, {"do": "clear_the_queue", "event_data": {"building": building, "reciept": pawn_sample}})
 
     def get_sum_population(self) -> int:
         population = 0
         for popgroup in self.popgroups:
-            population += popgroup.get_population()
+            population += popgroup.get_sum_population()
         return population
     
     def get_population(self) -> dict:
         population = {}
         for popgroup in self.popgroups:
-            population[popgroup.name] = popgroup.get_population()
+            population[popgroup.name] = popgroup.get_sum_population()
         return population
+    
+    def get_popgroup(self, popgroup_name: str) -> PopGroup|None:
+        for popgroup in self.popgroups:
+            if popgroup.name == popgroup_name:
+                return popgroup
+        return None
     
     def remove_popgroup(self, popgroup_name: str):
         for popgroup in self.popgroups:
