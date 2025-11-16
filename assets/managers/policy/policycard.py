@@ -1,5 +1,5 @@
 import pygame as py
-import root
+from ... import root
 
 class PolicyCard(py.sprite.Sprite):
     def __init__(self, policy_data: dict, pos: tuple[int, int]=(0, 0)):

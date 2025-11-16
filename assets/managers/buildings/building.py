@@ -1,13 +1,13 @@
 from types import UnionType
-import root
-from root import logger
-from auxiliary_stuff import update_gui
+from ... import root
+from ...root import logger
+from ...auxiliary_stuff import update_gui
 from typing import Any, TYPE_CHECKING
 import math
 import copy
+from ...world.cell import Cell
 
 if TYPE_CHECKING:
-    from ...world.cell import Cell
     from ..towns.town import Town
     from ..resources.resource_type import ResourceType
 
@@ -75,7 +75,7 @@ class Building:
             self.prodaction_time = data.get("prodaction_time", 1)
             self.last_prodaction_at = data.get("last_prodaction_at", root.game_manager.turn_manager.turn)
             self.prodaction = data.get("prodaction", {})
-            def produce(self: Building):
+            def produce(self: "Building"):
                 for resource, amout in self.prodaction.items():
                     self.add_resource(resource, amout, "output")
             self.produce = produce
@@ -84,7 +84,7 @@ class Building:
             self.is_town = True
             self.max_queue = data.get("max_queue", 1)
             self.queue = data.get("queue", [])
-            self.town: Town = root.game_manager.town_manager.build_town(self.name, self.coord, self.fraction_id)
+            self.town: "Town" = root.game_manager.town_manager.build_town(self.name, self.coord, self.fraction_id)
 
     def set_inventory(self, data: dict):
         if data.get("storage_type") == "dict":
@@ -277,7 +277,7 @@ class Building:
         if self.get_hp() <= 0:
             self.destroy()
 
-    def conect(self, town: Town):
+    def conect(self, town: "Town"):
         self.conected_with = town
         if self.necessary_workers == {}:
             self.can_work = True

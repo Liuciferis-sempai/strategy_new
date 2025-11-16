@@ -1,6 +1,6 @@
 from .sample import Button
-import root
-from auxiliary_stuff import update_gui
+from ... import root
+from ...auxiliary_stuff import update_gui
 
 class UpgradeBuildingButton(Button):
     def __init__(self, width: int, height: int):

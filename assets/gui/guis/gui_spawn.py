@@ -1,3 +1,4 @@
+import pygame as py
 from ..buttons import *
 from ..infoboxs import *
 from ..contentbox import *
@@ -5,11 +6,11 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import root
-from root import logger
+from ..inputfield import *
+from ... import root
+from ...root import logger
+from ...auxiliary_stuff import timeit, back_window_state
 from typing import Any, TYPE_CHECKING
-import pygame as py
-from auxiliary_stuff import timeit, back_window_state
 
 if TYPE_CHECKING:
     from managers.towns.town import Town
@@ -80,14 +81,14 @@ class GUISpawn:
             ]
         self.change_position_for_new_screen_sizes()
             
-    def _town_has_enought_people(self, town: Town, pawn: dict) -> bool:
+    def _town_has_enought_people(self, town: "Town", pawn: dict) -> bool:
         for pop in town.popgroups:
             if pop.has_enough_quality(pawn["cost"]["people"]["quality"]):
                 if sum(pop.size["adult"]) >= pawn["cost"]["people"]["amout"]:
                     return True
         return False
 
-    def _town_has_enought_resources(self, town: Town, pawn: dict) -> bool:
+    def _town_has_enought_resources(self, town: "Town", pawn: dict) -> bool:
         if root.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], town):
             return True
         for building in town.conection:
@@ -96,7 +97,7 @@ class GUISpawn:
                     return True
         return False
 
-    def _town_has_necessary_buildings(self, town: Town, pawn: dict) -> bool:
+    def _town_has_necessary_buildings(self, town: "Town", pawn: dict) -> bool:
         necessary_buildings = pawn.get("necessaty_buildings", [])
         if necessary_buildings == []:
             return True

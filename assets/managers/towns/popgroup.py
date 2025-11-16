@@ -1,4 +1,4 @@
-import root
+from ... import root
 from random import random
 
 class PopGroup:

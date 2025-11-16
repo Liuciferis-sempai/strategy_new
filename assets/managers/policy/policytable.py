@@ -1,8 +1,8 @@
 import os
-from auxiliary_stuff import read_json_file, update_gui
+from ...auxiliary_stuff import read_json_file, update_gui
 from .policycard import PolicyCard
-import root
-from root import logger, loading
+from ... import root
+from ...root import logger, loading
 
 class PolicyTable:
     def __init__(self):

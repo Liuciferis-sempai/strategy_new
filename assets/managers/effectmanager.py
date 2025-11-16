@@ -1,33 +1,32 @@
 from typing import Any, TYPE_CHECKING
-import root
-from root import logger
+from .. import root
+from ..root import logger
 
-if TYPE_CHECKING:
-    from world.cell import Cell
-    from .pawns.pawn import Pawn
-    from .buildings.building import Building
-    from .policy.policytable import PolicyCard
-    from .towns.town import Town
+from ..world.cell import Cell
+from .pawns.pawn import Pawn
+from .buildings.building import Building
+from .policy.policytable import PolicyCard
+from .towns.town import Town
 
 class EffectManager:
     def __init__(self):
         self.effects: dict[str, dict[str, Any]] = {
-            "clear_the_queue": {"building": Building, "reciept": dict},
-            "restore_movement_points": {"pawn": Pawn},
-            "add_resource": {"pawn": Pawn, "building": Building, "resource": str, "amout": int}, #pawn and building are mutually exclusive
-            "take_resource": {"pawn": Pawn, "building": Building, "resource": str, "anout": int}, #pawn and building are mutually exclusive
+            "clear_the_queue": {"building": "Building", "reciept": dict},
+            "restore_movement_points": {"pawn": "Pawn"},
+            "add_resource": {"pawn": "Pawn", "building": "Building", "resource": str, "amout": int}, #pawn and building are mutually exclusive
+            "take_resource": {"pawn": "Pawn", "building": "Building", "resource": str, "anout": int}, #pawn and building are mutually exclusive
             "open_share_menu": {"target": str},
-            "stand_here": {"pawn": Pawn, "target_cell": Cell},
+            "stand_here": {"pawn": "Pawn", "target_cell": "Cell"},
             "build_scheme": {"target_building_str": str, "building_coord": tuple[int, int], "building_fraction": int},
             "spawn": {"coord": tuple[int, int], "type": str|dict, "fraction_id": int},
             "build": {"coord": tuple[int, int], "type": str|dict, "fraction_id": int},
-            "change_cell": {"cell": Cell, "coord": tuple[int, int], "new_type": str}, #cell and coord are mutually exclusive
+            "change_cell": {"cell": "Cell", "coord": tuple[int, int], "new_type": str}, #cell and coord are mutually exclusive
             "open_area": {"start_coord": tuple[int, int], "end_coord": tuple[int, int]},
             "show_statistic": {"coord": tuple[int, int]},
             "add_policy": {"fraction_id": int, "policy": str|dict|PolicyCard},
             "remove_policy": {"fraction_id": int, "policy": str|dict|PolicyCard},
-            "add_popgroup": {"town": Town, "popgroup_name": str, "size": dict},
-            "remove_popgroup": {"town": Town, "popgroup_name": str, "size": dict|str},
+            "add_popgroup": {"town": "Town", "popgroup_name": str, "size": dict},
+            "remove_popgroup": {"town": "Town", "popgroup_name": str, "size": dict|str},
             "create_fraction": {"name": str, "type": str, "data": dict},
             "attack": {"target": Pawn|Building, "data": dict}
         }
@@ -80,22 +79,22 @@ class EffectManager:
         logger.info(do_answer, f"EffectManager.do(...)")
         return do_answer
 
-    def cleat_the_queue(self, building: Building, reciept: dict) -> str:
+    def cleat_the_queue(self, building: "Building", reciept: dict) -> str:
         return building.remove_from_queue(reciept)
     
-    def restore_movement_points(self, pawn: Pawn) -> str:
+    def restore_movement_points(self, pawn: "Pawn") -> str:
         return root.game_manager.pawns_manager.restore_movement_points(pawn)
     
-    def add_resource_to_pawn(self, pawn: Pawn, resource: str, amout: int) -> str:
+    def add_resource_to_pawn(self, pawn: "Pawn", resource: str, amout: int) -> str:
         return root.game_manager.pawns_manager.add_resource(pawn, resource, amout)
 
-    def add_resource_to_building(self, building: Building, resource: str, amout: int) -> str:
+    def add_resource_to_building(self, building: "Building", resource: str, amout: int) -> str:
         return root.game_manager.buildings_manager.add_resources(building, resource, amout)
 
-    def remove_resource_from_pawn(self, pawn: Pawn, resource: str, amout: int) -> str:
+    def remove_resource_from_pawn(self, pawn: "Pawn", resource: str, amout: int) -> str:
         return root.game_manager.pawns_manager.remove_resource(pawn, resource, amout)
     
-    def remove_resource_from_building(self, building: Building, resource: str, amout: int) -> str:
+    def remove_resource_from_building(self, building: "Building", resource: str, amout: int) -> str:
         return root.game_manager.buildings_manager.remove_resource(building, resource, amout)
     
     def open_share_menu(self, target_of_action: str) -> str:
@@ -103,7 +102,7 @@ class EffectManager:
         root.game_manager.gui.sharemenu.open(target_of_action)
         return f"opened share menu with {target_of_action}"
     
-    def stand_here(self, pawn: Pawn, target_cell: Cell) -> str:
+    def stand_here(self, pawn: "Pawn", target_cell: "Cell") -> str:
         return root.game_manager.pawns_manager.move_pawn(pawn, target_cell)
     
     def build_scheme(self, target_building_str: str, building_coord: tuple[int, int, int], building_fraction: int) -> str:

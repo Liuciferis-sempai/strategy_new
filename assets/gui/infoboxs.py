@@ -1,6 +1,6 @@
 from typing import Any
 import pygame as py
-import root
+from .. import root
 
 class InfoBox(py.sprite.Sprite):
     def __init__(self, title:str="Title", text:str="Description", width:int=0, height:int=0, color:tuple[int, int, int]=(255, 255, 255), font_size:int=40, position:tuple[int, int]=(5, 5)):

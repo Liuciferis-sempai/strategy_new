@@ -1,11 +1,10 @@
-import root
-from root import logger
+from .. import root
+from ..root import logger
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from .pawns.pawn import Pawn
-    from .buildings.building import Building
-    from .towns.town import Town
+from .buildings.building import Building
+from .pawns.pawn import Pawn
+from .towns.town import Town
 
 class TriggerManager:
     def __init__(self):
@@ -64,7 +63,7 @@ class TriggerManager:
     def true(self, *args, **kwargs) -> bool:
         return True
     
-    def stand_on_cell(self, pawn: Pawn, args: dict) -> bool:
+    def stand_on_cell(self, pawn: "Pawn", args: dict) -> bool:
         cell = root.game_manager.world_map.get_cell_by_coord(pawn.coord)
         result = False
         if args.get("cell_type", False):
@@ -81,7 +80,7 @@ class TriggerManager:
                         return False
         return result
     
-    def target_is_near(self, pawn: Pawn, args: dict) -> bool:
+    def target_is_near(self, pawn: "Pawn", args: dict) -> bool:
         target = root.game_manager.world_map.get_cell_by_coord(args["coord"])
         distance = args["distance"]
 
@@ -96,7 +95,7 @@ class TriggerManager:
             logger.warning(f"target is not recognized. target coord {args['coord']}", f"TriggerManager.target_is_near({pawn}, {args})")
         return False
 
-    def compare_inventory(self, pawn: Pawn, args: dict) -> bool:
+    def compare_inventory(self, pawn: "Pawn", args: dict) -> bool:
         building = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
         if building.is_scheme:
             total = {}

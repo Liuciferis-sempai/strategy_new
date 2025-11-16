@@ -1,6 +1,6 @@
 import pygame as py
-import root
-from gui.textfield import TextField
+from .. import root
+from ..gui.textfield import TextField
 
 class Messenger:
     def __init__(self, font_size: int = 25, font_color: dict[str, tuple[int, int, int]] = {"info": (255, 255, 255), "warning": (255, 0, 0)}, bg_color: tuple[int, int, int]|tuple[int, int, int, int] = (10, 10, 10, 100), position: tuple[int, int] = (10, 10), line_lifespan: int = 5):

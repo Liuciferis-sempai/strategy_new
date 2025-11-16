@@ -1,8 +1,8 @@
 import os
-from auxiliary_stuff import read_json_file
+from ...auxiliary_stuff import read_json_file
 from .resource_type import ResourceType
-import root
-from root import loading, logger
+from ... import root
+from ...root import loading, logger
 
 class ResourceManager:
     def __init__(self):

@@ -1,10 +1,8 @@
 from .fraction import Fraction
-import root
-from root import logger
+from ... import root
+from ...root import logger
 from typing import Any, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..policy.policycard import PolicyCard
+from ..policy.policycard import PolicyCard
 
 class FractionManager:
     def __init__(self):

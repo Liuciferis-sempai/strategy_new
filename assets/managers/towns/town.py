@@ -1,5 +1,5 @@
-import root
-from root import logger
+from ... import root
+from ...root import logger
 from .popgroup import PopGroup
 import math
 import matplotlib.pyplot as plt
@@ -173,7 +173,7 @@ class Town:
                 time = 1
             building.add_in_queue(pawn_sample)
             root.game_manager.turn_manager.add_event_in_queue(time, {"do": "spawn", "event_data": {"type": pawn_type, "coord": self.coord, "fraction_id": self.fraction_id}})
-            root.game_manager.turn_manager.add_event_in_queue(time, {"do": "clear_the_queue", "event_data": {"building": building, "reciept": pawn_sample}})
+            root.game_manager.turn_manager.add_event_in_queue(time, {"do": "clear_the_queue", "event_data": {"building": "Building", "reciept": pawn_sample}})
 
     def get_sum_population(self) -> int:
         population = 0

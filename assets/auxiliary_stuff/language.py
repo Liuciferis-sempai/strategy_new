@@ -1,6 +1,6 @@
 from .work_with_files import read_json_file
 from .functions import can_be_int
-import root
+from .. import root
 
 class Language:
     def __init__(self, language:str):

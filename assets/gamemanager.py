@@ -70,7 +70,7 @@ class GameManager:
         self.gui.change_position_for_new_screen_sizes()
         self.gui.policy.update_positions()
 
-    def set_chosen_cell(self, new_chosen_cell: Cell):
+    def set_chosen_cell(self, new_chosen_cell: "Cell"):
         logger.info(f"chosen cell changed from {self.chosen_cell} to {new_chosen_cell}", f"Game.set_chosen_cell({new_chosen_cell})")
         self.chosen_cell = new_chosen_cell
         self.chosen_cell_coord = self.chosen_cell.coord

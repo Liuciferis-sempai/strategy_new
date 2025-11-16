@@ -1,5 +1,5 @@
 import pygame as py
-import root
+from ... import root
 
 class Tech(py.sprite.Sprite):
     def __init__(self, tech_data: dict):

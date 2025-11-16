@@ -1,6 +1,6 @@
 from .sample import Button
-import root
-from auxiliary_stuff.functions import update_gui
+from ... import root
+from ...auxiliary_stuff.functions import update_gui
 
 class FractionNameEditButton(Button):
     def __init__(self):

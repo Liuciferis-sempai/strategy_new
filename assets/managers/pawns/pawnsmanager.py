@@ -1,17 +1,15 @@
 import os
 import copy
-from auxiliary_stuff import read_json_file
+from ...auxiliary_stuff import read_json_file
 from .pawn import Pawn
-import root
+from ... import root
 from typing import Any, TYPE_CHECKING
-from root import loading, logger
-
-if TYPE_CHECKING:
-    from world.cell import Cell
+from ...root import loading, logger
+from ...world.cell import Cell
 
 class PawnsManager:
     def __init__(self):
-        self._default_pawn: Pawn = Pawn()
+        self._default_pawn: "Pawn" = Pawn()
 
         self.pawns: list[Pawn] = []
         self.pawns_types: list[str] = []
@@ -185,6 +183,7 @@ class PawnsManager:
             if not self._process_pawn_movement_point_for_job(job, job_id, pawn): return #if pawn has not enought movements points
 
             self._execute_job(job, job_name)
+            root.game_manager.turn_manager.add_event_in_queue(job["work_time"] if job["work_time"] > 0 else 1, {"do": "restore_movement_points", "event_data": {"pawn": pawn}})
             
             root.game_manager.world_map.unmark_region("for_move")
             root.game_manager.gui.close_all_extra_windows()
@@ -210,10 +209,9 @@ class PawnsManager:
                     logger.warning(f"Pawn '{pawn.id}' cannot do job '{job_id}' due to insufficient movement points.", f"PawnsManager.do_job({pawn}, {job_id})")
                     return False
                 pawn.data["movement_points"] -= job["movement_points_cost"]
-                root.game_manager.turn_manager.add_event_in_queue(job["work_time"], {"do": "restore_movement_points", "event_data": {"pawn": pawn}})
         return True
     
-    #def do_job(self, pawn: Pawn, job_id:str):
+    #def do_job(self, pawn: "Pawn", job_id:str):
     #    if root.game_manager.job_manager.is_job_available(job_id, pawn):
     #        job = root.game_manager.job_manager.get_job_by_id(root.game_manager.job_manager.get_job_id_from_name(job_id))
     #        if job != None:
@@ -231,7 +229,7 @@ class PawnsManager:
     #                        return
     #
     #            root.game_manager.turn_manager.add_event_in_queue(job["work_time"], {"do": result["type"], "event_data": result["args"]}) #job event
-    #            root.game_manager.turn_manager.add_event_in_queue(job["work_time"], {"do": "restore_movement_points", "event_data": {"pawn": pawn}}) #pawn movement points event
+    #            root.game_manager.turn_manager.add_event_in_queue(job["work_time"], {"do": "restore_movement_points", "event_data": {"pawn": "Pawn"}}) #pawn movement points event
     #
     #            root.game_manager.world_map.unmark_region("for_move")
     #

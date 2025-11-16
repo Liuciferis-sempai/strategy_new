@@ -1,4 +1,5 @@
 import pygame as py
+from .. import root
 
 class Loading:
     def __init__(self):

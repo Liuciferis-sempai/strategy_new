@@ -1,3 +1,4 @@
+import pygame as py
 from ..buttons import *
 from ..infoboxs import *
 from ..contentbox import *
@@ -6,12 +7,12 @@ from ..textfield import *
 from ..iconbox import *
 from ..listof import *
 from ..inputfield import *
-import root
+from ... import root
+from ...root import logger
+from ...auxiliary_stuff import timeit
 from typing import Any, TYPE_CHECKING
-from auxiliary_stuff import timeit
 
-if TYPE_CHECKING:
-    from managers.buildings.building import Building
+from ...managers.buildings.building import Building
 
 class GUIBuildings:
     def __init__(self):

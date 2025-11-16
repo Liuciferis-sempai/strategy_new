@@ -1,3 +1,4 @@
+import pygame as py
 from ..buttons import *
 from ..infoboxs import *
 from ..contentbox import *
@@ -5,8 +6,11 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import root
-from root import logger
+from ..inputfield import *
+from ... import root
+from ...root import logger
+from ...auxiliary_stuff import timeit
+from typing import Any, TYPE_CHECKING
 
 class GUIWriting:
     def __init__(self):

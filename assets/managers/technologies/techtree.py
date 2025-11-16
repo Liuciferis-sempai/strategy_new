@@ -1,9 +1,9 @@
-from auxiliary_stuff import read_json_file, update_gui
+from ...auxiliary_stuff import read_json_file, update_gui
 import pygame as py
 import os
-import root
+from ... import root
 from .tech import Tech
-from root import loading
+from ...root import loading
 
 class Link(py.sprite.Sprite):
     def __init__(self, prerequisite: Tech, tech: Tech):

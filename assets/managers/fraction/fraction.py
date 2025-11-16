@@ -1,5 +1,5 @@
 import random
-from root import logger
+from ...root import logger
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:

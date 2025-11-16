@@ -2,11 +2,9 @@ import os
 import json
 import copy
 from typing import Any, TYPE_CHECKING
-import root
-from root import loading, logger
-
-if TYPE_CHECKING:
-    from .pawns.pawn import Pawn
+from .. import root
+from ..root import loading, logger
+from .pawns.pawn import Pawn
 
 class JobManager:
     def __init__(self):
@@ -156,7 +154,7 @@ class JobManager:
 
         return jobs
     
-    #def is_job_available(self, job_name: str, pawn: Pawn) -> bool:
+    #def is_job_available(self, job_name: str, pawn: "Pawn") -> bool:
     #    job = self.get_job_by_id(self.get_job_id_from_name(job_name))
     #    if job:
     #        if self._are_type_or_id_there(job, pawn):
@@ -175,7 +173,7 @@ class JobManager:
     #        logger.warning(f"job id is not recognized '{self.get_job_id_from_name(job_name)}'", f"JobManager.is_job_available({job_name}, {pawn})")
     #    return False
     
-    #def _is_job_available(self, job: dict, job_name: str, pawn: Pawn) -> bool:
+    #def _is_job_available(self, job: dict, job_name: str, pawn: "Pawn") -> bool:
     #    if hasattr(root.game_manager.trigger_manager, job["trigger"]["type"]):
     #        job = self._replace_target_in_args(job, job_name)
     #        trigger_func = getattr(root.game_manager.trigger_manager, job["trigger"]["type"])
@@ -183,7 +181,7 @@ class JobManager:
     #    return False
     
 
-    def is_job_available(self, job_name: str, pawn: Pawn) -> bool:
+    def is_job_available(self, job_name: str, pawn: "Pawn") -> bool:
         job_id = self.get_job_id_from_name(job_name)
         job = self.get_job_by_id(job_id)
         if job != {}:
@@ -201,7 +199,7 @@ class JobManager:
             logger.warning(f"job id is not recognized '{job_id}'", f"JobManager.is_job_available({job_id}, {pawn})")
         return False
     
-    def _check_job_trigger(self, trigger: dict, job_name: str, pawn: Pawn) -> bool:
+    def _check_job_trigger(self, trigger: dict, job_name: str, pawn: "Pawn") -> bool:
         if hasattr(root.game_manager.trigger_manager, trigger["type"]):
             trigger = self._procces_trigger(trigger, job_name)
             trigger_func = getattr(root.game_manager.trigger_manager, trigger["type"])

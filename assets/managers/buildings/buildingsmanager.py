@@ -1,13 +1,13 @@
 import os
-from auxiliary_stuff import read_json_file
+from ...auxiliary_stuff import read_json_file
 from .building import Building
-import root
-from world.cell import Cell
-from root import loading, logger
+from ... import root
+from ...world.cell import Cell
+from ...root import loading, logger
 
 class BuildingsManager:
     def __init__(self):
-        self._default_building: Building = Building()
+        self._default_building: "Building" = Building()
          
         self.buildings: dict[str, Building] = {}
         self.types_of_buildings: list[dict] = []
@@ -98,14 +98,14 @@ class BuildingsManager:
         cell = root.game_manager.world_map.get_cell_by_coord(coord)
         cell.remove_building()
 
-    def _add_to_fraction(self, building: Building, fraction_id: int):
+    def _add_to_fraction(self, building: "Building", fraction_id: int):
         fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         fraction.statistics["building_count"] += 1
         fraction.buildings.append(building)
         if building.category == "producer":
             fraction.production["buildings"].append(building)
     
-    def _remove_from_fraction(self, building: Building, fraction_id: int):
+    def _remove_from_fraction(self, building: "Building", fraction_id: int):
         fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         fraction.statistics["building_count"] -= 1 #type: ignore
         fraction.buildings.remove(building)
@@ -165,7 +165,7 @@ class BuildingsManager:
 
         return buildings_by_types
     
-    def try_to_build_on_cell(self, cell: Cell):
+    def try_to_build_on_cell(self, cell: "Cell"):
         if self.buildings.get(str(cell.coord), None) == None:
             self.build_scheme(root.game_manager.gui.game.sticked_object.img.replace(".png", ""), cell.coord, root.player_id) #type: ignore
         

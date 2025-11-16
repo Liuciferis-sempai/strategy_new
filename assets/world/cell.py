@@ -1,6 +1,6 @@
 import pygame as py
-import root
-from root import logger
+from .. import root
+from ..root import logger
 from copy import deepcopy
 
 class Cell(py.sprite.Sprite):
@@ -78,7 +78,7 @@ class Cell(py.sprite.Sprite):
         if root.player_id == self.pawns[self.chosen_pawn_index].get("fraction_id"):
             root.game_manager.set_opened_pawn(self.pawns[self.chosen_pawn_index])
             root.game_manager.gui.game.open_pawn()
-            root.game_manager.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), self.pawns[self.chosen_pawn_index].get("movement_points", 1))
+            root.game_manager.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), pawn.data["movement_points"])
 
     def _open_building(self):
         if self.buildings.get("fraction_id") == root.player_id:

@@ -1,5 +1,5 @@
-import root
-from root import logger
+from .. import root
+from ..root import logger
 
 class TurnManager:
     def __init__(self):

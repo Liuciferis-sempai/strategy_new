@@ -1,7 +1,7 @@
-import root
+from .. import root
 import os
-from auxiliary_stuff import read_json_file
-from root import loading, logger
+from ..auxiliary_stuff import read_json_file
+from ..root import loading, logger
 import copy
 
 class RecieptsManager:
@@ -55,8 +55,8 @@ class RecieptsManager:
                         for resource, amout in reciept["necessary"].values():
                             root.game_manager.buildings_manager.remove_resource(building, resource, amout)
                         for resource, amout in reciept["production"]:
-                            root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "add_resource", "event_data": {"building": building, "resource": resource, "amout": amout}})
-                        root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "clear_the_queue", "event_data": {"building": building, "reciept": reciept}})
+                            root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "add_resource", "event_data": {"building": "Building", "resource": resource, "amout": amout}})
+                        root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "clear_the_queue", "event_data": {"building": "Building", "reciept": reciept}})
                         building.add_in_queue(reciept.copy())
                         logger.info(f"added reciept {reciept["id"]} in queue for {building}", f"RecieptManager.use_reciept({reciept_id})")
                         return

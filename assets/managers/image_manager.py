@@ -1,7 +1,7 @@
 import pygame as py
-import root
+from .. import root
 import os
-from root import loading, logger
+from ..root import loading, logger
 
 class ImageManager:
     def __init__(self):

@@ -1,12 +1,12 @@
 #from typing import Any
 import pygame as py
-import root
+from .. import root
 from .cell import Cell
 from .river import River
 from random import randint, seed, choice, uniform, random
 import os
-from auxiliary_stuff import read_json_file, timeit, update_gui
-from root import loading, logger
+from ..auxiliary_stuff import read_json_file, timeit, update_gui
+from ..root import loading, logger
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -35,6 +35,7 @@ class WorldMap(py.sprite.Sprite):
         self.cells_on_screen: list[Cell] = []
         self.marked_region: dict[str, list[Cell]] = {}
 
+        self.rivers: list[River] = []
         self.terrain: dict[str, list[list[Cell]]] = {}
         self.types_of_land = []
         self.types_of_flora = []
@@ -53,7 +54,7 @@ class WorldMap(py.sprite.Sprite):
                 self._process_click(cell, mouse_button)
                 return
     
-    def _process_click(self, cell: Cell, mouse_button: int):
+    def _process_click(self, cell: "Cell", mouse_button: int):
         if mouse_button == 1:
             if root.game_manager.gui.game.sticked_object != None:
                 self._process_lmb_click_with_sticked_object(cell)
@@ -66,10 +67,10 @@ class WorldMap(py.sprite.Sprite):
             else:
                 self._process_rmb_click_usual(cell)
 
-    def _process_lmb_click_with_sticked_object(self, cell: Cell):
+    def _process_lmb_click_with_sticked_object(self, cell: "Cell"):
         root.game_manager.buildings_manager.try_to_build_on_cell(cell)
 
-    def _process_lmb_click_usual(self, cell: Cell):
+    def _process_lmb_click_usual(self, cell: "Cell"):
         if not root.game_manager.is_chosen_cell_default():
             if not root.game_manager.is_opened_pawn_default():
                 if root.game_manager.get_opened_pawn_coord() != cell.coord:
@@ -84,7 +85,7 @@ class WorldMap(py.sprite.Sprite):
 
         self._click_at_cell(cell)
 
-    def _process_rmb_click_usual(self, cell: Cell):
+    def _process_rmb_click_usual(self, cell: "Cell"):
         if not root.game_manager.is_opened_pawn_default():
             if root.game_manager.get_opened_pawn_coord() == cell.coord:
                 self.unchose_cell()
@@ -97,7 +98,7 @@ class WorldMap(py.sprite.Sprite):
                         root.game_manager.set_target_coord(cell.coord)
                         root.game_manager.gui.game.show_actions(cell.pawns, cell.buildings)
 
-    def _click_at_cell(self, cell: Cell):
+    def _click_at_cell(self, cell: "Cell"):
         cell.click()
         cell.mark((255, 0, 0, 250))
         self._draw_cell(cell)
@@ -214,7 +215,7 @@ class WorldMap(py.sprite.Sprite):
             root.game_manager.gui.game.main_info_window_content.draw()
         #logger.info(f"drawn {len(self.cells_on_screen)}", "WorldMap.draw()")
     
-    def _draw_cell(self, cell: Cell):
+    def _draw_cell(self, cell: "Cell"):
         cell_position = cell.rect.topleft
         cell_position = (cell_position[0] + self.x_offset, cell_position[1] + self.y_offset)
         cell.draw(cell_position, self.image, self.display_mode)
@@ -286,7 +287,7 @@ class WorldMap(py.sprite.Sprite):
             
         return visited
     
-    def _add_mark(self, cell: Cell, type_:str):
+    def _add_mark(self, cell: "Cell", type_:str):
         if type_ not in self.marked_region:
             self.marked_region[type_] = []
         if cell not in self.marked_region[type_]:
@@ -401,11 +402,12 @@ class WorldMap(py.sprite.Sprite):
         self.right_limit = (root.world_map_size[0]-1)*root.cell_sizes[root.cell_size_scale][0]+(root.world_map_size[0]-1)*5
 
         #river generation
+        self.rivers = []
         for _ in range(root.river_count):
             if random() > 0.3:
-                River((0, 0, randint(0, root.world_map_size[1])), self)
+                self.rivers.append(River((0, 0, randint(0, root.world_map_size[1])), self))
             else:
-                River((0, randint(0, root.world_map_size[0]), randint(0, root.world_map_size[1])), self)
+                self.rivers.append(River((0, randint(0, root.world_map_size[0]), randint(0, root.world_map_size[1])), self))
         seed(None)
         update_gui()
 

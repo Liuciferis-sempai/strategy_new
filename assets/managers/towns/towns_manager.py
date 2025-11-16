@@ -1,13 +1,12 @@
 import pygame as py
 import os
-import root
-from root import logger, read_json_file
+from ... import root
+from ...root import logger, read_json_file
 from .popgroup import PopGroup
 import copy
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from .town import Town
+from .town import Town
 
 class TownManager:
     def __init__(self,):

@@ -1,15 +1,14 @@
 import pygame as py
 from typing import Any, TYPE_CHECKING
-import root
-from root import logger
-from world.cell import Cell
-from auxiliary_stuff import update_gui, can_be_int
-from gui.inputfield import InputField
-from gui.textfield import TextField
+from .. import root
+from ..root import logger
+from ..world.cell import Cell
+from ..auxiliary_stuff import update_gui, can_be_int
+from ..gui.inputfield import InputField
+from ..gui.textfield import TextField
 
-if TYPE_CHECKING:
-    from managers.pawns.pawn import Pawn
-    from managers.buildings.building import Building
+from ..managers.pawns.pawn import Pawn
+from ..managers.buildings.building import Building
 
 class CommandLine(py.sprite.Sprite):
     _translate = {
@@ -246,7 +245,7 @@ class CommandLine(py.sprite.Sprite):
 
     def _process_popgroup_command(self, effect_name: str, splited_command: list[str]):
         town = root.game_manager.town_manager.get_town_by_coord(self._process_coord({"coord": "coord"}, splited_command[0], {})["coord"])
-        effect_data = {"town": town, "size": {}, "popgroup_name": splited_command[1]}
+        effect_data = {"town": "Town", "size": {}, "popgroup_name": splited_command[1]}
         command = self._generate_command(splited_command[2:])
 
         for entry in command:

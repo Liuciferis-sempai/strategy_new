@@ -1,6 +1,6 @@
 import pygame as py
-import root
-from root import logger
+from ... import root
+from ...root import logger
 
 class Pawn:
     def __init__(self, id: int= -1, coord: tuple[int, int, int]=(0, 0, 0), data: dict= {}, is_default: bool=True):

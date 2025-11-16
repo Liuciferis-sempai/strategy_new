@@ -1,6 +1,6 @@
 import pygame as py
-import root
-from processing_input.basic_input_process import BasicInputProcessor
+from ... import root
+from ..basic_input_process import BasicInputProcessor
 
 class RecieptInputProcessor(BasicInputProcessor):
     def __init__(self, root_prcessor_input):

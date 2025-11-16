@@ -1,6 +1,6 @@
 import datetime
 import time
-import root as root
+from .. import root
 import pygame as py
 
 # Threshold in seconds: only log timing info if function runs longer than this
