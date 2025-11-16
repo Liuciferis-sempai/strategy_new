@@ -1,11 +1,12 @@
 import pygame as py
 import assets.root as root
 from assets.root import logger
+from copy import deepcopy
 
 class Cell(py.sprite.Sprite):
     def __init__(self, position: tuple[int, int]=(-1, -1), coord: tuple[int, int, int]=(-1, -1, 0), data: dict={"type": "field", "desc": "field_desc", "temperature": 0.5, "height": 0.5, "humidity": 0.5, "soil_fertility": 0.5}, is_default: bool=True):
         super().__init__()
-        self.data = data.copy()
+        self.data = deepcopy(data)
         self.position = position
         self.coord: tuple[int, int, int] = coord
         self.is_opened = False
@@ -39,7 +40,7 @@ class Cell(py.sprite.Sprite):
     def __bool__(self) -> bool:
         return not self.is_default
 
-    def click(self, mouse_pos: tuple[int, int]):
+    def click(self):
         root.game_manager.set_chosen_cell(self)
         if self.pawns != []:
             self.chosen_pawn_index += 1

@@ -17,10 +17,11 @@ class SpawnInputProcessor(BasicInputProcessor):
     
     #@logger
     def process_mousebuttondown(self, event:py.event.Event):
-        if self.process_mousebutton_for_inputfield(event): return root.update_gui()
         mouse_pos = event.pos
+        rel_mouse_pos = (mouse_pos[0], mouse_pos[1]+root.game_manager.gui.spawn.y_offset)
+        if self.process_mousebutton_for_inputfield(rel_mouse_pos): return root.update_gui()
+        
         if event.button == 1:
-            rel_mouse_pos = (mouse_pos[0], mouse_pos[1]+root.game_manager.gui.spawn.y_offset)
             for button in root.game_manager.gui.spawn.buttons:
                 if button.rect.collidepoint(rel_mouse_pos):
                     button.click()

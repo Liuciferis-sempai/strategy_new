@@ -48,7 +48,7 @@ class GUISpawn:
             back_window_state()
             return
         town = opened_building.town
-        pawns = root.game_manager.pawns_manager.get_all_pawns_sample()
+        pawns = root.game_manager.pawns_manager.get_all_pawns_sample_for_fraction(root.player_id)
 
         self.spawns = []
         for pawn in pawns:

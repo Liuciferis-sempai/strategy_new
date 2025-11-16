@@ -31,8 +31,13 @@ class PawnsManager:
     def get_all_pawns_types(self) -> list[str]:
         return self.pawns_types
     
-    def get_all_pawns_sample(self) -> list[dict]:
-        return self.types_of_pawns
+    def get_all_pawns_sample_for_fraction(self, fraction_id: int) -> list[dict]:
+        samples = []
+        fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
+        for sample in self.types_of_pawns:
+            if sample["type"] in fraction.allowed_pawns:
+                samples.append(copy.deepcopy(sample))
+        return samples
     
     def get_pawn_sample_by_type(self, pawn_type: str) -> dict:
         for type in self.types_of_pawns:

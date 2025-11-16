@@ -16,8 +16,9 @@ class FractionInputProcessor(BasicInputProcessor):
 
     #@logger
     def process_mousebuttondown(self, event:py.event.Event):
-        if self.process_mousebutton_for_inputfield(event): return root.update_gui()
         mouse_pos = event.pos
+        if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
+        
         if root.game_manager.gui.fraction.fraction_name_edit_button.rect.collidepoint(mouse_pos):
                 root.game_manager.gui.fraction.fraction_name_edit_button.click()
         root.update_gui()

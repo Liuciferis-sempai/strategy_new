@@ -13,9 +13,9 @@ class BasicInputProcessor:
                 return True
         return False
 
-    def process_mousebutton_for_inputfield(self, event:py.event.Event) -> bool:
+    def process_mousebutton_for_inputfield(self, mouse_pos: tuple[int, int]) -> bool:
         for inputfield in root.game_manager.input_fields:
-            if inputfield.rect.collidepoint(event.pos):
+            if inputfield.rect.collidepoint(mouse_pos) and not inputfield.hidden:
                 inputfield.click()
                 return True
         root.input_field_active = False

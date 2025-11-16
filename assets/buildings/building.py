@@ -61,7 +61,6 @@ class Building:
         self.is_town = False
 
         if data.get("category", False) == "workbench":
-            if self.is_workbench: return
             self.is_workbench = True
             self.max_queue = data.get("max_queue", 1)
             self.queue = data.get("queue", [])
@@ -70,7 +69,6 @@ class Building:
                     self.add_in_queue(item)
 
         elif data.get("category", False) == "producer":
-            if self.is_producer: return
             self.is_producer = True
             self.prodaction_time = data.get("prodaction_time", 1)
             self.last_prodaction_at = data.get("last_prodaction_at", root.game_manager.turn_manager.turn)
@@ -81,7 +79,6 @@ class Building:
             self.produce = produce
 
         elif data.get("category", False) == "town":
-            if self.is_town: return
             self.is_town = True
             self.max_queue = data.get("max_queue", 1)
             self.queue = data.get("queue", [])
@@ -342,7 +339,6 @@ class Building:
     def upgrade(self):
         if self.is_scheme:
             self.is_scheme = False
-            self.level += 1
             for effect in self.data["upgrades"][str(self.level)]["effect"]:
                 self.do_change(effect["type"], effect["args"])
             self.cell.buildings = {"name": self.data["name"], "desc": self.data["desc"], "coord": self.coord, "img": self.data["img"], "fraction_id": self.data["fraction_id"], "type": self.data["type"], "level": self.data["level"]}
@@ -366,13 +362,16 @@ class Building:
                 if args.get("new_type", False):
                     self.data["storage_type"] = args["new_type"]
                     temp_inv = copy.deepcopy(self.inventory)
-                    self.data["storage"] = []
-                    if args["new_type"] == "list" and isinstance(self.inventory, dict):
+                    if args["new_type"] == "list" and isinstance(temp_inv, dict):
+                        self.data["storage"] = []
+                        self.data["storage_size"] = args["new_size"]
                         self.set_inventory(self.data)
-                        for inv in temp_inv:
+                        for inv in temp_inv.values():
                             for resource in inv:
                                 self.inventory.append(resource) #type: ignore
-                    elif args["new_type"] == "dict" and isinstance(self.inventory, list):
+                    elif args["new_type"] == "dict" and isinstance(temp_inv, list):
+                        self.data["storage"] = {}
+                        self.data["storage_size"] = args["new_size"]
                         self.set_inventory(self.data)
                         for resource in temp_inv:
                             self.add_resource(resource.name, resource.amout)
@@ -383,7 +382,8 @@ class Building:
         if mod:
             if self.can_be_upgraded():
                 self.is_scheme = True
-                self.scheme_inventory = {"cost": [root.game_manager.resource_manager.create(name, amout) for name, amout in self.data["upgrades"][str(self.level+1)]["cost"].items()], "inventory": []}
+                self.level += 1
+                self.scheme_inventory = {"cost": [root.game_manager.resource_manager.create(name, amout) for name, amout in self.data["upgrades"][str(self.level)]["cost"].items()], "inventory": []}
                 self.scheme_inventory_size = 0
                 for resource, amout in self.data["cost"].items():
                     self.scheme_inventory_size += int(amout / root.game_manager.resource_manager.get_resource_data(resource)["max_amout"]) #type: ignore
@@ -394,7 +394,7 @@ class Building:
                 self.name = "scheme of_" + self.name
                 self.data["name"] = self.name
                 self.data["scheme"] = True
-                self.cell.buildings = self.data
+                self.cell.buildings = {"name": self.name, "desc": self.data["desc"], "coord": self.coord, "img": self.data["img"], "fraction_id": self.fraction_id, "type": self.type, "level": self.level}
                 self.cell.resize()
             else:
                 logger.error(f"Building can not be upgraded", f"Building.set_upgrade_mod({mod})")
@@ -444,8 +444,8 @@ class Building:
             self.set_inventory(self.data)
             self.cell.buildings = {"name": self.name, "desc": self.data["desc"], "coord": self.coord, "img": self.data["img"], "fraction_id": self.fraction_id, "type": self.type, "level": self.level}
             self.cell.resize()
-            #if self.level == 0:
-            #    self.upgrade()
+            if self.level != 0:
+                self.upgrade()
             self.is_scheme = False
             update_gui()
 

@@ -2,9 +2,10 @@ from .sample import Button
 import assets.root as root
 
 class UseReciept(Button):
-    def __init__(self, width: int, height: int, value: str, is_allowed: bool, img: str):
+    def __init__(self, width: int, height: int, value: str, message: str, is_allowed: bool, img: str):
         super().__init__(width=width, height=height, img=img, text="")
         self.value = value
+        self.message = message
         self.is_allowed = is_allowed
     
     def click(self):

@@ -35,6 +35,7 @@ class GUIReciept:
         for reciept in self.reciepts:
             is_allowed = root.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building)
             is_allowed_img = "allowed.png" if is_allowed else "not_allowed.png"
+            is_allowed_message = "building_has_not_en_res" if is_allowed else ""
 
             time = Icon(self.item_width, self.item_height, img="time.png")
             time_cost = TextField(self.item_width,  self.item_height, text=reciept["time"])
@@ -42,7 +43,7 @@ class GUIReciept:
             necessary_count = [TextField(self.item_width, self.item_height, text=reciept["necessary"][resource]) for resource in reciept["necessary"]]
             production = [Icon(self.item_width, self.item_height, img=production) for production in reciept["production"]]
             production_count = [TextField(self.item_width, self.item_height, text=reciept["production"][resource]) for resource in reciept["production"]]
-            use_reciept = UseReciept(width=self.item_width, height=self.item_height, img=is_allowed_img, is_allowed=is_allowed, value=f"{reciept["id"]}")
+            use_reciept = UseReciept(width=self.item_width, height=self.item_height, img=is_allowed_img, is_allowed=is_allowed, value=f"{reciept["id"]}", message=is_allowed_message)
             allowed = use_reciept
             self.buttons.append(use_reciept)
             self.reciepts_list.append({"necessary": necessary, "necessary_count": necessary_count, "time": time, "time_cost": time_cost, "production": production, "production_count": production_count, "allowed": allowed})

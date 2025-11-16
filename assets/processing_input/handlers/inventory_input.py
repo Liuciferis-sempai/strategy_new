@@ -16,8 +16,9 @@ class InventoryInputProcessor(BasicInputProcessor):
 
     #@logger
     def process_mousebuttondown(self, event:py.event.Event):
-        if self.process_mousebutton_for_inputfield(event): return root.update_gui()
         mouse_pos = event.pos
+        if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
+        
         #if root.game_manager.gui.inventory.owner_inventory:
         #    if event.button == 1:
         #        for cell, _ in root.game_manager.gui.inventory.owner_inventory:

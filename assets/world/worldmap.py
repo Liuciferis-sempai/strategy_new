@@ -47,59 +47,58 @@ class WorldMap(py.sprite.Sprite):
     
     #@timeit
     def click(self, mouse_pos: tuple[int, int], mouse_button: int):
-        #print("World map clicked")
         rel_mouse_pos = (mouse_pos[0] - self.rect.x - self.x_offset, mouse_pos[1] - self.rect.y - self.y_offset)
         for cell in self.cells_on_screen:
             if cell.rect.collidepoint(rel_mouse_pos):
-                self._process_click(cell, rel_mouse_pos, mouse_button)
+                self._process_click(cell, mouse_button)
                 return
     
-    def _process_click(self, cell: Cell, rel_mouse_pos: tuple[int, int], mouse_button: int):
+    def _process_click(self, cell: Cell, mouse_button: int):
         if mouse_button == 1:
             if root.game_manager.gui.game.sticked_object != None:
-                self._process_lmb_click_with_sticked_object(cell, rel_mouse_pos)
+                self._process_lmb_click_with_sticked_object(cell)
             else:
-                self._process_lmb_click_usual(cell, rel_mouse_pos)
+                self._process_lmb_click_usual(cell)
         elif mouse_button == 3:
             if root.game_manager.gui.game.sticked_object != None:
                 root.game_manager.gui.game.sticked_object = None
                 update_gui()
             else:
-                self._process_rmb_click_usual(cell, rel_mouse_pos)
+                self._process_rmb_click_usual(cell)
 
-    def _process_lmb_click_with_sticked_object(self, cell: Cell, rel_mouse_pos: tuple[int, int]):
+    def _process_lmb_click_with_sticked_object(self, cell: Cell):
         root.game_manager.buildings_manager.try_to_build_on_cell(cell)
 
-    def _process_lmb_click_usual(self, cell: Cell, rel_mouse_pos: tuple[int, int]):
+    def _process_lmb_click_usual(self, cell: Cell):
         if not root.game_manager.is_chosen_cell_default():
             if not root.game_manager.is_opened_pawn_default():
                 if root.game_manager.get_opened_pawn_coord() != cell.coord:
                     self.unchose_cell()
                     if root.game_manager.pawns_manager.try_to_move_pawn(root.game_manager.get_opened_pawn(), cell):
-                        self._click_at_cell(cell, rel_mouse_pos)
+                        self._click_at_cell(cell)
                         return
                 else:
                     self.unmark_region("all")
                     root.game_manager.reset_opened_pawn()
             elif root.game_manager.get_chosen_cell_coord() != cell.coord: self.unchose_cell()
 
-        self._click_at_cell(cell, rel_mouse_pos)
+        self._click_at_cell(cell)
 
-    def _process_rmb_click_usual(self, cell: Cell, rel_mouse_pos: tuple[int, int]):
+    def _process_rmb_click_usual(self, cell: Cell):
         if not root.game_manager.is_opened_pawn_default():
             if root.game_manager.get_opened_pawn_coord() == cell.coord:
                 self.unchose_cell()
             else:
                 if root.game_manager.pawns_manager.try_to_move_pawn(root.game_manager.get_opened_pawn(), cell):
                     self.unchose_cell()
-                    self._click_at_cell(cell, rel_mouse_pos)
+                    self._click_at_cell(cell)
                 else:
                     if cell.pawns != [] or cell.buildings != {}:
                         root.game_manager.set_target_coord(cell.coord)
                         root.game_manager.gui.game.show_actions(cell.pawns, cell.buildings)
 
-    def _click_at_cell(self, cell: Cell, rel_mouse_pos: tuple[int, int]):
-        cell.click(rel_mouse_pos)
+    def _click_at_cell(self, cell: Cell):
+        cell.click()
         cell.mark((255, 0, 0, 250))
         self._draw_cell(cell)
 
@@ -273,7 +272,7 @@ class WorldMap(py.sprite.Sprite):
                                 cell.is_opened = True
                 continue
 
-            if (x, y) in visited and visited[(x, y, z)][1] >= remaining:
+            if (x, y, z) in visited and visited[(x, y, z)][1] >= remaining:
                 continue
 
             if set_open: cell.is_opened = True

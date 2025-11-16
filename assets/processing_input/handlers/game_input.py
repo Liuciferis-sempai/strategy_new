@@ -82,8 +82,9 @@ class GameInputProcessor(BasicInputProcessor):
 
     #@logger
     def process_mousebuttondown(self, event:py.event.Event):
-        if self.process_mousebutton_for_inputfield(event): return root.update_gui()
         mouse_pos = event.pos
+        if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
+
         if event.button == 1:
             if root.game_manager.gui.game.jobs_list:
                 if root.game_manager.gui.game.jobs_list.rect.collidepoint(mouse_pos):

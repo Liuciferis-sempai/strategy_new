@@ -32,6 +32,9 @@ class InputField(py.sprite.Sprite):
         self.font = py.font.Font(None, font_size)
         self.update_text_surface()
 
+    def __repr__(self) -> str:
+        return f"<InputField {self.processor} {self.value} {self.place_holder}>"
+
     def update_text_surface(self):
         text = self.value if self.value != "" else self.place_holder
         if root.input_field_active: text += "<"
@@ -55,8 +58,12 @@ class InputField(py.sprite.Sprite):
             root.input_field_active = False
         elif event.key == py.K_BACKSPACE:
             self.value = self.value[:-1]
-        elif event.key == py.K_RETURN and self.processor != None:
-            self.processor.process_input(self.value)
+        elif event.key == py.K_RETURN:
+            if self.processor != None:
+                self.processor.process_input(self.value)
+            else:
+                root.game_manager.reset_chosen_inputfield()
+                root.input_field_active = False
         else:
             self.value += event.unicode
         self.update_text_surface()

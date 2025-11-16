@@ -167,7 +167,7 @@ class GUIGame:
         y_offset = 0
 
         tettain_name = cell.type if cell.is_opened else "not researched cell"
-        terrain = TextField(text=tettain_name + f" *[{cell.coord[0]}|{cell.coord[1]}]",
+        terrain = TextField(text=tettain_name + f" *[{cell.coord[0]}|{cell.coord[1]}] *[{cell.data["subdata"].get("movement_points")}]",
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+10

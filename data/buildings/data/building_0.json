@@ -35,18 +35,7 @@
                 "resource_0": 2
             },
             "effect": [
-                {"type": "change_text",
-                    "args": {
-                        "new_name": "manufactory_with_with_a_water_wheel",
-                        "new_desc": "manufactory_with_with_a_water_wheel_desc",
-                        "new_img": "manufactory_with_with_a_water_wheel.png"
-                    }
-                },
-                {"type": "change_numbers", "args": {"max_hp": 400, "max_service": 150}},
-                {"type": "change_cost", "args": {"repair": {"resource_0": 2}}, "service": {"resource_0": 2}},
-                {"type": "change_type", "args": {"new_type": "workbench_1"}},
-                {"type": "change_storage_type", "args": {"new_type": "list"}},
-                {"type": "change_storage_size", "args": {"new_size": 10}}
+                {"type": "change_storage_type", "args": {"new_type": "list", "new_size": 10}}
             ]
         }
     }
