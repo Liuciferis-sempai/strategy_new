@@ -41,6 +41,8 @@ def main():
             
         if root.game_manager.input_processor.is_move_button_pressed():
             root.game_manager.input_processor.move()
+        
+        root.game_manager.messenger.tick()
 
         if root.need_update_gui:
             root.game_manager.draw()

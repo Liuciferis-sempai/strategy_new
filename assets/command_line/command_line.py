@@ -51,7 +51,7 @@ class CommandLine(py.sprite.Sprite):
 
     def add_answer(self, answer: str):
         #print(answer)
-        self.lines.append(TextField(self.width, self.font_size, text=answer, font_size=self.font_size, color=self.color, translate=False))
+        self.lines.append(TextField(self.width, self.font_size, text=answer, font_size=self.font_size, bg_color=self.color, translate=False))
         if len(self.lines) > 5:
             self.lines.pop(0)
         update_gui()

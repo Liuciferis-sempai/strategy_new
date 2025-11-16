@@ -64,7 +64,7 @@ class BuildingsManager:
         data = data.copy()
 
         data["fraction_id"] = fraction_id
-        data["name"] = "scheme" + ":of_" + data["name"]
+        data["name"] = "scheme of_" + data["name"]
         data["img"] = data["img"].replace(".png", "_scheme.png")
         data["scheme"] = True
         cell = root.game_manager.world_map.get_cell_by_coord(coord)

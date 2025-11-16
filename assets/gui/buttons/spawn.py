@@ -12,4 +12,4 @@ class SpawnPawn(Button):
         if self.is_allowed:
             root.game_manager.town_manager.get_town_by_coord(root.game_manager.get_chosen_cell_coord()).spawn(self.value)
         else:
-            print(self.message)
+            root.game_manager.messenger.print(self.message, "warning")

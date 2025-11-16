@@ -18,6 +18,7 @@ class InputField(py.sprite.Sprite):
 
         self.image = py.Surface((width, height))
         self.image.fill(self.bg_color)
+        if len(self.bg_color) == 4: self.image.set_alpha(self.bg_color[-1])
 
         self.ch_image = py.Surface((width+10, height+10))
         self.ch_image.fill(ch_color)

@@ -7,6 +7,7 @@ from assets.towns.town import Town
 from typing import Any
 import math
 from assets.resources.resource_type import ResourceType
+import copy
 
 class Building:
     def __init__(self, coord: tuple[int, int, int] = (0, 0, 0), cell: Cell = Cell(), data: dict = {"name": "unknow", "type": "unknow", "category": "unknow", "fraction_id": -1}, is_default: bool = True):
@@ -279,8 +280,12 @@ class Building:
 
     def conect(self, town: Town):
         self.conected_with = town
+        if self.necessary_workers == {}:
+            self.can_work = True
+            return
+
         for pop in self.conected_with.popgroups:
-            if pop.has_enough_quality(self.necessary_workers["quality"]):
+            if pop.has_enough_quality(self.necessary_workers.get("quality", {})):
                 if pop.add_workers(self.necessary_workers["amout"]):
                     self.can_work = True
                     return
@@ -326,7 +331,7 @@ class Building:
 
     def destroy(self):
         root.game_manager.buildings_manager.remove(self.coord)
-        root.game_manager.buildings_manager.build({"name": f"ruin:of_{self.name}", "desc": f"ruin_of_{self.data["desc"]}", "img": f"ruin_of_{self.data["img"]}", "type": "ruin", "level": self.level}, self.coord, self.fraction_id)
+        root.game_manager.buildings_manager.build({"name": f"ruin of_{self.name}", "desc": f"ruin_of_{self.data["desc"]}", "img": f"ruin_of_{self.data["img"]}", "type": "ruin", "level": self.level}, self.coord, self.fraction_id)
 
     def can_be_upgraded(self) -> bool:
         if self.data.get("upgrades", False):
@@ -360,14 +365,14 @@ class Building:
             case "change_storage_type":
                 if args.get("new_type", False):
                     self.data["storage_type"] = args["new_type"]
+                    temp_inv = copy.deepcopy(self.inventory)
+                    self.data["storage"] = []
                     if args["new_type"] == "list" and isinstance(self.inventory, dict):
-                        temp_inv = self.inventory.copy()
                         self.set_inventory(self.data)
                         for inv in temp_inv:
                             for resource in inv:
                                 self.inventory.append(resource) #type: ignore
                     elif args["new_type"] == "dict" and isinstance(self.inventory, list):
-                        temp_inv = self.inventory.copy()
                         self.set_inventory(self.data)
                         for resource in temp_inv:
                             self.add_resource(resource.name, resource.amout)
@@ -436,10 +441,11 @@ class Building:
             self.data["name"] = self.name
             self.data["img"].replace("_scheme.png", ".png")
             self.data["scheme"] = False
-            self.cell.buildings = self.data
+            self.set_inventory(self.data)
+            self.cell.buildings = {"name": self.name, "desc": self.data["desc"], "coord": self.coord, "img": self.data["img"], "fraction_id": self.fraction_id, "type": self.type, "level": self.level}
             self.cell.resize()
-            if self.level == 0:
-                self.upgrade()
+            #if self.level == 0:
+            #    self.upgrade()
             self.is_scheme = False
             update_gui()
 

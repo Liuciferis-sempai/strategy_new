@@ -49,7 +49,7 @@ class Town:
             group.set_workers(0)
         cells = root.game_manager.world_map.get_travel_region(self.coord, self.conection_lenght, root.player_id==self.fraction_id)
         for cell, _ in cells.values():
-            if cell.buildings != {}:
+            if cell.buildings != {} and cell.coord != self.coord:
                 if cell.buildings["fraction_id"] == self.fraction_id:
                     building = root.game_manager.buildings_manager.get_building_by_coord(cell.coord)
                     self.conection.append(building)

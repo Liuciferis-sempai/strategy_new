@@ -19,6 +19,7 @@ from assets.resources.resourcemanager import ResourceManager
 from assets.processing_input.proccessing_input import InputKeyProcessor
 from assets.command_line.command_line import CommandLine
 from assets.towns.towns_manager import TownManager
+from assets.messenger.messenger import Messenger
 
 class GameManager:
     def __init__(self):
@@ -51,6 +52,7 @@ class GameManager:
         self.resource_manager = ResourceManager()
         self.input_processor = InputKeyProcessor()
         self.town_manager = TownManager()
+        self.messenger = Messenger()
 
         self.command_line = CommandLine()
         self.input_fields.append(self.command_line.inputfield)
@@ -59,6 +61,7 @@ class GameManager:
         self.gui.draw()
         if self.command_line.is_active:
             self.command_line.draw()
+        self.messenger.draw()
         #for input in self.input_fields:
         #    if not input.hidden:
         #        input.draw()

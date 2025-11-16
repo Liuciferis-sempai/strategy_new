@@ -9,4 +9,7 @@ class UseReciept(Button):
     
     def click(self):
         super().click()
-        root.game_manager.reciept_manager.use_recipe(self.value)
+        if self.is_allowed:
+            root.game_manager.reciept_manager.use_recipe(self.value)
+        else:
+            root.game_manager.messenger.print("reciept_is_not_allowed", "warning")

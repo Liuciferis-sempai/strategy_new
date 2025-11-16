@@ -19,6 +19,7 @@ class BuildingInputProcessor(BasicInputProcessor):
     def process_mousebuttondown(self, event:py.event.Event):
         if self.process_mousebutton_for_inputfield(event): return root.update_gui()
         mouse_pos = event.pos
+        mouse_pos = (mouse_pos[0], mouse_pos[1]+root.game_manager.gui.building.y_global_offset)
         if event.button == 1:
             if root.game_manager.gui.building.building.is_workbench:
                 if root.game_manager.gui.building.building_reciept_button.rect.collidepoint(mouse_pos):

@@ -73,6 +73,8 @@ class GUIGame:
                     item_position = (10, item_position[1]+root.button_standard_size[1]+20)
                     header_tab += 1
                 item.change_position(item_position)
+
+        root.game_manager.messenger.change_position((10, (root.button_standard_size[1]+20)*(header_tab+1)+20+root.info_box_size[1]*header_info_tab))
         return header_info_tab, header_tab
     
     def update_footer_tab_content(self) -> int:

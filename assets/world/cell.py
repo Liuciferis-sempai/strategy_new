@@ -25,6 +25,7 @@ class Cell(py.sprite.Sprite):
 
         self.mark_image = py.Surface((root.cell_sizes[root.cell_size_scale][0]+10, root.cell_sizes[root.cell_size_scale][1]+10), py.SRCALPHA)
         self.mark_image.fill((0, 0, 0, 0))
+        self.mark_image.set_alpha(0)
         self.surface = py.Surface((root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1]), py.SRCALPHA)
         self.surface.fill((180, 180, 180))
         self._set_graph()
@@ -76,7 +77,7 @@ class Cell(py.sprite.Sprite):
         if root.player_id == self.pawns[self.chosen_pawn_index].get("fraction_id"):
             root.game_manager.set_opened_pawn(self.pawns[self.chosen_pawn_index])
             root.game_manager.gui.game.open_pawn()
-            root.game_manager.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), self.pawns[self.chosen_pawn_index].get("movement_points", 1), (0, 0, 255, 100))
+            root.game_manager.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), self.pawns[self.chosen_pawn_index].get("movement_points", 1))
 
     def _open_building(self):
         if self.buildings.get("fraction_id") == root.player_id:
@@ -116,9 +117,11 @@ class Cell(py.sprite.Sprite):
 
     def mark(self, color: tuple[int, int, int, int]=(255, 0, 0, 100)):
         self.mark_image.fill(color)
+        self.mark_image.set_alpha(color[3])
     
     def unmark(self):
         self.mark_image.fill((0, 0, 0, 0))
+        self.mark_image.set_alpha(0)
 
     def draw(self, position: tuple[int, int], image: py.surface.Surface, display_mode: str = "norlam"):
         image.blit(self.mark_image, (position[0]-5, position[1]-5))

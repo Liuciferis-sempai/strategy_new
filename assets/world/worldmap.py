@@ -100,7 +100,7 @@ class WorldMap(py.sprite.Sprite):
 
     def _click_at_cell(self, cell: Cell, rel_mouse_pos: tuple[int, int]):
         cell.click(rel_mouse_pos)
-        cell.mark((255, 0, 0, 200))
+        cell.mark((255, 0, 0, 250))
         self._draw_cell(cell)
 
     def unchose_cell(self):
@@ -120,6 +120,7 @@ class WorldMap(py.sprite.Sprite):
             self.y_offset = 0
             return
         self.draw()
+        root.game_manager.messenger.draw()
 
     def move_map_down(self):
         self.y_offset -= self.move_distance
@@ -127,6 +128,7 @@ class WorldMap(py.sprite.Sprite):
             self.y_offset = -self.lower_limit
             return
         self.draw()
+        root.game_manager.messenger.draw()
 
     def move_map_left(self):
         self.x_offset += self.move_distance
@@ -134,6 +136,7 @@ class WorldMap(py.sprite.Sprite):
             self.x_offset = 0
             return
         self.draw()
+        root.game_manager.messenger.draw()
 
     def move_map_right(self):
         self.x_offset -= self.move_distance
@@ -141,6 +144,7 @@ class WorldMap(py.sprite.Sprite):
             self.x_offset = -self.right_limit
             return
         self.draw()
+        root.game_manager.messenger.draw()
 
     def load_types_of_land(self):
         self.types_of_land = []
@@ -226,7 +230,7 @@ class WorldMap(py.sprite.Sprite):
     #                    self._draw_cell(cell)
     #                    self._add_mark(cell, mark_type)
 
-    def mark_movement_region(self, start_coord: tuple[int, int, int], movement_points: int=1, color: tuple[int, int, int, int]=(0, 0, 255, 100)):
+    def mark_movement_region(self, start_coord: tuple[int, int, int], movement_points: int=1, color: tuple[int, int, int, int]=(0, 0, 255, 150)):
         cells = self.get_travel_region(start_coord, movement_points, True)
 
         for cell, remaining in cells.values():

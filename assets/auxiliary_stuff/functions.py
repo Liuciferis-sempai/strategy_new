@@ -131,16 +131,13 @@ def back_window_state():
 
 def start_the_game(game_name: str="New Game", game_seed: int=9999):
     root.loading.draw("Starting the game...")
-    #Initialize game state
     root.game_manager.game_name = game_name
     root.game_manager.world_map.map_generate(game_seed)
 
     root.loading.draw("Set initial GUI state...")
-    #Set initial GUI state
     change_window_state("game")
 
     root.loading.draw("Create players fraction...")
-    #Create players fraction
     root.game_manager.fraction_manager.create_fraction("Player's Fraction", "player", root.player_id)
     root.game_manager.gui.fraction.open_player_fraction()
 
