@@ -1,4 +1,4 @@
-import assets.root as root
+import root
 from random import random
 
 class River:

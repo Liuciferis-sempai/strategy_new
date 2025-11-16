@@ -16,9 +16,9 @@ from .guis.gui_sharemenu import GUIShareMenu
 from .guis.gui_fraction import GUIFraction
 from .guis.gui_inventory import GUIInventory
 from .guis.gui_spawn import GUISpawn
-import assets.root as root
-from assets.auxiliary_stuff import timeit
-from assets.root import loading
+import root
+from .auxiliary_stuff import timeit
+from .root import loading
 
 class GUI:
     def initialize(self):

@@ -1,5 +1,5 @@
 import pygame as py
-import assets.root as root
+import root
 from .buttons import JobButton
 
 class ListOf(py.sprite.Sprite):

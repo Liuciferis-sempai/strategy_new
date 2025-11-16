@@ -1,5 +1,5 @@
 from .sample import Button
-import assets.root as root
+import root
 
 class SpawnPawn(Button):
     def __init__(self, width: int, height: int, value: str, message: str, is_allowed: bool, img: str):

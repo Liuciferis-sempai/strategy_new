@@ -5,11 +5,14 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import assets.root as root
-from assets.root import logger
+import root
+from root import logger
+from typing import Any, TYPE_CHECKING
 import pygame as py
-from assets.auxiliary_stuff import timeit, back_window_state
-from assets.towns.town import Town
+from auxiliary_stuff import timeit, back_window_state
+
+if TYPE_CHECKING:
+    from managers.towns.town import Town
 
 class GUISpawn:
     def __init__(self):

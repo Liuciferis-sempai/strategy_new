@@ -5,10 +5,10 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import assets.root as root
-from assets.root import logger
+import root
+from root import logger
 import pygame as py
-from assets.auxiliary_stuff import timeit
+from auxiliary_stuff import timeit
 
 class GUIShareMenu:
     def __init__(self):

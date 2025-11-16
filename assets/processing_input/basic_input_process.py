@@ -1,6 +1,6 @@
 import pygame as py
-import assets.root as root
-#from assets.processing_input.proccessing_input import InputKeyProcessor
+import root
+#from .processing_input.proccessing_input import InputKeyProcessor
 
 class BasicInputProcessor:
     def __init__(self, root_prcessor_input):

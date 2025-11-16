@@ -1,6 +1,6 @@
 import pygame as py
-import assets.root as root
-from assets.root import loading, logger, language
+import root
+from .root import loading, logger, language
 
 class InputField(py.sprite.Sprite):
     def __init__(self, width: int = 0, height: int = 0, position: tuple[int, int] = (10, 10), place_holder: str = "", font_size: int = 20, bg_color: tuple[int, int, int, int] = (0, 0, 0, 0), ch_color: tuple[int, int, int, int] = (0, 255, 0, 255), input_processor=None, hidden: bool = False):

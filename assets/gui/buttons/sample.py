@@ -1,7 +1,7 @@
 import pygame as py
-import assets.root as root
-from assets.auxiliary_stuff import update_gui
-from assets.root import language, logger
+import  root
+from auxiliary_stuff import update_gui
+from root import language, logger
 
 class Button(py.sprite.Sprite):
     def __init__(self, text:str="Button", img:str="", width:int=0, height:int=0, color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), font_size:int=20, position:tuple[int, int]=(5, 5)):

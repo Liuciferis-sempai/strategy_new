@@ -1,7 +1,7 @@
 import pygame as py
-import assets.root as root
-from assets.world.cell import Cell
-from assets.auxiliary_stuff import update_gui
+import root
+from world.cell import Cell
+from auxiliary_stuff import update_gui
 from .handlers.building_input import BuildingInputProcessor
 from .handlers.fraction_input import FractionInputProcessor
 from .handlers.game_input import GameInputProcessor
@@ -15,7 +15,7 @@ from .handlers.spawn_input import SpawnInputProcessor
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from assets.gamemanager import GameManager
+    from gamemanager import GameManager
 
 class InputKeyProcessor:
     def __init__(self,):

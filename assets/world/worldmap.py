@@ -1,16 +1,16 @@
 #from typing import Any
 import pygame as py
-import assets.root as root
+import root
 from .cell import Cell
 from .river import River
 from random import randint, seed, choice, uniform, random
 import os
-from assets.auxiliary_stuff import read_json_file, timeit, update_gui
-from assets.root import loading, logger
+from auxiliary_stuff import read_json_file, timeit, update_gui
+from root import loading, logger
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from assets.gamemanager import GameManager
+    from gamemanager import GameManager
 
 class WorldMap(py.sprite.Sprite):
     def __init__(self,):

@@ -1,5 +1,5 @@
 import pygame as py
-import assets.root as root
+import root
 
 class Icon(py.sprite.Sprite):
     def __init__(self, width:int=0, height:int=0, color:tuple[int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), img:str="", spec_path:str="data/icons", bg:tuple[int, int, int, int]=(0, 0, 0, 0)):

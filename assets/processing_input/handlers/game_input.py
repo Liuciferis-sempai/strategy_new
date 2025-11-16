@@ -1,7 +1,10 @@
 import pygame as py
-import assets.root as root
-from assets.processing_input.basic_input_process import BasicInputProcessor
-from assets.world.cell import Cell
+import root
+from typing import Any, TYPE_CHECKING
+from processing_input.basic_input_process import BasicInputProcessor
+
+if TYPE_CHECKING:
+    from world.cell import Cell
 
 class GameInputProcessor(BasicInputProcessor):
     def __init__(self, root_prcessor_input):

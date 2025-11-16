@@ -1,6 +1,6 @@
 from typing import Any
 import pygame as py
-import assets.root as root
+import root
 
 class TextField(py.sprite.Sprite):
     def __init__(self, width:int|str=0, height:int|str=0, font_color: tuple[int, int, int] = (0, 0, 0), bg_color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), text:str="", font_size:int=40, translate: bool = True):

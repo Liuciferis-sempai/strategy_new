@@ -55,11 +55,11 @@ cell_size_scale = config.get("cell_size_scale", 1)
 language = Language(config["language"])
 
 loading.draw("Image manager initializing...")
-from .image_manager.image_manager import ImageManager
+from .managers.image_manager import ImageManager
 image_manager = ImageManager()
 
 loading.draw("Game initializing...")
-from assets.gamemanager import GameManager
+from .gamemanager import GameManager
 game_manager = GameManager()
 game_manager.gui.initialize()
 game_manager.gui.change_position_for_new_screen_sizes()

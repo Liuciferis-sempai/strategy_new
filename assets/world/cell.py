@@ -1,6 +1,6 @@
 import pygame as py
-import assets.root as root
-from assets.root import logger
+import root
+from root import logger
 from copy import deepcopy
 
 class Cell(py.sprite.Sprite):

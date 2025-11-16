@@ -5,8 +5,8 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import assets.root as root
-from assets.root import logger
+import root
+from root import logger
 
 class GUIWriting:
     def __init__(self):

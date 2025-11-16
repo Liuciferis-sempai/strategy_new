@@ -5,11 +5,14 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import assets.root as root
-from assets.root import logger
-from assets.pawns.pawn import Pawn
-from assets.world.cell import Cell
-from assets.auxiliary_stuff import timeit
+import root
+from root import logger
+from typing import Any, TYPE_CHECKING
+from auxiliary_stuff import timeit
+
+if TYPE_CHECKING:
+    from managers.pawns.pawn import Pawn
+    from world.cell import Cell
 
 class GUIGame:
     def __init__(self):

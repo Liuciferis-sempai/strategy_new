@@ -5,8 +5,11 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import assets.root as root
-from assets.policy.policycard import PolicyCard
+import root
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from managers.policy.policycard import PolicyCard
 
 class GUIGPolicy:
     def __init__(self):

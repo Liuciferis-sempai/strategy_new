@@ -1,7 +1,7 @@
 import pygame as py
 from pygame.event import Event
-import assets.root as root
-from assets.processing_input.basic_input_process import BasicInputProcessor
+import root
+from processing_input.basic_input_process import BasicInputProcessor
 
 class SpawnInputProcessor(BasicInputProcessor):
     def __init__(self, root_prcessor_input):

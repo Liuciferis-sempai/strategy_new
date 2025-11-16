@@ -5,7 +5,7 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import assets.root as root
+import root
 
 class GUITechnology:
     def __init__(self):

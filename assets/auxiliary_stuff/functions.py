@@ -1,5 +1,5 @@
 import pygame as py
-import assets.root as root
+import root
 import copy
 
 def update_gui():

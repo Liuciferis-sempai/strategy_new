@@ -5,9 +5,9 @@ from ..statistikbox import *
 from ..textfield import *
 from ..iconbox import *
 from ..listof import *
-import assets.root as root
-from assets.root import logger
-from assets.auxiliary_stuff import timeit
+import root
+from root import logger
+from auxiliary_stuff import timeit
 
 class GUIReciept:
     def __init__(self):

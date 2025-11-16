@@ -1,25 +1,25 @@
-from assets.root import logger
-from assets.root import loading
-from assets.gui.gui_manager import GUI
-from assets.pawns.pawnsmanager import PawnsManager
-from assets.pawns.pawn import Pawn
-from assets.reciepts.reciept import RecieptsManager
-from assets.turn_manager.turnmanager import TurnManager
-from assets.world.worldmap import WorldMap
-from assets.world.cell import Cell
-from assets.gui.inputfield import InputField
-from assets.triggers.triggermanager import TriggerManager
-from assets.fraction.fraction_manager import FractionManager, Fraction
-from assets.technologies.techtree import Techtree
-from assets.buildings.buildingsmanager import BuildingsManager
-from assets.policy.policytable import PolicyTable
-from assets.effects.effectmanager import EffectManager
-from assets.jobs.jobmanager import JobManager
-from assets.resources.resourcemanager import ResourceManager
-from assets.processing_input.proccessing_input import InputKeyProcessor
-from assets.command_line.command_line import CommandLine
-from assets.towns.towns_manager import TownManager
-from assets.messenger.messenger import Messenger
+from .root import logger
+from .root import loading
+from .gui.gui_manager import GUI
+from .managers.pawns.pawnsmanager import PawnsManager
+from .managers.pawns.pawn import Pawn
+from .managers.reciept import RecieptsManager
+from .managers.turnmanager import TurnManager
+from .world.worldmap import WorldMap
+from .world.cell import Cell
+from .gui.inputfield import InputField
+from .managers.triggermanager import TriggerManager
+from .managers.fraction.fraction_manager import FractionManager, Fraction
+from .managers.technologies.techtree import Techtree
+from .managers.buildings.buildingsmanager import BuildingsManager
+from .managers.policy.policytable import PolicyTable
+from .managers.effectmanager import EffectManager
+from .managers.jobmanager import JobManager
+from .managers.resources.resourcemanager import ResourceManager
+from .processing_input.proccessing_input import InputKeyProcessor
+from .helpers.command_line import CommandLine
+from .managers.towns.towns_manager import TownManager
+from .helpers.messenger import Messenger
 
 class GameManager:
     def __init__(self):
