@@ -1,6 +1,6 @@
 import pygame as py
 from ... import root
-from ...root import logger
+from ...root import logger, language
 
 class Pawn:
     def __init__(self, id: int= -1, coord: tuple[int, int, int]=(0, 0, 0), data: dict= {}, is_default: bool=True):
@@ -14,7 +14,7 @@ class Pawn:
         self.inventory = []
         self.data = data.copy()
 
-        self.name = data.get("name", data.get("type", "unknow"))
+        self.name = language.get(data.get("name", data.get("type", "unknow")))
         self.type = data.get("type", "unknow")
         self.fraction_id = data.get("fraction_id", -1)
         self.category = data.get("category", "unknown")
@@ -23,6 +23,8 @@ class Pawn:
         self.max_hp = data.get("max_hp", 50)
         self.max_hp_mod = data.get("hp_mod", {})
         self.attack = data.get("attack", {"type": "none", "distance": 0, "damage": 0, "mods": []})
+
+        self.has_job_to_res_movment_points = data.get("has_job_to_res_movment_points", None)
     
     def __repr__(self) -> str:
         if not self:

@@ -6,8 +6,12 @@ from .. import root
 from ..root import loading, logger
 from .pawns.pawn import Pawn
 
+if TYPE_CHECKING:
+    from ..gamemanager import GameManager
+
 class JobManager:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
         self.jobs = {}
 
         loading.draw("Loading job types...")
@@ -26,19 +30,19 @@ class JobManager:
         checking if pawn type or id is in job's allowed types or ids
         '''
         if isinstance(pawn, dict):
-            if job.get("pawn_types", []) == [] or "any" in job.get("pawn_types", []) or pawn["type"] in job.get("pawn_types", []):
-                    if job.get("pawn_ids", []) == [] or "any" in job.get("pawn_ids", []) or pawn["id"] in job.get("pawn_ids", []):
+            if job.get("pawn_category", []) == [] or "any" in job.get("pawn_category", []) or pawn["category"] in job.get("pawn_category", []):
+                    if job.get("pawn_types", []) == [] or "any" in job.get("pawn_types", []) or pawn["type"] in job.get("pawn_types", []):
                         return True
 
         elif isinstance(pawn, Pawn):
-            if job.get("pawn_types", []) == [] or "any" in job.get("pawn_types", []) or pawn.type in job.get("pawn_types", []):
-                    if job.get("pawn_ids", []) == [] or "any" in job.get("pawn_ids", []) or pawn.id in job.get("pawn_ids", []):
+            if job.get("pawn_category", []) == [] or "any" in job.get("pawn_category", []) or pawn.category in job.get("pawn_category", []):
+                    if job.get("pawn_types", []) == [] or "any" in job.get("pawn_types", []) or pawn.type in job.get("pawn_types", []):
                         return True
         return False
     
     def _procces_trigger(self, trigger: dict, job_name: str) -> dict:
-        chosen_cell_coord = root.game_manager.get_chosen_cell_coord()
-        target_coord = root.game_manager.get_target_coord()
+        chosen_cell_coord = self.game_manager.get_chosen_cell_coord()
+        target_coord = self.game_manager.get_target_coord()
 
         if trigger["args"].get("target_of_action", None) != None:
             trigger["args"]["target_of_action"] = job_name.replace("with_", "")
@@ -50,36 +54,39 @@ class JobManager:
         return trigger
     
     def procces_result(self, job: dict, job_name: str) -> dict:
-        chosen_cell_coord = root.game_manager.get_chosen_cell_coord()
-        target_coord = root.game_manager.get_target_coord()
+        chosen_cell_coord = self.game_manager.get_chosen_cell_coord()
+        target_coord = self.game_manager.get_target_coord()
     
         if job["result"]["args"].get("target_building_coord", None) != None:
             job["result"]["args"]["target_building_coord"] = chosen_cell_coord
 
         if job["result"]["type"] == "attack":
             target_name = job_name.split(".")[-1]
-            if target_name in root.game_manager.buildings_manager.get_all_possible_buildings_names():
-                target = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_target_coord())
+            if target_name in self.game_manager.buildings_manager.get_all_possible_buildings_names():
+                target = self.game_manager.buildings_manager.get_building_by_coord(self.game_manager.get_target_coord())
             else:
-                target = root.game_manager.pawns_manager.get_pawn_by_coord(target_name, root.game_manager.get_target_coord())
+                target = self.game_manager.pawns_manager.get_pawn_by_coord(target_name, self.game_manager.get_target_coord())
             job["result"]["args"]["target"] = target
-            job["result"]["args"]["data"] = root.game_manager.get_opened_pawn().attack
+            job["result"]["args"]["data"] = self.game_manager.get_chosen_pawn().attack
 
         if job["result"]["args"].get("target_of_action", None) != None:
             target_of_action = job_name.split(".")[-1]
             job["result"]["args"]["target_of_action"] = target_of_action.replace("with_", "")
 
         if job["result"]["args"].get("target_cell", None) != None:
-            job["result"]["args"]["target_cell"] = root.game_manager.world_map.get_cell_by_coord(target_coord)
+            job["result"]["args"]["target_cell"] = self.game_manager.world_map.get_cell_by_coord(target_coord)
 
         if job["result"]["args"].get("target_building_str", None) != None:
-            building = root.game_manager.world_map.get_cell_by_coord(chosen_cell_coord).buildings
+            building = self.game_manager.world_map.get_cell_by_coord(chosen_cell_coord).buildings
             job["result"]["args"]["target_building_str"] = building.get("name", "").replace("scheme:of_", "")
             job["result"]["args"]["building_coord"] = chosen_cell_coord
             job["result"]["args"]["building_fraction"] = building.get("fraction_id", -1)
+        
+        if job["result"]["args"].get("fauna_loot", None) != None:
+            job["result"]["args"]["loot"] = self.game_manager.get_chosen_cell().fauna.get("loot", {})
 
-        if "pawn" in root.game_manager.effect_manager.effects[job["result"]["type"]].keys():
-            job["result"]["args"]["pawn"] = root.game_manager.get_opened_pawn()
+        if "pawn" in self.game_manager.effect_manager.effects[job["result"]["type"]].keys():
+            job["result"]["args"]["pawn"] = self.game_manager.get_chosen_pawn()
 
         return job
 
@@ -87,8 +94,8 @@ class JobManager:
         '''
         prepares the work result for processing by the effects manager, replacing placeholders with game objects
         '''
-        chosen_cell_coord = root.game_manager.get_chosen_cell_coord()
-        target_coord = root.game_manager.get_target_coord()
+        chosen_cell_coord = self.game_manager.get_chosen_cell_coord()
+        target_coord = self.game_manager.get_target_coord()
 
         if job["trigger"]["args"].get("target_of_action", None) != None:
             job["trigger"]["args"]["target_of_action"] = job_id.split(".")[-1]
@@ -100,22 +107,22 @@ class JobManager:
         
         if job["result"]["type"] == "attack":
             target_name = job_id.split(".")[-1]
-            if target_name in root.game_manager.buildings_manager.get_all_possible_buildings_names():
-                target = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_target_coord())
+            if target_name in self.game_manager.buildings_manager.get_all_possible_buildings_names():
+                target = self.game_manager.buildings_manager.get_building_by_coord(self.game_manager.get_target_coord())
             else:
-                target = root.game_manager.pawns_manager.get_pawn_by_coord(target_name, root.game_manager.get_target_coord())
+                target = self.game_manager.pawns_manager.get_pawn_by_coord(target_name, self.game_manager.get_target_coord())
             job["result"]["args"]["target"] = target
-            job["result"]["args"]["data"] = root.game_manager.get_opened_pawn().attack
+            job["result"]["args"]["data"] = self.game_manager.get_chosen_pawn().attack
 
         if job["result"]["args"].get("target_of_action", None) != None:
             target_of_action = job_id.split(".")[-1]
             job["result"]["args"]["target_of_action"] = target_of_action.replace("with_", "")
 
         if job["result"]["args"].get("target_cell", None) != None:
-            job["result"]["args"]["target_cell"] = root.game_manager.world_map.get_cell_by_coord(target_coord)
+            job["result"]["args"]["target_cell"] = self.game_manager.world_map.get_cell_by_coord(target_coord)
 
         if job["result"]["args"].get("target_building_str", None) != None:
-            building = root.game_manager.world_map.get_cell_by_coord(chosen_cell_coord).buildings
+            building = self.game_manager.world_map.get_cell_by_coord(chosen_cell_coord).buildings
             job["result"]["args"]["target_building_str"] = building.get("name", "").replace("scheme:of_", "")
             job["result"]["args"]["building_coord"] = chosen_cell_coord
             job["result"]["args"]["building_fraction"] = building.get("fraction_id", -1)
@@ -174,9 +181,9 @@ class JobManager:
     #    return False
     
     #def _is_job_available(self, job: dict, job_name: str, pawn: "Pawn") -> bool:
-    #    if hasattr(root.game_manager.trigger_manager, job["trigger"]["type"]):
+    #    if hasattr(self.game_manager.trigger_manager, job["trigger"]["type"]):
     #        job = self._replace_target_in_args(job, job_name)
-    #        trigger_func = getattr(root.game_manager.trigger_manager, job["trigger"]["type"])
+    #        trigger_func = getattr(self.game_manager.trigger_manager, job["trigger"]["type"])
     #        return trigger_func(pawn, job["trigger"].get("args", {})) #type: ignore
     #    return False
     
@@ -200,8 +207,11 @@ class JobManager:
         return False
     
     def _check_job_trigger(self, trigger: dict, job_name: str, pawn: "Pawn") -> bool:
-        if hasattr(root.game_manager.trigger_manager, trigger["type"]):
+        if hasattr(self.game_manager.trigger_manager, trigger["type"]):
             trigger = self._procces_trigger(trigger, job_name)
-            trigger_func = getattr(root.game_manager.trigger_manager, trigger["type"])
-            return trigger_func(pawn, trigger["args"])
+            trigger_func = getattr(self.game_manager.trigger_manager, trigger["type"])
+            is_allowed, comment = trigger_func(pawn, trigger["args"])
+            if not is_allowed:
+                self.game_manager.messenger.print(comment, "warning")
+            return is_allowed
         return False

@@ -19,29 +19,36 @@ from .guis.gui_spawn import GUISpawn
 from .. import root
 from ..auxiliary_stuff import timeit
 from ..root import loading
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..gamemanager import GameManager
 
 class GUI:
-    def initialize(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
         loading.draw("Initializing GUIBuildings...")
-        self.building = GUIBuildings()
+        self.building = GUIBuildings(game_manager)
         loading.draw("Initializing GUIFraction...")
-        self.fraction = GUIFraction()
+        self.fraction = GUIFraction(game_manager)
         loading.draw("Initializing GUIGame...")
-        self.game = GUIGame()
+        self.game = GUIGame(game_manager)
         loading.draw("Initializing GUIGPolicy...")
-        self.policy = GUIGPolicy()
+        self.policy = GUIGPolicy(game_manager)
         loading.draw("Initializing GUIReciept...")
-        self.reciept = GUIReciept()
+        self.reciept = GUIReciept(game_manager)
         loading.draw("Initializing GUIShareMenu...")
-        self.sharemenu = GUIShareMenu()
+        self.sharemenu = GUIShareMenu(game_manager)
         loading.draw("Initializing GUITechnology...")
-        self.technology = GUITechnology()
+        self.technology = GUITechnology(game_manager)
         loading.draw("Initializing GUIWriting...")
-        self.writing = GUIWriting()
+        self.writing = GUIWriting(game_manager)
         loading.draw("Initializing GUIInventory...")
-        self.inventory = GUIInventory()
+        self.inventory = GUIInventory(game_manager)
         loading.draw("Initializing GUISpawn...")
-        self.spawn = GUISpawn()
+        self.spawn = GUISpawn(game_manager)
+
+        logger.info("gui ended initialization", "GUI.initialize()")
 
     def change_position_for_new_screen_sizes(self):
         self.game.change_position_for_new_screen_sizes()

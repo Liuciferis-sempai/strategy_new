@@ -5,7 +5,7 @@ from .cell import Cell
 from .river import River
 from random import randint, seed, choice, uniform, random
 import os
-from ..auxiliary_stuff import read_json_file, timeit, update_gui
+from ..auxiliary_stuff import read_json_file, timeit, update_gui, get_cell_side_size, get_cell_size
 from ..root import loading, logger
 
 from typing import TYPE_CHECKING
@@ -28,7 +28,7 @@ class WorldMap(py.sprite.Sprite):
 
         self.x_offset = 0
         self.y_offset = 0
-        self.move_distance = root.cell_sizes[root.cell_size_scale][1]//4
+        self.move_distance = get_cell_size()[1]//4
         self.lower_limit = 0
         self.right_limit = 0
 
@@ -72,25 +72,25 @@ class WorldMap(py.sprite.Sprite):
 
     def _process_lmb_click_usual(self, cell: "Cell"):
         if not root.game_manager.is_chosen_cell_default():
-            if not root.game_manager.is_opened_pawn_default():
-                if root.game_manager.get_opened_pawn_coord() != cell.coord:
+            if not root.game_manager.is_chosen_pawn_default():
+                if root.game_manager.get_chosen_pawn_coord() != cell.coord:
                     self.unchose_cell()
-                    if root.game_manager.pawns_manager.try_to_move_pawn(root.game_manager.get_opened_pawn(), cell):
+                    if root.game_manager.pawns_manager.try_to_move_pawn(root.game_manager.get_chosen_pawn(), cell):
                         self._click_at_cell(cell)
                         return
                 else:
                     self.unmark_region("all")
-                    root.game_manager.reset_opened_pawn()
+                    root.game_manager.reset_chosen_pawn()
             elif root.game_manager.get_chosen_cell_coord() != cell.coord: self.unchose_cell()
 
         self._click_at_cell(cell)
 
     def _process_rmb_click_usual(self, cell: "Cell"):
-        if not root.game_manager.is_opened_pawn_default():
-            if root.game_manager.get_opened_pawn_coord() == cell.coord:
+        if not root.game_manager.is_chosen_pawn_default():
+            if root.game_manager.get_chosen_pawn_coord() == cell.coord:
                 self.unchose_cell()
             else:
-                if root.game_manager.pawns_manager.try_to_move_pawn(root.game_manager.get_opened_pawn(), cell):
+                if root.game_manager.pawns_manager.try_to_move_pawn(root.game_manager.get_chosen_pawn(), cell):
                     self.unchose_cell()
                     self._click_at_cell(cell)
                 else:
@@ -110,7 +110,8 @@ class WorldMap(py.sprite.Sprite):
             chosen_cell.unmark()
             self._draw_cell(chosen_cell)
             root.game_manager.reset_chosen_cell(False)
-            root.game_manager.reset_opened_pawn()
+            root.game_manager.reset_chosen_pawn()
+            root.game_manager.reset_chosen_building()
             self.unmark_region("all")
             root.game_manager.gui.game.set_standard_footer()
 
@@ -119,32 +120,24 @@ class WorldMap(py.sprite.Sprite):
         if self.y_offset > 0:
             self.y_offset = 0
             return
-        self.draw()
-        root.game_manager.messenger.draw()
 
     def move_map_down(self):
         self.y_offset -= self.move_distance
         if -self.y_offset > self.lower_limit:
             self.y_offset = -self.lower_limit
             return
-        self.draw()
-        root.game_manager.messenger.draw()
 
     def move_map_left(self):
         self.x_offset += self.move_distance
         if self.x_offset > 0:
             self.x_offset = 0
             return
-        self.draw()
-        root.game_manager.messenger.draw()
 
     def move_map_right(self):
         self.x_offset -= self.move_distance
         if -self.x_offset > self.right_limit:
             self.x_offset = -self.right_limit
             return
-        self.draw()
-        root.game_manager.messenger.draw()
 
     def load_types_of_land(self):
         self.types_of_land = []
@@ -182,10 +175,9 @@ class WorldMap(py.sprite.Sprite):
         cell = self.get_cell_by_coord((coord[0], coord[1], 0))
         cell.is_opened = True
 
-        for nx in range(start_coord[0]-1, end_coord[0]+2):
-            for ny in range(start_coord[1]-1, end_coord[1]+2):
-                for nz in range(start_coord[2]-1, end_coord[2]+2):
-                    cell = self.get_cell_by_coord((nx, ny, nz))
+        for nx in range(start_coord[0], end_coord[0]+1):
+            for ny in range(start_coord[1], end_coord[1]+1):
+                    cell = self.get_cell_by_coord((nx, ny, start_coord[2]))
                     cell.is_opened = True
 
     #@timeit
@@ -194,7 +186,7 @@ class WorldMap(py.sprite.Sprite):
         self.image.fill((200, 200, 200))
 
         layer = self.display_layer
-        cell_size = list(root.cell_sizes[root.cell_size_scale])
+        cell_size = list(get_cell_size())
         cell_size[0] += 5
         cell_size[1] += 5
 
@@ -333,8 +325,8 @@ class WorldMap(py.sprite.Sprite):
         if self.height < 0:
             logger.warning("Calculated world map height is negative. Adjusting to minimum size.", f"WorldMap.change_position({header_tab}, {footer_tab}, {header_info_tab})")
             #print("Screen is too low", self.height)
-            self.height = root.cell_sizes[root.cell_size_scale][1]*2
-            #y = root.cell_sizes[root.cell_size_scale][1]//2+20
+            self.height = get_cell_size()[1]*2
+            #y = get_cell_size()[1]//2+20
         
         self.image = py.Surface((self.width, self.height))
         self.image.fill((200, 200, 200))
@@ -380,6 +372,8 @@ class WorldMap(py.sprite.Sprite):
     @timeit
     def map_generate(self, seed_:int=0):
         loading.draw("Map generation...")
+        cell_side_size = get_cell_side_size()
+
         seed(seed_)
         self.terrain = {"0": []}
 
@@ -396,18 +390,18 @@ class WorldMap(py.sprite.Sprite):
                 land = self._define_flora(land)
                 land = self._define_fauna(land)
 
-                cell = Cell(position=(x*root.cell_sizes[root.cell_size_scale][0]+5*x, y*root.cell_sizes[root.cell_size_scale][1]+5*y), coord=(x, y, 0), data=land, is_default=False)
+                cell = Cell(position=(x*cell_side_size+5*x, y*cell_side_size+5*y), coord=(x, y, 0), data=land, is_default=False)
                 self.terrain["0"][-1].append(cell)
-        self.lower_limit = (root.world_map_size[1]-1)*root.cell_sizes[root.cell_size_scale][1]+(root.world_map_size[1]-1)*5
-        self.right_limit = (root.world_map_size[0]-1)*root.cell_sizes[root.cell_size_scale][0]+(root.world_map_size[0]-1)*5
+        self.lower_limit = (root.world_map_size[1]-1)*cell_side_size+(root.world_map_size[1]-1)*5
+        self.right_limit = (root.world_map_size[0]-1)*cell_side_size+(root.world_map_size[0]-1)*5
 
         #river generation
         self.rivers = []
         for _ in range(root.river_count):
             if random() > 0.3:
-                self.rivers.append(River((0, 0, randint(0, root.world_map_size[1])), self))
+                self.rivers.append(River((0, randint(0, root.world_map_size[1]), 0), self))
             else:
-                self.rivers.append(River((0, randint(0, root.world_map_size[0]), randint(0, root.world_map_size[1])), self))
+                self.rivers.append(River((randint(0, root.world_map_size[0]), randint(0, root.world_map_size[1]), 0), self))
         seed(None)
         update_gui()
 

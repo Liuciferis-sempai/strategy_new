@@ -14,9 +14,12 @@ from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from managers.towns.town import Town
+    from ...gamemanager import GameManager
 
 class GUISpawn:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.y_offset = 0
 
         self.spawns: list[dict] = []
@@ -46,13 +49,13 @@ class GUISpawn:
             x += self.item_width+10
 
     def open(self):
-        opened_building = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
+        opened_building = self.game_manager.get_chosen_building()
         if not opened_building.is_town:
             logger.error("opened spawn for not town!", "GUISpawn.open()")
             back_window_state()
             return
         town = opened_building.town
-        pawns = root.game_manager.pawns_manager.get_all_pawns_sample_for_fraction(root.player_id)
+        pawns = self.game_manager.pawns_manager.get_all_pawns_sample_for_fraction(root.player_id)
 
         self.spawns = []
         for pawn in pawns:
@@ -89,11 +92,11 @@ class GUISpawn:
         return False
 
     def _town_has_enought_resources(self, town: "Town", pawn: dict) -> bool:
-        if root.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], town):
+        if self.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], town)[0]:
             return True
         for building in town.conection:
             if building.category == "storage":
-                if root.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], building):
+                if self.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], building)[0]:
                     return True
         return False
 

@@ -38,18 +38,18 @@ def main():
             root.game_manager.gui.show_info_under_mouse()
         else:
             time_withoute_mouse_moving += 1
-            
+
         if root.game_manager.input_processor.is_move_button_pressed():
             root.game_manager.input_processor.move()
+            py.display.update()
         
         root.game_manager.messenger.tick()
 
         if root.need_update_gui:
             root.game_manager.draw()
-        else:
+            py.display.update()
+        elif logger.logging_errors != [] or logger.logging_info != []:
             logger.write_down()
-
-        py.display.update()
 
         clock.tick(root.config["FPS"])
         print(f"FPS: {clock.get_fps():.2f}\r", end="")

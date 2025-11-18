@@ -2,6 +2,12 @@ import pygame as py
 from .. import root
 import copy
 
+def get_cell_size() -> tuple[int, int]:
+    return root.cell_sizes[root.cell_size_scale]
+
+def get_cell_side_size() -> int:
+    return root.cell_sizes[root.cell_size_scale][0]
+
 def update_gui():
     '''
     update all gui element

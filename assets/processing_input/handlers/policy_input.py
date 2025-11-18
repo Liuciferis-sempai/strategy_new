@@ -1,10 +1,14 @@
 import pygame as py
 from ... import root
 from ..basic_input_process import BasicInputProcessor
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
 
 class PolicyInputProcessor(BasicInputProcessor):
-    def __init__(self, root_prcessor_input):
-        super().__init__(root_prcessor_input)
+    def __init__(self, root_prcessor_input, game_manager: "GameManager"):
+        super().__init__(root_prcessor_input, game_manager)
 
     #@logger
     def process_keydown(self, event:py.event.Event):
@@ -20,7 +24,7 @@ class PolicyInputProcessor(BasicInputProcessor):
         if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
         
         if event.button == 4:
-            root.game_manager.gui.policy.scroll_up()
+            self.game_manager.gui.policy.scroll_up()
         elif event.button == 5:
-            root.game_manager.gui.policy.scroll_down()
+            self.game_manager.gui.policy.scroll_down()
         root.update_gui()

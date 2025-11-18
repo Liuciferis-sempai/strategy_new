@@ -1,6 +1,7 @@
 import pygame as py
 from .. import root
 from ..root import logger
+from ..auxiliary_stuff import get_cell_size, get_cell_side_size
 from copy import deepcopy
 
 class Cell(py.sprite.Sprite):
@@ -24,10 +25,12 @@ class Cell(py.sprite.Sprite):
         self.pawns = data.get("pawns", [])
         self.chosen_pawn_index = -1
 
-        self.mark_image = py.Surface((root.cell_sizes[root.cell_size_scale][0]+10, root.cell_sizes[root.cell_size_scale][1]+10), py.SRCALPHA)
+        cell_side_size = get_cell_side_size()
+
+        self.mark_image = py.Surface((cell_side_size+10, cell_side_size+10), py.SRCALPHA)
         self.mark_image.fill((0, 0, 0, 0))
         self.mark_image.set_alpha(0)
-        self.surface = py.Surface((root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1]), py.SRCALPHA)
+        self.surface = py.Surface((cell_side_size, cell_side_size), py.SRCALPHA)
         self.surface.fill((180, 180, 180))
         self._set_graph()
     
@@ -74,16 +77,17 @@ class Cell(py.sprite.Sprite):
     
     def _open_pawn(self):
         pawn = root.game_manager.pawns_manager.get_pawn_by_id(self.pawns[self.chosen_pawn_index]["id"])
-        root.game_manager.gui.game.open_main_info_window(pawn.name)
+        root.game_manager.gui.game.open_main_info_window(f"*{pawn.name}")
         if root.player_id == self.pawns[self.chosen_pawn_index].get("fraction_id"):
-            root.game_manager.set_opened_pawn(self.pawns[self.chosen_pawn_index])
+            root.game_manager.set_chosen_pawn(self.pawns[self.chosen_pawn_index])
             root.game_manager.gui.game.open_pawn()
             root.game_manager.world_map.mark_movement_region(self.pawns[self.chosen_pawn_index].get("coord"), pawn.data["movement_points"])
 
     def _open_building(self):
         if self.buildings.get("fraction_id") == root.player_id:
-            root.game_manager.gui.game.open_building(self.buildings)
-        root.game_manager.gui.game.open_main_info_window(self.buildings.get("name", "unknow"))
+            root.game_manager.gui.game.open_building()
+            root.game_manager.set_chosen_building(self.buildings)
+        root.game_manager.gui.game.open_main_info_window(f"*{self.buildings.get("name", "unknow")}")
 
     def change_type(self, new_type: str):
         self.type = new_type
@@ -110,10 +114,12 @@ class Cell(py.sprite.Sprite):
         self._set_graph()
 
     def resize(self):
-        self.position = (self.coord[0]*root.cell_sizes[root.cell_size_scale][0]+5*self.coord[0], self.coord[1]*root.cell_sizes[root.cell_size_scale][1]+5*self.coord[1])
-        self.surface = py.Surface((root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1]), py.SRCALPHA)
+        cell_side_size = get_cell_side_size()
+
+        self.position = (self.coord[0]*cell_side_size+5*self.coord[0], self.coord[1]*cell_side_size+5*self.coord[1])
+        self.surface = py.Surface((cell_side_size, cell_side_size), py.SRCALPHA)
         self.change_display_mode(self.display_mode)
-        self.mark_image = py.Surface((root.cell_sizes[root.cell_size_scale][0]+10, root.cell_sizes[root.cell_size_scale][1]+10), py.SRCALPHA)
+        self.mark_image = py.Surface((cell_side_size+10, cell_side_size+10), py.SRCALPHA)
         self._set_graph()
 
     def mark(self, color: tuple[int, int, int, int]=(255, 0, 0, 100)):
@@ -151,21 +157,21 @@ class Cell(py.sprite.Sprite):
 
     def _set_graph(self):
         self.bg_image = root.image_manager.get_worldcell_image(f"land/{self.land}", "land")
-        #self.bg_image = py.transform.scale(self.bg_image, root.cell_sizes[root.cell_size_scale])
+        #self.bg_image = py.transform.scale(self.bg_image, get_cell_size())
 
         if self.fauna != {}:
             self.fauna_image = root.image_manager.get_worldcell_image(f"fauna/{self.fauna.get("img")}", "fauna")
-            #self.fauna_image = py.transform.scale(self.fauna_image, root.cell_sizes[root.cell_size_scale])
+            #self.fauna_image = py.transform.scale(self.fauna_image, get_cell_size())
             self.bg_image.blit(self.fauna_image, (0, 0))
 
         if self.flora != {}:
             self.flora_image = root.image_manager.get_worldcell_image(f"flora/{self.flora.get("img")}", "flora")
-            #self.flora_image = py.transform.scale(self.flora_image, root.cell_sizes[root.cell_size_scale])
+            #self.flora_image = py.transform.scale(self.flora_image, get_cell_size())
             self.bg_image.blit(self.flora_image, (0, 0))
         
         if self.buildings != {}:
             self.buildings_image = root.image_manager.get_image(f"data/buildings/img/{self.buildings.get("img")}", "data/buildings/img/none.png")
-            self.buildings_image = py.transform.scale(self.buildings_image, root.cell_sizes[root.cell_size_scale])
+            self.buildings_image = py.transform.scale(self.buildings_image, get_cell_size())
             self.bg_image.blit(self.buildings_image, (0, 0))
         
         if self.pawns != []:
@@ -174,7 +180,7 @@ class Cell(py.sprite.Sprite):
                 self.pawns_image_list.append(root.image_manager.get_image(f"data/pawns/img/{pawn.get("img")}", "data/pawns/img/none.png"))
 
             for pawn_image in self.pawns_image_list:
-                pawn_image = py.transform.scale(pawn_image, root.cell_sizes[root.cell_size_scale])
+                pawn_image = py.transform.scale(pawn_image, get_cell_size())
                 self.bg_image.blit(pawn_image, (0, 0))
 
         self.rect = self.bg_image.get_rect(topleft=self.position)

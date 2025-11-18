@@ -12,8 +12,13 @@ from ...root import logger
 from ...auxiliary_stuff import timeit
 from typing import Any, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
+
 class GUIReciept:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.reciepts = None
         self.buttons: list[UseReciept] = []
         self.reciepts_list = []
@@ -24,19 +29,19 @@ class GUIReciept:
     
     def open(self):
         self.reciept_y_offset = 0
-        chosen_cell = root.game_manager.get_chosen_cell()
+        chosen_cell = self.game_manager.get_chosen_cell()
 
         self.reciepts_list = []
-        player_fraction = root.game_manager.fraction_manager.get_player_fraction()
+        player_fraction = self.game_manager.fraction_manager.get_player_fraction()
         if not player_fraction:
             logger.error("Player fraction not found when opening GUIReciept", "GUIReciept.open()")
             #print("Player Fraction doesnt found")
             return False
-        self.reciepts = root.game_manager.reciept_manager.get_reciepts_for_workbench(chosen_cell.buildings["type"], chosen_cell.buildings["level"]) #type: ignore
+        self.reciepts = self.game_manager.reciept_manager.get_reciepts_for_workbench(chosen_cell.buildings["type"], chosen_cell.buildings["level"]) #type: ignore
         self.reciepts = [reciept for reciept in self.reciepts if reciept["id"] in player_fraction.reciepts]
-        building = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
+        building = self.game_manager.get_chosen_building()
         for reciept in self.reciepts:
-            is_allowed = root.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building)
+            is_allowed = self.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building)[0]
             is_allowed_img = "allowed.png" if is_allowed else "not_allowed.png"
             is_allowed_message = "building_has_not_en_res" if is_allowed else ""
 

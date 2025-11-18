@@ -1,10 +1,14 @@
 import pygame as py
 from ... import root
 from ..basic_input_process import BasicInputProcessor
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
 
 class ShareMenuInputProcessor(BasicInputProcessor):
-    def __init__(self, root_prcessor_input):
-        super().__init__(root_prcessor_input)
+    def __init__(self, root_prcessor_input, game_manager: "GameManager"):
+        super().__init__(root_prcessor_input, game_manager)
 
     #@logger
     def process_keydown(self, event:py.event.Event):
@@ -20,18 +24,18 @@ class ShareMenuInputProcessor(BasicInputProcessor):
         if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
         
         if event.button in [1, 3]:
-            for cell, _ in root.game_manager.gui.sharemenu.share_starter_inventory:
+            for cell, _ in self.game_manager.gui.sharemenu.share_starter_inventory:
                 if cell.rect.collidepoint(mouse_pos):
-                    root.game_manager.gui.sharemenu.click(cell, "starter", event.button)
+                    self.game_manager.gui.sharemenu.click(cell, "starter", event.button)
                     return
-            if isinstance(root.game_manager.gui.sharemenu.share_target_inventory, list):
-                for cell, _ in root.game_manager.gui.sharemenu.share_target_inventory:
+            if isinstance(self.game_manager.gui.sharemenu.share_target_inventory, list):
+                for cell, _ in self.game_manager.gui.sharemenu.share_target_inventory:
                     if cell.rect.collidepoint(mouse_pos):
-                        root.game_manager.gui.sharemenu.click(cell, "target", event.button)
+                        self.game_manager.gui.sharemenu.click(cell, "target", event.button)
                         return
-            elif isinstance(root.game_manager.gui.sharemenu.share_starter_inventory, dict):
-                for inventory_type in root.game_manager.gui.sharemenu.share_target_inventory.keys(): #type: ignore
-                    for cell, _ in root.game_manager.gui.sharemenu.share_target_inventory[inventory_type]:
+            elif isinstance(self.game_manager.gui.sharemenu.share_starter_inventory, dict):
+                for inventory_type in self.game_manager.gui.sharemenu.share_target_inventory.keys(): #type: ignore
+                    for cell, _ in self.game_manager.gui.sharemenu.share_target_inventory[inventory_type]:
                         if cell.rect.collidepoint(mouse_pos):
-                            root.game_manager.gui.sharemenu.click(cell, "target", event.button)
+                            self.game_manager.gui.sharemenu.click(cell, "target", event.button)
                             return

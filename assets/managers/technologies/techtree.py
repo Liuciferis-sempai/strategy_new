@@ -4,6 +4,10 @@ import os
 from ... import root
 from .tech import Tech
 from ...root import loading
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
 
 class Link(py.sprite.Sprite):
     def __init__(self, prerequisite: Tech, tech: Tech):
@@ -12,14 +16,12 @@ class Link(py.sprite.Sprite):
         self.prerequisite = prerequisite
         self.tech = tech
 
-        self.draw()
-
     def draw(self):
         py.draw.line(root.screen, (255, 0, 0), (self.prerequisite.rect.right, self.prerequisite.rect.centery), (self.tech.rect.left, self.tech.rect.centery))
 
 class Techtree:
-    def __init__(self, game_manager):
-        
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
         #self.scale = 1.0
 
         self.techs = []
@@ -49,7 +51,7 @@ class Techtree:
         for tech in self.techs:
             if tech.rect.collidepoint(mouse_pos):
                 if tech.is_allowed():
-                    root.game_manager.fraction_manager.edit_fraction(id=root.player_id, data={"set": True, "research_technology": tech.data.get("id")})
+                    self.game_manager.fraction_manager.edit_fraction(id=root.player_id, data={"set": True, "research_technology": tech.data.get("id")})
                     if self.chosen_tech is not None:
                         self.chosen_tech.chosen = False
                         self.chosen_tech.chosen_tech()
@@ -61,7 +63,7 @@ class Techtree:
         return False
 
     def set_none_tech(self):
-        root.game_manager.fraction_manager.edit_fraction(id=root.player_id, data={"set": True, "research_technology": "none_technology"})
+        self.game_manager.fraction_manager.edit_fraction(id=root.player_id, data={"set": True, "research_technology": "none_technology"})
         if self.chosen_tech is not None:
             self.chosen_tech.chosen = False
             self.chosen_tech.chosen_tech()

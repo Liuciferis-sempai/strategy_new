@@ -3,6 +3,7 @@ from .auxiliary_stuff import *
 write_txt_file("data/logs.txt", "")
 write_txt_file("data/errors.txt", "")
 
+from .helpers.logger import Logger
 logger = Logger()
 
 #pygame load
@@ -61,5 +62,6 @@ image_manager = ImageManager()
 loading.draw("Game initializing...")
 from .gamemanager import GameManager
 game_manager = GameManager()
-game_manager.gui.initialize()
+#game_manager.initialize()
+#game_manager.gui.initialize()
 game_manager.gui.change_position_for_new_screen_sizes()

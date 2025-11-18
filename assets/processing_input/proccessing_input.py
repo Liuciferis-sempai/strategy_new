@@ -12,20 +12,25 @@ from .handlers.sharemenu_input import ShareMenuInputProcessor
 from .handlers.technology_input import TechnologyInputProcessor
 from .handlers.writing_input import WritingInputProcessor
 from .handlers.spawn_input import SpawnInputProcessor
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..gamemanager import GameManager
 
 class InputKeyProcessor:
-    def __init__(self,):
-        
-        self.building_input = BuildingInputProcessor(self)
-        self.fraction_input = FractionInputProcessor(self)
-        self.game_input = GameInputProcessor(self)
-        self.inventory_input = InventoryInputProcessor(self)
-        self.policy_input = PolicyInputProcessor(self)
-        self.reciept_input = RecieptInputProcessor(self)
-        self.share_menu_input = ShareMenuInputProcessor(self)
-        self.technology_input = TechnologyInputProcessor(self)
-        self.writing_input = WritingInputProcessor(self)
-        self.spawn = SpawnInputProcessor(self)
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
+        self.building_input = BuildingInputProcessor(self, game_manager)
+        self.fraction_input = FractionInputProcessor(self, game_manager)
+        self.game_input = GameInputProcessor(self, game_manager)
+        self.inventory_input = InventoryInputProcessor(self, game_manager)
+        self.policy_input = PolicyInputProcessor(self, game_manager)
+        self.reciept_input = RecieptInputProcessor(self, game_manager)
+        self.share_menu_input = ShareMenuInputProcessor(self, game_manager)
+        self.technology_input = TechnologyInputProcessor(self, game_manager)
+        self.writing_input = WritingInputProcessor(self, game_manager)
+        self.spawn = SpawnInputProcessor(self, game_manager)
 
         self.is_ctrl_pressed = False
         self.is_shift_pressed = False
@@ -43,13 +48,15 @@ class InputKeyProcessor:
     def move(self):
         if not root.input_field_active:
             if self.k_w_pressed:
-                root.game_manager.gui.move_up()
+                self.game_manager.gui.move_up()
             elif self.k_s_pressed:
-                root.game_manager.gui.move_down()
+                self.game_manager.gui.move_down()
             if self.k_a_pressed:
-                root.game_manager.gui.move_left()
+                self.game_manager.gui.move_left()
             elif self.k_d_pressed:
-                root.game_manager.gui.move_right()
+                self.game_manager.gui.move_right()
+            self.game_manager.world_map.draw()
+            self.game_manager.messenger.draw()
         else:
             self.k_a_pressed = False
             self.k_d_pressed = False

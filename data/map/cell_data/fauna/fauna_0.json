@@ -2,6 +2,10 @@
     "name": "cows",
     "desc": "cows_desc",
     "img": "cows.png",
+    "loot": {
+        "resource_1": 2,
+        "resource_0": 1
+    },
     "priority": 1,
     "frame": {
         "temperature": [0.4, 0.8],

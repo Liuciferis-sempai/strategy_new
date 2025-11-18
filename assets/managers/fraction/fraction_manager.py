@@ -4,8 +4,14 @@ from ...root import logger
 from typing import Any, TYPE_CHECKING
 from ..policy.policycard import PolicyCard
 
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
+
 class FractionManager:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+        self._default_fraction = self.game_manager.get_default_fraction()
+
         self.fractions: list = []
         self.allowed_fraction_ids: list[int] = []
 
@@ -24,7 +30,7 @@ class FractionManager:
             if fraction.name == name:
                 return fraction
         logger.error(f"fraction by name {name} not found", f"AllFactions.get_fraction_by_name({name})")
-        return Fraction()
+        return self._default_fraction
 
     def get_all_fractions(self) -> list[Fraction]:
         return self.fractions
@@ -34,14 +40,14 @@ class FractionManager:
             if fraction.type == "player" and fraction.id == root.player_id:
                 return fraction
         logger.error(f"player fraction not found", "AllFactions.get_fraction_by_name()")
-        return Fraction()
+        return self._default_fraction
 
     def get_fraction_by_id(self, id: int) -> Fraction:
         for fraction in self.fractions:
             if fraction.id == id:
                 return fraction
         logger.error(f"fraction id not found", f"AllFactions.get_fraction_by_name({id})")
-        return Fraction()
+        return self._default_fraction
 
     def edit_fraction(self, name:str="", id:int=0, data:dict={}) -> bool:
         if name == "" and id == 0:
@@ -57,9 +63,9 @@ class FractionManager:
             fraction = self.get_fraction_by_id(fraction)
         
         if isinstance(policy, str):
-            policy = root.game_manager.policy_table.get_policy_by_id(policy)
+            policy = self.game_manager.policy_table.get_policy_by_id(policy)
         elif isinstance(policy, dict):
-            policy = root.game_manager.policy_table.get_policy_by_id(policy.get("id", "unknow"))
+            policy = self.game_manager.policy_table.get_policy_by_id(policy.get("id", "unknow"))
         
         fraction.policies.append(policy)
         return f"added {policy.id} to {fraction.name} ({fraction.id})"
@@ -69,9 +75,9 @@ class FractionManager:
             fraction = self.get_fraction_by_id(fraction)
         
         if isinstance(policy, str):
-            policy = root.game_manager.policy_table.get_policy_by_id(policy)
+            policy = self.game_manager.policy_table.get_policy_by_id(policy)
         elif isinstance(policy, dict):
-            policy = root.game_manager.policy_table.get_policy_by_id(policy.get("id", "unknow"))
+            policy = self.game_manager.policy_table.get_policy_by_id(policy.get("id", "unknow"))
         
         print(fraction.policies)
         fraction.policies.remove(policy)

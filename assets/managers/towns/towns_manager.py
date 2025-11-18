@@ -6,11 +6,15 @@ from .popgroup import PopGroup
 import copy
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
+
 from .town import Town
 
 class TownManager:
-    def __init__(self,):
-        
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.grouptypes: list[dict] = []
         self.towns: list[Town] = []
         self.allowed_town_id = 0
@@ -34,7 +38,7 @@ class TownManager:
         if isinstance(town, Town):
             self.allowed_town_id += 1
             self.towns.append(town)
-            fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
+            fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
             fraction.towns.append(town)
             fraction.statistics["town_count"] += 1
             return town

@@ -1,6 +1,6 @@
 from types import UnionType
 from ... import root
-from ...root import logger
+from ...root import logger, language
 from ...auxiliary_stuff import update_gui
 from typing import Any, TYPE_CHECKING
 import math
@@ -17,7 +17,7 @@ class Building:
         if self.is_default:
             logger.warning("created default building", f"Building.__init__(...)")
         self.coord = coord
-        self.name = data["name"]
+        self.name = language.get(data["name"])
         self.type = data["type"]
         self.category = data["category"]
         self.data = data.copy()

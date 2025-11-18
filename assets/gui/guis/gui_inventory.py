@@ -9,11 +9,16 @@ from ..listof import *
 from ..inputfield import *
 from ... import root
 from ...root import logger
-from ...auxiliary_stuff import timeit
+from ...auxiliary_stuff import timeit, back_window_state
 from typing import Any, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
+
 class GUIInventory:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.owner = None
         self.owner_inventory = []
         self.owner_inventory_names = []
@@ -65,12 +70,16 @@ class GUIInventory:
             self.owner_ico = Icon(root.window_size[0]//8, int(root.window_size[1]//2), img=self.owner.data.get("img", "none.png"), spec_path="data/buildings/img")#type: ignore 
     
     def open(self):
-        if not root.game_manager.is_opened_pawn_default():
-            self.owner = root.game_manager.pawns_manager.get_pawn_by_id(root.game_manager.get_opened_pawn().id)
+        if not self.game_manager.is_chosen_pawn_default():
+            self.owner = self.game_manager.get_chosen_pawn()
             self.owner_type = "pawn"
-        elif not root.game_manager.is_chosen_cell_default():
-            self.owner = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
+        elif not self.game_manager.is_chosen_building_defult():
+            self.owner = self.game_manager.get_chosen_building()
             self.owner_type = "building"
+        else:
+            logger.error("can not open pawn or building", "GUIInventory")
+            back_window_state()
+            return
         
         self.change_position_for_new_screen_sizes()
         self.set_inventory()

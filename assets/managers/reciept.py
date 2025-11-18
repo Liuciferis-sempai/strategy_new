@@ -3,9 +3,14 @@ import os
 from ..auxiliary_stuff import read_json_file
 from ..root import loading, logger
 import copy
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..gamemanager import GameManager
 
 class RecieptsManager:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
         self.reciepts = []
 
         loading.draw("Loading reciepts...")
@@ -35,7 +40,7 @@ class RecieptsManager:
         return allowed_reciepts
 
     def use_recipe(self, reciept_id: str):
-        building = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
+        building = root.game_manager.get_chosen_building()
         if not building.can_work:
             logger.warning(f"{building} can not work", f"RecieptManager.use_reciept({reciept_id})")
             return
@@ -43,7 +48,7 @@ class RecieptsManager:
         for reciept in self.get_reciepts_for_workbench(building.type, building.level):
             if reciept["id"] == reciept_id:
                 if  not root.game_manager.is_chosen_cell_default():
-                    if root.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building) and len(building.queue) < building.max_queue:
+                    if root.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building)[0] and len(building.queue) < building.max_queue:
                         reciept["time"] /= building.data["speed_of_work_mod"]
                         if "." in str(reciept["time"]):
                             reciept["time"] = str(reciept["time"]).split(".")

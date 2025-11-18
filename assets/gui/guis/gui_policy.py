@@ -14,14 +14,17 @@ from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from managers.policy.policycard import PolicyCard
+    from ...gamemanager import GameManager
 
 class GUIGPolicy:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.policies: list[PolicyCard] = []
     
     def open(self):
-        root.game_manager.policy_table.load_policies_for_player()
-        self.policies = root.game_manager.fraction_manager.get_player_fraction().policies
+        self.game_manager.policy_table.load_policies_for_player()
+        self.policies = self.game_manager.fraction_manager.get_player_fraction().policies
     
     def draw(self):
         root.screen.fill((0, 0, 0))

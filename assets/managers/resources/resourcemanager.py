@@ -3,9 +3,15 @@ from ...auxiliary_stuff import read_json_file
 from .resource_type import ResourceType
 from ... import root
 from ...root import loading, logger
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
 
 class ResourceManager:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.types_of_resources = []
 
         loading.draw("Loading resources...")

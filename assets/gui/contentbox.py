@@ -34,8 +34,6 @@ class ContentBox(py.sprite.Sprite):
         self.value_surface = self.font.render(str(value), False, (0, 255, 0))
         self.value_rect = self.value_surface.get_rect(topleft=(position[0] - 5, 10))
 
-        self.draw()
-    
     def get_value(self) -> int:
         return self.value
     
@@ -60,7 +58,6 @@ class ContentBox(py.sprite.Sprite):
         self.position = new_position
         self.rect.topleft = new_position
         self.value_rect.topleft = (new_position[0] - 5, new_position[1])
-        self.draw()
     
     def draw(self):
         self.bg.blit(self.image, (0, 0))

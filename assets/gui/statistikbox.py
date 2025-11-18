@@ -27,7 +27,6 @@ class Statistikbox(py.sprite.Sprite):
     def change_position(self, position: tuple[int, int]):
         self.position = position
         self.rect.topleft = position
-        self.draw()
     
     def update_statistics(self, data:dict={}):
         self._wrapping_text(data)

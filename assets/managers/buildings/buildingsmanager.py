@@ -4,10 +4,16 @@ from .building import Building
 from ... import root
 from ...world.cell import Cell
 from ...root import loading, logger
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
 
 class BuildingsManager:
-    def __init__(self):
-        self._default_building: "Building" = Building()
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
+        self._default_building: "Building" = self.game_manager.get_default_building()
          
         self.buildings: dict[str, Building] = {}
         self.types_of_buildings: list[dict] = []
@@ -67,7 +73,7 @@ class BuildingsManager:
         data["name"] = "scheme of_" + data["name"]
         data["img"] = data["img"].replace(".png", "_scheme.png")
         data["scheme"] = True
-        cell = root.game_manager.world_map.get_cell_by_coord(coord)
+        cell = self.game_manager.world_map.get_cell_by_coord(coord)
         building = Building(coord, cell, data.copy(), False)
         self.buildings[str(coord)] = building
 
@@ -78,14 +84,14 @@ class BuildingsManager:
         data = data.copy()
 
         data["fraction_id"] = fraction_id
-        cell = root.game_manager.world_map.get_cell_by_coord(coord)
+        cell = self.game_manager.world_map.get_cell_by_coord(coord)
         building = Building(coord, cell, data, False)
         self.buildings[str(coord)] = building
 
         cell.add_building({"name": data["name"], "desc": data["desc"], "coord": coord, "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
         self._add_to_fraction(building, fraction_id)
         
-        fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
+        fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         for town in fraction.towns:
             town.check_conection()
 
@@ -95,18 +101,18 @@ class BuildingsManager:
         self._remove_from_fraction(building, building.fraction_id)
 
         self.buildings.pop(str(coord))
-        cell = root.game_manager.world_map.get_cell_by_coord(coord)
+        cell = self.game_manager.world_map.get_cell_by_coord(coord)
         cell.remove_building()
 
     def _add_to_fraction(self, building: "Building", fraction_id: int):
-        fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
+        fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         fraction.statistics["building_count"] += 1
         fraction.buildings.append(building)
         if building.category == "producer":
             fraction.production["buildings"].append(building)
     
     def _remove_from_fraction(self, building: "Building", fraction_id: int):
-        fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
+        fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         fraction.statistics["building_count"] -= 1 #type: ignore
         fraction.buildings.remove(building)
         if building.is_town:
@@ -140,7 +146,7 @@ class BuildingsManager:
         buildings_by_types = {}
         uniqu_buildings = []
         if only_allowed_for_players_fraction:
-            player_fraction = root.game_manager.fraction_manager.get_player_fraction()
+            player_fraction = self.game_manager.fraction_manager.get_player_fraction()
             if not player_fraction:
                 logger.error("No player fraction found in get_all_buildings_sorted_by_types", f"BuildingsManager.get_all_buildings_sorted_by_types({only_allowed_for_players_fraction})")
                 return buildings_by_types
@@ -167,7 +173,7 @@ class BuildingsManager:
     
     def try_to_build_on_cell(self, cell: "Cell"):
         if self.buildings.get(str(cell.coord), None) == None:
-            self.build_scheme(root.game_manager.gui.game.sticked_object.img.replace(".png", ""), cell.coord, root.player_id) #type: ignore
+            self.build_scheme(self.game_manager.gui.game.sticked_object.img.replace(".png", ""), cell.coord, root.player_id) #type: ignore
         
     def remove_resource(self, target: Cell|Building, resource: str, amout: int, inv_type: str = "input") -> str:
         if isinstance(target, Cell):

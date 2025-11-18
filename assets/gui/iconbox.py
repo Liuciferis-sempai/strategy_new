@@ -21,8 +21,6 @@ class Icon(py.sprite.Sprite):
         self.image = py.transform.scale(self.image, (self.width, self.height))
         self.rect = self.image.get_rect(topleft=position)
 
-        self.draw()
-
     def draw(self):
         self.bg_image.blit(self.image, (0, 0))
         root.screen.blit(self.bg_image, self.bg_rect)
@@ -41,4 +39,3 @@ class Icon(py.sprite.Sprite):
         self.position = position
         self.rect.topleft = position
         self.bg_rect.topleft = position
-        self.draw()

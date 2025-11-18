@@ -9,11 +9,16 @@ from ..listof import *
 from ..inputfield import *
 from ... import root
 from ...root import logger
-from ...auxiliary_stuff import timeit
+from ...auxiliary_stuff import timeit, get_cell_side_size, get_cell_size
 from typing import Any, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
+
 class GUIShareMenu:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.share_starter = None
         self.share_target = None
         self.share_starter_inventory = []
@@ -78,11 +83,11 @@ class GUIShareMenu:
             logger.error("Share starter or target not found", f"GUIShareMenu._set_inventories({target_inventory}, {max_target_inventory})")
     
     def open(self, target:str):
-        self.share_starter = root.game_manager.pawns_manager.get_pawn_by_id(root.game_manager.get_opened_pawn().id)
-        self.share_target = root.game_manager.pawns_manager.get_pawn_by_type(target, root.game_manager.get_target_coord())
+        self.share_starter = self.game_manager.pawns_manager.get_pawn_by_id(self.game_manager.get_chosen_pawn().id)
+        self.share_target = self.game_manager.pawns_manager.get_pawn_by_type(target, self.game_manager.get_target_coord())
 
         if self.share_target.is_default:
-            self.share_target = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_target_coord())
+            self.share_target = self.game_manager.buildings_manager.get_building_by_coord(self.game_manager.get_target_coord())
             self.share_target_type = "building"
         else:
             self.share_target_type = "pawn"
@@ -132,45 +137,47 @@ class GUIShareMenu:
         root.screen.fill((100, 100, 100))
         py.draw.line(root.screen, (255, 255, 255), (root.window_size[0]//2, 0), (root.window_size[0]//2, root.window_size[1]), 2)
 
-        self.share_starter_ico.change_position((root.cell_sizes[root.cell_size_scale][0]//4, root.window_size[1]//2 - self.share_starter_ico.height//2)) #type: ignore
+        cell_side_size = get_cell_side_size()
+
+        self.share_starter_ico.change_position((cell_side_size//4, root.window_size[1]//2 - self.share_starter_ico.height//2)) #type: ignore
         self.share_starter_ico.draw() #type: ignore
 
-        self.share_target_ico.change_position((root.window_size[0]-root.cell_sizes[root.cell_size_scale][0]//4-self.share_target_ico.width, root.window_size[1]//2 - self.share_target_ico.height//2)) #type: ignore
+        self.share_target_ico.change_position((root.window_size[0]-cell_side_size//4-self.share_target_ico.width, root.window_size[1]//2 - self.share_target_ico.height//2)) #type: ignore
         self.share_target_ico.draw() #type: ignore
 
         y_offset = 0
         x_offset = 0
         for cell, amout in self.share_starter_inventory:
-            if root.cell_sizes[root.cell_size_scale][0]//4+self.share_starter_ico.width+root.cell_sizes[root.cell_size_scale][0]//4 + (cell.width+10)*(x_offset+1) > root.window_size[0]//2+root.cell_sizes[root.cell_size_scale][0]//4: #type:ignore
+            if cell_side_size//4+self.share_starter_ico.width+cell_side_size//4 + (cell.width+10)*(x_offset+1) > root.window_size[0]//2+cell_side_size//4: #type:ignore
                 y_offset += 1
                 x_offset = 0
 
-            cell.change_position((root.cell_sizes[root.cell_size_scale][0]//2+self.share_starter_ico.width + (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_starter_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
-            amout.change_position((root.cell_sizes[root.cell_size_scale][0]//2+self.share_starter_ico.width + (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_starter_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
+            cell.change_position((cell_side_size//2+self.share_starter_ico.width + (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_starter_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
+            amout.change_position((cell_side_size//2+self.share_starter_ico.width + (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_starter_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
             x_offset += 1
 
         y_offset = 0
         x_offset = 0
         if isinstance(self.share_target_inventory, list):
             for cell, amout in self.share_target_inventory:
-                if root.window_size[0] - root.cell_sizes[root.cell_size_scale][0]//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset < root.window_size[0]//2-root.cell_sizes[root.cell_size_scale][0]//4: #type:ignore
+                if root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset < root.window_size[0]//2-cell_side_size//4: #type:ignore
                     y_offset += 1
                     x_offset = 0
 
-                cell.change_position((root.window_size[0] - root.cell_sizes[root.cell_size_scale][0]//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
-                amout.change_position((root.window_size[0] - root.cell_sizes[root.cell_size_scale][0]//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
+                cell.change_position((root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
+                amout.change_position((root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
                 x_offset += 1
         elif isinstance(self.share_target_inventory, dict):
             for i, inventory_type in enumerate(self.share_starter_inventory_org.keys()): #type: ignore
                 self.share_target_inventory_names[i].change_position((root.window_size[0]//2+10, root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset)) #type:ignore
                 y_offset += 1
                 for cell, amout in self.share_target_inventory[inventory_type]:
-                    if root.window_size[0] - root.cell_sizes[root.cell_size_scale][0]//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset < root.window_size[0]//2-root.cell_sizes[root.cell_size_scale][0]//4: #type:ignore
+                    if root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset < root.window_size[0]//2-cell_side_size//4: #type:ignore
                         y_offset += 1
                         x_offset = 0
 
-                    cell.change_position((root.window_size[0] - root.cell_sizes[root.cell_size_scale][0]//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
-                    amout.change_position((root.window_size[0] - root.cell_sizes[root.cell_size_scale][0]//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
+                    cell.change_position((root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
+                    amout.change_position((root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
                     x_offset += 1
                 y_offset += 1
                 x_offset = 0

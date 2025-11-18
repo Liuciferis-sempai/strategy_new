@@ -12,6 +12,7 @@ class InputField(py.sprite.Sprite):
         self.value = ""
         self.font_size = font_size
         self.bg_color = bg_color
+        self.ch_color = ch_color
         self.hidden = hidden
 
         self.processor = input_processor
@@ -75,6 +76,9 @@ class InputField(py.sprite.Sprite):
         self.image = py.Surface((self.width, self.height))
         self.image.fill(self.bg_color)
 
+        self.ch_image = py.Surface((self.width+10, self.height+10))
+        self.ch_image.fill(self.ch_color)
+
         self.rect = self.image.get_rect()
         self.rect.topleft = self.position
 
@@ -85,4 +89,3 @@ class InputField(py.sprite.Sprite):
         self.rect.topleft = new_position
         self.ch_rect.topleft = (new_position[0]-5, new_position[1]-5)
         self.text_rect.topleft = new_position
-        self.draw()

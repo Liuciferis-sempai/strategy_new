@@ -1,19 +1,24 @@
 import pygame as py
 from .. import root
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..gamemanager import GameManager
 
 class BasicInputProcessor:
-    def __init__(self, root_prcessor_input):
+    def __init__(self, root_prcessor_input, game_manager: "GameManager"):
         self.root_processor = root_prcessor_input
+        self.game_manager = game_manager
 
     def process_keydown_for_inputfield(self, event:py.event.Event) -> bool:
         if root.input_field_active:
             if event.key != py.K_CARET:
-                root.game_manager.get_chosen_inputfield().key_down(event)
+                self.game_manager.get_chosen_inputfield().key_down(event)
                 return True
         return False
 
     def process_mousebutton_for_inputfield(self, mouse_pos: tuple[int, int]) -> bool:
-        for inputfield in root.game_manager.input_fields:
+        for inputfield in self.game_manager.input_fields:
             if inputfield.rect.collidepoint(mouse_pos) and not inputfield.hidden:
                 inputfield.click()
                 return True

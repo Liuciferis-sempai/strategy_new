@@ -12,8 +12,13 @@ from ...root import logger
 from ...auxiliary_stuff import timeit
 from typing import Any, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
+
 class GUIWriting:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.writing = "" #type of input
         self.writing_index = 0
         
@@ -58,7 +63,7 @@ class GUIWriting:
             "symbol": self.all_input[1],
             "color": color
         }
-        root.game_manager.fraction_manager.edit_fraction(id=root.player_id, data=data)
+        self.game_manager.fraction_manager.edit_fraction(id=root.player_id, data=data)
     
     def update_input_field(self):
         self.input_field = py.font.Font(None, 30).render(self.input, False, (0, 0, 0))
@@ -79,7 +84,7 @@ class GUIWriting:
                 case _:
                     pass
         root.back_window_state()
-        root.game_manager.gui.fraction.open_player_fraction()
+        self.game_manager.gui.fraction.open_player_fraction()
         update_gui()
     
     def draw(self):

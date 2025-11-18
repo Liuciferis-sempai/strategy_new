@@ -46,8 +46,6 @@ class InfoBox(py.sprite.Sprite):
             line.get_rect(center=(self.width // 2, 40 + i * (self.font_size + 5))) for i, line in enumerate(self.lines_surface)
         ]
 
-        self.draw()
-
     def click(self):
         #print(f"{self.title} box clicked!")
         self.close()
@@ -64,7 +62,6 @@ class InfoBox(py.sprite.Sprite):
         self.rect.topleft = new_position
         for i, _ in enumerate(self.lines_surface):
             self.text_rect[i].topleft = (new_position[0] + 10, new_position[1] + 40 + i * (self.font_size + 5))
-        self.draw()
 
     def close(self):
         self.closed = True
@@ -77,8 +74,6 @@ class InfoBox(py.sprite.Sprite):
         
         self._update_title()
         self._update_text()
-
-        self.draw()
 
     def _update_title(self):
         self.title_surface = self.font.render(root.language.get(self.title), False, (0, 0, 0))

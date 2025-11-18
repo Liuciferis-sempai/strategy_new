@@ -12,12 +12,17 @@ from ...root import logger
 from ...auxiliary_stuff import timeit
 from typing import Any, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
+
 class GUIFraction:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.fraction_name_edit_button = FractionNameEditButton()
     
     def open_player_fraction(self):
-        self.player_fraction = root.game_manager.fraction_manager.get_player_fraction()
+        self.player_fraction = self.game_manager.fraction_manager.get_player_fraction()
         if not self.player_fraction:
             logger.error("Cannot find player fraction", "GUIFraction.open_player_fraction()")
             return

@@ -18,8 +18,8 @@ class CommandLine(py.sprite.Sprite):
             "ch_cell_c": "chosen_cell_coord",
             "ch_pawn": "chosen_pawn",
             "ch_pawn_c": "chosen_pawn_coord",
-            "op_pawn": "opened_pawn",
-            "op_pawn_c": "opened_pawn_coord",
+            "op_pawn": "chosen_pawn",
+            "op_pawn_c": "chosen_pawn_coord",
             "window": "window_size",
             "world": "world_map_size",
             "food_frame": "food_sufficiency_factor_frame",
@@ -28,7 +28,10 @@ class CommandLine(py.sprite.Sprite):
             "year": "year_length",
             "growth_rate": "base_growth_rate",
             "food_cons": "food_valued_consumption_per_person_factor",
-            "child": "children"
+            "child": "children",
+            "res": "resource",
+            "add_res": "add_resource",
+            "re_res": "remove_resource"
         }
 
     def __init__(self, color:tuple[int, int, int, int]=(100, 100, 100, 255), font_size:int=30, line_color:tuple[int, int, int, int]=(150, 150, 150, 255)):
@@ -99,6 +102,8 @@ class CommandLine(py.sprite.Sprite):
                     self._process_create_command(command[1:])
                 elif command_type == "damage":
                     self._process_attack_command(command[1:])
+                elif command_type == "help":
+                    self._process_help_command(command[1:])
                 else:
                     self._process_usual_command(command[0], command[1:])
             except Exception as e:
@@ -156,7 +161,7 @@ class CommandLine(py.sprite.Sprite):
         self.add_answer(attribute[0])
 
     def _process_add_command(self, splited_command: list[str]):
-        command_target = splited_command[0]
+        command_target = self._translate_value(splited_command[0])
 
         if command_target == "resource":
             effect_name = "add_resource"
@@ -172,7 +177,7 @@ class CommandLine(py.sprite.Sprite):
         self._process_usual_command(effect_name, splited_command[1:])
 
     def _process_remove_command(self, splited_command: list[str]):
-        command_target = splited_command[0]
+        command_target = self._translate_value(splited_command[0])
 
         if command_target == "resource":
             effect_name = "take_resource"
@@ -252,6 +257,28 @@ class CommandLine(py.sprite.Sprite):
             effect_data["size"][self._translate_value(entry)] = int(next(command))
         
         self.add_answer(root.game_manager.effect_manager.do(effect_name, effect_data))
+    
+    def _process_help_command(self, splited_command: list[str]):
+        if splited_command == []:
+            items = root.game_manager.effect_manager.effects.keys()
+            answer = f""
+            for key in items:
+                answer += f"{key}; "
+            self.add_answer(answer)
+        else:
+            effect_name = self._translate_value(splited_command[0])
+            if effect_name in root.game_manager.effect_manager.effects.keys():
+                items = root.game_manager.effect_manager.effects[effect_name].items()
+                answer = f"{effect_name}-> "
+                for key, value in items:
+                    answer += f"{key}: {value}; ".replace("|", " or ")
+                self.add_answer(answer)
+            elif effect_name == "target":
+                self.add_answer(f"to specify a target, it is enough to indicate its coordinates")
+            elif effect_name == "coord":
+                self.add_answer(f"the correct entry for coordinates is: x,y or x,y,z (default z is 0)")
+            else:
+                self.add_answer(f"unknow command '{effect_name}'")
 
     def _process_usual_command(self, effect_name: str, splited_command: list[str]):
         command = self._generate_command(splited_command)
@@ -352,7 +379,7 @@ class CommandLine(py.sprite.Sprite):
         self.image.fill(self.color)
         self.rect = py.Rect(self.position[0], self.position[1], self.width, self.height)
 
-        self.inputfield.change_size(self.width, self.height)
+        self.inputfield.change_size(self.width, self.font_size)
         self.inputfield.rect.top = self.height - self.font_size
 
     def draw(self):

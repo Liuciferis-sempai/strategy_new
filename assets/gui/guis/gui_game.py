@@ -9,15 +9,18 @@ from ..listof import *
 from ..inputfield import *
 from ... import root
 from ...root import logger
-from ...auxiliary_stuff import timeit
+from ...auxiliary_stuff import *
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from managers.pawns.pawn import Pawn
     from world.cell import Cell
+    from ...gamemanager import GameManager
 
 class GUIGame:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
         self.turn_counter = ContentBox(position=(10, 10), value=0, img="turn_ico.png", allowed_range=[0, 9999])
         self.header_info_content = [self.turn_counter]
 
@@ -41,7 +44,7 @@ class GUIGame:
 
         self.set_standard_footer()
 
-        self.main_info_window_content = TextField(int(root.interface_size*1.5), 40)
+        self.main_info_window_content = TextField(int(root.interface_size*1.5), 60, font_size=60 , positioning="right", width_as_text_width=True)
 
         self.sticked_object = None
 
@@ -79,7 +82,7 @@ class GUIGame:
                     header_tab += 1
                 item.change_position(item_position)
 
-        root.game_manager.messenger.change_position((10, (root.button_standard_size[1]+20)*(header_tab+1)+20+root.info_box_size[1]*header_info_tab))
+        self.game_manager.messenger.change_position((10, (root.button_standard_size[1]+20)*(header_tab+1)+20+root.info_box_size[1]*header_info_tab))
         return header_info_tab, header_tab
     
     def update_footer_tab_content(self) -> int:
@@ -107,12 +110,12 @@ class GUIGame:
         
         # Main info window
         if self.main_info_window_content:
-            item_position = (root.window_size[0]-self.main_info_window_content.rect.width, root.window_size[1]-self.main_info_window_content.rect.height-(root.button_standard_size[1]+20)*(footer_tab+1)-10)
+            item_position = (root.window_size[0], root.window_size[1]-self.main_info_window_content.rect.height-(root.button_standard_size[1]+20)*(footer_tab+1)-10)
             self.main_info_window_content.change_position(item_position)
     
         # World map
-        if root.game_manager.world_map:
-            root.game_manager.world_map.change_position(header_tab, footer_tab, header_info_tab)
+        if self.game_manager.world_map:
+            self.game_manager.world_map.change_position(header_tab, footer_tab, header_info_tab)
 
         #self.building_reciept_button.change_position((root.window_size[0]-110, 10))
     
@@ -132,19 +135,20 @@ class GUIGame:
 
     def open_scheme_type(self, building_type: str):
         self.scheme_list = []
+        cell_side_size = get_cell_side_size()
         for i, building in enumerate(self.buildings_list.get(building_type, [])):
-            self.scheme_list.append(Icon(root.cell_sizes[root.cell_size_scale][0], root.cell_sizes[root.cell_size_scale][1], position=(root.interface_size+10+(root.cell_sizes[root.cell_size_scale][1]*i), root.game_manager.world_map.rect.bottomleft[1]-root.cell_sizes[root.cell_size_scale][1]), img=f"{building.data['img']}", spec_path="data/buildings/img", bg=(125, 125, 125, 255))) #type: ignore
+            self.scheme_list.append(Icon(cell_side_size, cell_side_size, position=(root.interface_size+10+(cell_side_size*i), self.game_manager.world_map.rect.bottomleft[1]-cell_side_size), img=f"{building.data['img']}", spec_path="data/buildings/img", bg=(125, 125, 125, 255))) #type: ignore
         #self.change_position_for_new_screen_sizes()
         update_gui()
 
     def open_scheme_list(self):
-        self.buildings_list = root.game_manager.buildings_manager.get_all_unique_buildings_sorted_by_types(True)
-        self.buildings_types_list = ListOf(list(self.buildings_list.keys()), position=(0, root.game_manager.world_map.rect.bottomleft[1]), type_of_list="scheme_list", open_direction="up")
+        self.buildings_list = self.game_manager.buildings_manager.get_all_unique_buildings_sorted_by_types(True)
+        self.buildings_types_list = ListOf(list(self.buildings_list.keys()), position=(0, self.game_manager.world_map.rect.bottomleft[1]), type_of_list="scheme_list", open_direction="up")
         #self.change_position_for_new_screen_sizes()
         update_gui()
 
-    def open_building(self, buildings_dict: dict):
-        buildings = root.game_manager.buildings_manager.get_building_by_coord(buildings_dict["coord"])
+    def open_building(self):
+        buildings = self.game_manager.get_chosen_building()
         self.footer_content = [self.next_turn_button, self.open_building_interface_button, self.open_inventory_button]
         if buildings.is_workbench:
             self.footer_content.append(self.open_reciept_button)
@@ -159,61 +163,64 @@ class GUIGame:
         update_gui()
     
     def show_jobs(self):
-        if not root.game_manager.is_opened_pawn_default():
-            self.jobs_list = ListOf(root.game_manager.job_manager.get_jobs_id_for_pawn(root.game_manager.get_opened_pawn()), position=self.show_job_button.rect.topleft, type_of_list="job_list")
+        if not self.game_manager.is_chosen_pawn_default():
+            self.jobs_list = ListOf(self.game_manager.job_manager.get_jobs_id_for_pawn(self.game_manager.get_chosen_pawn()), position=self.show_job_button.rect.topleft, type_of_list="job_list")
         update_gui()
 
     def show_info_about_cell_under_mouse(self):
-        cell = root.game_manager.input_processor.game_input.cell_under_mouse
+        cell = self.game_manager.input_processor.game_input.cell_under_mouse
         mouse_pos = py.mouse.get_pos()
 
-        cell_info = [[]]
+        cell_info: list[list[TextField]] = [[]]
         self.cell_info = []
         y_offset = 0
+        font_size = 25
 
         tettain_name = cell.type if cell.is_opened else "not researched cell"
-        terrain = TextField(text=tettain_name + f" *[{cell.coord[0]}|{cell.coord[1]}] *[{cell.data["subdata"].get("movement_points")}]",
+        move_points = f"*[{cell.data["subdata"].get("movement_points")}]" if cell.data["subdata"].get("movement_points") != None else ""
+        auxiliary_cell_info = f"*(x:{cell.coord[0]} *y:{cell.coord[1]}) {move_points}"
+        terrain = TextField(text=f"{tettain_name} {auxiliary_cell_info}",
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+10
-                                ), font_size=20)
+                                ), font_size=font_size)
         cell_info[-1].append(terrain)
         if cell.flora != {} and cell.is_opened:
             flora = TextField(text=cell.flora["name"],
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+terrain.text_rect.height+10
-                                ), font_size=20)
+                                ), font_size=font_size)
             cell_info[-1].append(flora)
         if cell.fauna != {} and cell.is_opened:
             fauna = TextField(text=cell.fauna["name"],
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+terrain.text_rect.height+flora.text_rect.height+10 if cell.flora != {} else mouse_pos[1]+terrain.text_rect.height+10 #type: ignore
-                                ), font_size=20)
+                                ), font_size=font_size)
             cell_info[-1].append(fauna)
         
         y_offset += sum([info.text_rect.height for info in cell_info[-1]])+10
 
         if cell.buildings != {}:
             cell_info.append([])
-            building = root.game_manager.buildings_manager.get_building_by_coord(cell.coord)
+            building = self.game_manager.buildings_manager.get_building_by_coord(cell.coord)
 
-            building_name = TextField(text=building.name, 
+            building_name = TextField(text=f"*{building.name}", 
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+10
-                                        ), font_size=20)
+                                        ), font_size=font_size)
             building_service = TextField(text=f"service *{building.get_service()}/{building.get_max_service()}",
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+building_name.text_rect.height+10
-                                        ), font_size=20)
+                                        ), font_size=font_size)
             building_hp = TextField(text=f"hp *{building.get_hp()}/{building.get_max_hp()}",
                                     position=(
                                         mouse_pos[0]+10,
                                         mouse_pos[1]+y_offset+building_name.text_rect.height+building_service.text_rect.height+10
-                                    ), font_size=20)
+                                    ), font_size=font_size)
 
             cell_info[-1].append(building_name)
             cell_info[-1].append(building_service)
@@ -226,7 +233,7 @@ class GUIGame:
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+building_name.text_rect.height+building_hp.text_rect.height+building_service.text_rect.height+10
-                                        ), font_size=20)
+                                        ), font_size=font_size)
                     cell_info[-1].append(town_pop)
                     y_offset += town_pop.text_rect.height
 
@@ -235,23 +242,23 @@ class GUIGame:
         if cell.pawns != []:
             for pawn_in_cell in cell.pawns:
                 cell_info.append([])
-                pawn = root.game_manager.pawns_manager.get_pawn_by_id(pawn_in_cell["id"])
-                pawns_name = TextField(text=pawn.name,
+                pawn = self.game_manager.pawns_manager.get_pawn_by_id(pawn_in_cell["id"])
+                pawns_name = TextField(text=f"*{pawn.name}",
                                        position=(
                                            mouse_pos[0]+10,
                                            mouse_pos[1]+y_offset+10
-                                       ), font_size=20)
+                                       ), font_size=font_size)
                 pawns_hp = TextField(text=f"hp *{pawn.get_hp()}/{pawn.get_max_hp()}",
                                     position=(
                                         mouse_pos[0]+10,
                                         mouse_pos[1]+y_offset+pawns_name.text_rect.height+10
-                                    ), font_size=20)
+                                    ), font_size=font_size)
 
                 cell_info[-1].append(pawns_name)
                 cell_info[-1].append(pawns_hp)
 
                 y_offset += sum([pawns_name.text_rect.height, pawns_hp.text_rect.height])+10
-        
+
         if cell_info != []:
             y_offset = 0
             max_width = 0
@@ -305,14 +312,14 @@ class GUIGame:
             open_direction = "up"
         else:
             open_direction = "down"
-        if not root.game_manager.is_opened_pawn_default():
+        if not self.game_manager.is_chosen_pawn_default():
             action_list = []
             for pawn in pawns:
                 if pawn["fraction_id"] != root.player_id:
                     action_list.append(f"attack.{pawn["type"]}")
                 else:
                     action_list.append(f"share.with_{pawn["type"]}")
-                    if pawn["type"] != root.game_manager.get_opened_pawn().type and "stand_here" not in action_list:
+                    if pawn["type"] != self.game_manager.get_chosen_pawn().type and "stand_here" not in action_list:
                         action_list.append("stand_here")
             if buildings.get("fraction_id") == root.player_id:
                 action_list.append(f"share.with_{buildings["name"]}")
@@ -327,8 +334,8 @@ class GUIGame:
     def draw(self):
         root.screen.fill((0, 0, 0))
         # Draw world map
-        if root.game_manager.world_map:
-            root.game_manager.world_map.draw()
+        if self.game_manager.world_map:
+            self.game_manager.world_map.draw()
 
         # Draw header info content
         for item in self.header_info_content:
@@ -369,13 +376,13 @@ class GUIGame:
         root.need_update_gui = False
     
     def move_up(self):
-        root.game_manager.world_map.move_map_up()
+        self.game_manager.world_map.move_map_up()
 
     def move_down(self):
-        root.game_manager.world_map.move_map_down()
+        self.game_manager.world_map.move_map_down()
 
     def move_left(self):
-        root.game_manager.world_map.move_map_left()
+        self.game_manager.world_map.move_map_left()
 
     def move_right(self):
-        root.game_manager.world_map.move_map_right()
+        self.game_manager.world_map.move_map_right()

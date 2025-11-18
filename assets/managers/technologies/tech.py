@@ -38,8 +38,6 @@ class Tech(py.sprite.Sprite):
         self.accumulated = tech_data.get("cost", {}).copy()
         for resource in self.accumulated:
             self.accumulated[resource] = 0
-
-        self.draw()
     
     #def scale(self, scale_factor:float):
     #    new_size = (int(self.rect.width * scale_factor), int(self.rect.height * scale_factor))
@@ -89,7 +87,7 @@ class Tech(py.sprite.Sprite):
     
     def is_allowed(self) -> bool:
         for prerequisite in self.data.get("prerequisites", []):
-            if root.game_manager.trigger_manager.has_no_tech(prerequisite, root.player_id):
+            if root.game_manager.trigger_manager.has_no_tech(prerequisite, root.player_id)[0]:
                 return False
         return True
 

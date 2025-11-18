@@ -9,20 +9,25 @@ from ..listof import *
 from ..inputfield import *
 from ... import root
 from ...root import logger
-from ...auxiliary_stuff import timeit
+from ...auxiliary_stuff import *
 from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
 
 from ...managers.buildings.building import Building
 
 class GUIBuildings:
-    def __init__(self):
-        cell_size = root.cell_sizes[root.cell_size_scale][0]
-        self._default_building = Building()
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
+
+        cell_size = get_cell_side_size()
+        self._default_building = self.game_manager.get_default_building()
         self.building = self._default_building
 
         self.building_ico = Icon(cell_size, cell_size, img=f"data/buildings/img/none")
         self.building_name = InputField(root.interface_size*2, 60, place_holder=f"unknow", bg_color=(255, 255, 255, 255), font_size=40, hidden=True)
-        root.game_manager.add_inputfield(self.building_name)
+        game_manager.add_inputfield(self.building_name)
         self.building_level = TextField(root.interface_size//2, root.interface_size//3, text=f"lvl unknow")
         self.buildings_queue_name = TextField(root.interface_size//2, root.interface_size//4, text="Queue")
         self.building_town_population_name = TextField(int(root.interface_size*1.2), root.interface_size//4, text="population *:")
@@ -34,7 +39,7 @@ class GUIBuildings:
         self.y_global_offset = 0
     
     def change_position_for_new_screen_sizes(self):
-        cell_size = root.cell_sizes[root.cell_size_scale][0]
+        cell_size = get_cell_side_size()
 
         self.building_ico.change_position((10, 10+self.y_global_offset))
         self.building_name.change_position((cell_size+20, 10+self.y_global_offset))
@@ -68,7 +73,7 @@ class GUIBuildings:
 
     def open(self):
         self.y_global_offset = 0
-        building = root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord())
+        building = self.game_manager.get_chosen_building()
         self.building = building
 
         self.building_ico.update_image(f"data/buildings/img/{building.data["img"]}")
@@ -92,7 +97,7 @@ class GUIBuildings:
             self.building_name.value = ""
     
     def _set_building_queue(self):
-        cell_size = root.cell_sizes[root.cell_size_scale][0]
+        cell_size = get_cell_side_size()
 
         self.buildings_queue = []
         y_offset = 0
@@ -106,7 +111,7 @@ class GUIBuildings:
                     self.buildings_queue.append(Icon(cell_size, cell_size, img="empty.png", spec_path="data/reciepts/img")) #type: ignore
 
     def _set_population(self) :
-        cell_size = root.cell_sizes[root.cell_size_scale][0]
+        cell_size = get_cell_side_size()
         self.buildings_town_population = []
 
         if self.building.is_town:
@@ -130,7 +135,7 @@ class GUIBuildings:
         self.building_ico.draw() #type: ignore
         self.building_name.draw() #type: ignore
         self.building_level.draw() #type: ignore
-        if root.game_manager.buildings_manager.get_building_by_coord(root.game_manager.get_chosen_cell_coord()).can_be_upgraded():
+        if self.game_manager.get_chosen_building().can_be_upgraded():
             self.upgrade_building_button.draw()
 
         if self.building.is_workbench or self.building.is_town:

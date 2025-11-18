@@ -3,9 +3,14 @@ from ...auxiliary_stuff import read_json_file, update_gui
 from .policycard import PolicyCard
 from ... import root
 from ...root import logger, loading
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...gamemanager import GameManager
 
 class PolicyTable:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
         self.all_policiec: list[PolicyCard] = []
 
         loading.draw("Loading policy cards...")
@@ -18,7 +23,7 @@ class PolicyTable:
                 self.all_policiec.append(PolicyCard(policy_data, (0, 0)))
 
     def load_policies_for_player(self):
-        player_fraction = root.game_manager.fraction_manager.get_player_fraction()
+        player_fraction = self.game_manager.fraction_manager.get_player_fraction()
 
         x = 0
         y = 0

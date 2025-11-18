@@ -3,8 +3,8 @@
     "desc": "job_0_desc",
     "type": "work",
     "movement_points_cost": "all",
-    "pawn_types": ["pawn_type_0"],
-    "pawn_ids": ["any"],
+    "pawn_category": ["pawn_category_0"],
+    "pawn_types": ["any"],
     "work_time": 1,
     "trigger": {"type": "stand_on_cell", "args": {"cell_type": "forest"}},
     "result": {"type": "add_resource", "args": {"resource": "wood", "amout": 1}}

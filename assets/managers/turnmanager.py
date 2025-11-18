@@ -1,20 +1,25 @@
 from .. import root
 from ..root import logger
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..gamemanager import GameManager
 
 class TurnManager:
-    def __init__(self):
+    def __init__(self, game_manager: "GameManager"):
+        self.game_manager = game_manager
         self.turn = 0
         self.events = []
 
     def do_step(self):
         self.turn += 1
-        root.game_manager.gui.game.turn_counter.change_value(1)
+        self.game_manager.gui.game.turn_counter.change_value(1)
 
         for event in self.events:
             if event["turn"] == self.turn:
                 logger.info(f"Executing turn event: {event}", f"TurnManager.do_step()")
-                root.game_manager.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
-        for fraction in root.game_manager.fraction_manager.get_all_fractions():
+                self.game_manager.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
+        for fraction in self.game_manager.fraction_manager.get_all_fractions():
             for producer in fraction.production["buildings"]:
                 if self.turn >= producer.last_prodaction_at + producer.prodaction_time:
                     producer.last_prodaction_at = self.turn
@@ -22,18 +27,27 @@ class TurnManager:
             for town in fraction.towns:
                 town.simulation()
 
-    def add_event_in_queue(self, time: int, event: dict):
+    def add_event_in_queue(self, time: int, event: dict) -> None|dict:
         '''
         event = {"do": event_type, "event_data": {"att": data...}}
 
         instead of {"att": data...} all attributes for the effects to be executed must be specified
-        for example: {"do": event_type, "event_data": {"cell": root.game_manager.get_chosen_cell(), "resource": {"resource_0": 10, "resource_1": 5}}}
+        for example: {"do": event_type, "event_data": {"cell": self.game_manager.get_chosen_cell(), "resource": {"resource_0": 10, "resource_1": 5}}}
         '''
         if time == 0:
             logger.info(f"event {event["do"]} has time {time} (0) and will be executed on this turn {self.turn}", f"TurnManager.add_event_in_queue(...)")
-            root.game_manager.effect_manager.do(event["do"], event["event_data"])
+            self.game_manager.effect_manager.do(event["do"], event["event_data"])
         elif time < 0:
             logger.error(f"Time for event must be a positive integer or zero, event {event["do"]}", f"TurnManager.add_event_in_queue(...)")
         else:
-            self.events.append({"turn": self.turn+time, "event": event})
+            effect = {"turn": self.turn+time, "event": event}
+            self.events.append(effect)
             logger.info(f"event {event["do"]} successfully added in qeue with time: {time} and will be executed on turn {self.turn+time}", f"TurnManager.add_event_in_queue(...)")
+            return effect
+
+    def remove_event(self, effect: dict) -> bool:
+        try:
+            self.events.remove(effect)
+            return True
+        except:
+            return False

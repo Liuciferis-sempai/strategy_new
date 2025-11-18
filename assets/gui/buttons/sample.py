@@ -49,4 +49,3 @@ class Button(py.sprite.Sprite):
         self.position = new_position
         self.rect.topleft = new_position
         self.text_rect.center = (self.width // 2, self.height // 2)
-        self.draw()
