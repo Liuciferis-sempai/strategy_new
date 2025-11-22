@@ -45,11 +45,23 @@ class TownManager:
         else:
             logger.error(f"can not create town", f"TownManager.build_town({town_}, {coord}, {fraction_id})")
             return Town()
+
+    def remove_town(self, town_: Town) -> bool:
+        if town_ in self.towns:
+            self.towns.remove(town_)
+            fraction = self.game_manager.fraction_manager.get_fraction_by_id(town_.fraction_id)
+            if town_ in fraction.towns:
+                fraction.towns.remove(town_)
+                fraction.statistics["town_count"] -= 1
+            return True
+        return False
     
-    def create_pop_group(self, popgroup: str, pop_size: dict = {"aged": [1], "adult": [2, 5, 3], "children": [1, 1]}) -> PopGroup:
+    def create_pop_group(self, popgroup: str, pop_size: dict | None = None) -> PopGroup:
+        if pop_size is None:
+            pop_size = {"aged": [70], "adult": [21, 23, 19], "children": [5, 8]}
         for group in self.grouptypes:
             if group["name"] == popgroup:
-                return PopGroup(group["name"], copy.deepcopy(group), pop_size.copy())
+                return PopGroup(group["name"], copy.deepcopy(group), copy.deepcopy(pop_size))
 
         logger.error(f"unknow popgroup {popgroup}", f"TownManager.create_pop_group({popgroup}, {pop_size})")
         return PopGroup("unknow", {})

@@ -1,10 +1,10 @@
 {
-    "id": "policy_3",
-    "desc:": "policy_3_desc",
+    "id": "policy_02",
+    "desc:": "policy_02_desc",
     "ico": "policy_0.png",
-    "color": "#fcd75d",
-    "figure": "pentagon",
-    "number": 3,
+    "color": "#3dfc03",
+    "figure": "circle",
+    "number": 0,
     "influence": {
         "categories": ["pop_growth"],
         "weight": 1,

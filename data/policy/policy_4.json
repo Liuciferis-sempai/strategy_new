@@ -1,8 +1,15 @@
 {
-    "name": "policy_4",
+    "id": "policy_4",
     "desc:": "policy_4_desc",
     "ico": "policy_0.png",
     "color": "#121754",
     "figure": "hexagon",
-    "number": 4
+    "number": 4,
+    "influence": {
+        "categories": ["pop_growth"],
+        "weight": 1,
+        "values": {
+            "pop_growth_factor": 1.2
+        }
+    }
 }

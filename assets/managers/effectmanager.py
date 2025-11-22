@@ -88,33 +88,33 @@ class EffectManager:
         return do_answer
 
     def cleat_the_queue(self, building: "Building", reciept: dict) -> str:
-        self.game_manager.messenger.print(f"*{building.name} finished {reciept["id"]}")
+        self.game_manager.messenger.print("building_finished_reciept", {"building_name": building.name, "reciept_id": reciept["id"]})
         return building.remove_from_queue(reciept)
     
     def restore_movement_points(self, pawn: "Pawn") -> str:
-        self.game_manager.messenger.print(f"*{pawn.name} restored_movement_points")
+        self.game_manager.messenger.print("restored_movement_points", {"pawn_name": pawn.name})
         return self.game_manager.pawns_manager.restore_movement_points(pawn)
     
     def add_resource_to_pawn(self, pawn: "Pawn", resource: str, amout: int) -> str:
-        self.game_manager.messenger.print(f"*{pawn.name} get {resource}")
+        self.game_manager.messenger.print("pawn_get_res", {"pawn_name": pawn.name, "resource": root.language.get(resource)})
         return self.game_manager.pawns_manager.add_resource(pawn, resource, amout)
 
     def add_resource_to_building(self, building: "Building", resource: str, amout: int) -> str:
-        self.game_manager.messenger.print(f"*{building.name} get {resource}")
+        self.game_manager.messenger.print("building_get_res", {"building_name": building.name, "resource": root.language.get(resource)})
         return self.game_manager.buildings_manager.add_resources(building, resource, amout)
 
     def remove_resource_from_pawn(self, pawn: "Pawn", resource: str, amout: int) -> str:
-        self.game_manager.messenger.print(f"*{pawn.name} lost {resource}")
+        self.game_manager.messenger.print("pawn_lost_res", {"pawn_name": pawn.name, "resource": root.language.get(resource)})
         return self.game_manager.pawns_manager.remove_resource(pawn, resource, amout)
     
     def remove_resource_from_building(self, building: "Building", resource: str, amout: int) -> str:
-        self.game_manager.messenger.print(f"*{building.name} lost {resource}")
+        self.game_manager.messenger.print("buildig_lost_res", {"building_name": building.name, "resouce": root.language.get(resource)})
         return self.game_manager.buildings_manager.remove_resource(building, resource, amout)
 
     def take_loot(self, pawn: Pawn, loot: dict[str, int]) -> str:
         answer = ""
         for resource, amout in loot.items():
-            self.game_manager.messenger.print(f"{pawn.name} get {resource}")
+            self.game_manager.messenger.print("pawn_get_loot", {"pawn": pawn.name, "resource": root.language.get(resource)})
             answer += self.game_manager.pawns_manager.add_resource(pawn, resource, amout) + "\n"
         return answer
     
@@ -130,24 +130,24 @@ class EffectManager:
         if self.game_manager.buildings_manager.build(target_building_str, building_coord, building_fraction):
             return f"scheme of the building {target_building_str} was successfully constructed using {building_coord} coordinates"
         else:
-            self.game_manager.messenger.print(f"place_is_taken")
+            self.game_manager.messenger.print("place_is_taken")
             return f"scheme of the building {target_building_str} can not be constructed using {building_coord} coordinates"
     
-    def spawn(self, type:str|dict, coord: tuple[int, int, int], fraction_id: int) -> str:
-        if self.game_manager.pawns_manager.spawn(type, coord, fraction_id):
-            self.game_manager.messenger.print(f"*{type if isinstance(type, str) else type["name"]} on_coord *{coord[0]};{coord[1]}")
-            return f"spawned pawn {type if isinstance(type, str) else type["name"]} on coord {coord} for fraction {fraction_id}"
+    def spawn(self, pawn_type:str|dict, coord: tuple[int, int, int], fraction_id: int) -> str:
+        if self.game_manager.pawns_manager.spawn(pawn_type, coord, fraction_id):
+            self.game_manager.messenger.print("spawned_pawn_on_coord", {"pawn": pawn_type if isinstance(pawn_type, str) else pawn_type["name"], "coord_x": coord[0], "coord_y": coord[1]})
+            return f"spawned pawn {pawn_type if isinstance(pawn_type, str) else pawn_type["name"]} on coord {coord} for fraction {fraction_id}"
         else:
-            self.game_manager.messenger.print(f"can_not_spawn_pawn_on_coord *{coord[0]};{coord[1]}")
-            return f"can not spawn {type if isinstance(type, str) else type["name"]} on coord {coord} for fraction {fraction_id}"
+            self.game_manager.messenger.print("can_not_spawn_pawn_on_coord", {"coord_x": coord[0], "coord_y": coord[1]})
+            return f"can not spawn {pawn_type if isinstance(pawn_type, str) else pawn_type["name"]} on coord {coord} for fraction {fraction_id}"
     
-    def build(self, type:str|dict, coord: tuple[int, int, int], fraction_id: int) -> str:
-        if self.game_manager.buildings_manager.build(type, coord, fraction_id):
-            self.game_manager.messenger.print(f"builded *{type if isinstance(type, str) else type["name"]} on_coord *{coord[0]};{coord[1]}")
-            return f"builded building {type if isinstance(type, str) else type["name"]} on coord {coord} for fraction {fraction_id}"
+    def build(self, building_type:str|dict, coord: tuple[int, int, int], fraction_id: int) -> str:
+        if self.game_manager.buildings_manager.build(building_type, coord, fraction_id):
+            self.game_manager.messenger.print("builded_building_on_coord", {"building": building_type if isinstance(building_type, str) else building_type["name"], "coord_x": coord[0], "coord_y": coord[1]})
+            return f"builded building {building_type if isinstance(building_type, str) else building_type["name"]} on coord {coord} for fraction {fraction_id}"
         else:
-            self.game_manager.messenger.print(f"can_not_build_building_on_coord *{coord[0]};{coord[1]}")
-            return f"can not build building {type if isinstance(type, str) else type["name"]} on coord {coord} for fraction {fraction_id}"
+            self.game_manager.messenger.print("can_not_build_building_on_coord", {"coord_x": coord[0], "coord_y": coord[1]})
+            return f"can not build building {building_type if isinstance(building_type, str) else building_type["name"]} on coord {coord} for fraction {fraction_id}"
     
     def change_cell_by_coord(self, coord: tuple[int, int, int], new_type: str) -> str:
         return self.game_manager.world_map.change_cell_by_coord(coord, new_type)
@@ -164,26 +164,26 @@ class EffectManager:
         return f"there are no town or any other structer that have statistic at coord {coord}"
 
     def add_policy(self, fraction_id: int, policy: str|dict|PolicyCard) -> str:
-        self.game_manager.messenger.print(f"*{self.game_manager.fraction_manager.get_fraction_by_id(fraction_id).name} taked_new_policy")
+        self.game_manager.messenger.print("fraction_get_new_policy", {"fraction": self.game_manager.fraction_manager.get_fraction_by_id(fraction_id).name})
         return self.game_manager.fraction_manager.add_policy_to_fraction(fraction_id, policy)
 
     def remove_policy(self, fraction_id: int, policy: str|dict|PolicyCard) -> str:
-        self.game_manager.messenger.print(f"*{self.game_manager.fraction_manager.get_fraction_by_id(fraction_id).name} lost_policy")
+        self.game_manager.messenger.print("fraction_lost_policy", {"fraction": self.game_manager.fraction_manager.get_fraction_by_id(fraction_id).name})
         return self.game_manager.fraction_manager.remove_policy_to_fraction(fraction_id, policy)
     
     def add_popgroup(self, town: Town, popgroup_name: str, popgroup_size: dict) -> str:
-        self.game_manager.messenger.print(f"*{town.name} has_new_popgroup {popgroup_name}")
+        self.game_manager.messenger.print("town_has_new_popgroup", {"town": town.name, "popgroup": popgroup_name})
         return town.add_population(popgroup_name, popgroup_size)
     
     def remove_popgroup(self, town: Town, popgroup_name: str, popgroup_size: dict|str) -> str:
-        self.game_manager.messenger.print(f"*{town.name} lost_new_popgroup {popgroup_name}")
+        self.game_manager.messenger.print("town_lost_new_popgroup", {"town": town.name, "popgroup": popgroup_name})
         return town.remove_population(popgroup_name, popgroup_size)
 
     def create_fraction(self, name: str, type: str, data: dict) -> str:
-        self.game_manager.messenger.print(f"created_new_fraction *{name}")
+        self.game_manager.messenger.print("created_new_fraction", {"fraction": name})
         fraction = self.game_manager.fraction_manager.create_fraction(name, type)
         return f"created {fraction}"
     
     def attack(self, target: Pawn|Building, data: dict) -> str:
-        self.game_manager.messenger.print(f"*{target.name} under_attack")
+        self.game_manager.messenger.print("target_under_attack", {"target": target.name})
         return target.attacked(data)

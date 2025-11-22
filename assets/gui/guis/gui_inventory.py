@@ -23,14 +23,49 @@ class GUIInventory:
         self.owner_inventory = []
         self.owner_inventory_names = []
         self.owner_inventory_org = []
-        self.owner_ico = None
+        self.owner_ico = Icon(root.window_size[0]//8, int(root.window_size[1]*0.7), img="none.png")
         self.owner_type = "pawn"
     
     def change_position_for_new_screen_sizes(self):
-        if root.window_size[0] >= 1900 and root.window_size[1] >= 1000:
-            self.cell_size = root.interface_size//2
-        else:
-            self.cell_size = root.interface_size//4
+        if root.window_size[0] >= 1900 and root.window_size[1] >= 1000: self.cell_size = root.interface_size//2
+        else: self.cell_size = root.interface_size//4
+
+        ico_x, ico_y = self.cell_size//4, root.window_size[1]//2 - self.owner_ico.height//2 #type: ignore
+
+        self.owner_ico.change_position((ico_x, ico_y)) #type: ignore
+
+        y_offset = 0
+        x_offset = 0
+        if isinstance(self.owner_inventory, list):
+            for cell, amout in self.owner_inventory:
+                x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
+                if  x_pos + cell.width > root.window_size[0]-self.cell_size//4:
+                    y_offset += 1
+                    x_offset = 0
+                    x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
+                y_pos = ico_y + (cell.height+10)*y_offset
+
+                cell.change_position((x_pos, y_pos))
+                amout.change_position((x_pos + (cell.width - amout.text_rect.width - 5), y_pos + amout.text_rect.height//2))
+                x_offset += 1
+
+        elif isinstance(self.owner_inventory, dict):
+            for i, inventory_type in enumerate(self.owner_inventory_org.keys()): #type: ignore
+                self.owner_inventory_names[i].change_position((ico_x + self.owner_ico.width + 10, ico_y + (self.cell_size + 10)*y_offset))
+                y_offset += 1
+                for cell, amout in self.owner_inventory[inventory_type]:
+                    x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
+                    if x_pos + cell.width > root.window_size[0]-self.cell_size//4:
+                        y_offset += 1
+                        x_offset = 0
+                        x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
+                    y_pos = ico_y + (cell.height+10)*y_offset
+
+                    cell.change_position((x_pos, y_pos)) 
+                    amout.change_position((x_pos + (cell.width - amout.text_rect.width - 5), y_pos + amout.text_rect.height//2))
+                    x_offset += 1
+                y_offset += 1
+                x_offset = 0
 
     def set_inventory(self):
         if self.owner:
@@ -65,9 +100,9 @@ class GUIInventory:
                         self.owner_inventory[inventory_type].append([Icon(self.cell_size, self.cell_size, img="empty_inventory_cell.png"), TextField(text="", font_size=50, width=0, height=0)]) #type: ignore
 
         if self.owner_type == "pawn":
-            self.owner_ico = Icon(root.window_size[0]//8, int(root.window_size[1]*0.7), img=self.owner.data.get("ico", "none.png"), spec_path="data/pawns/ico") #type: ignore
+            self.owner_ico.update_image(new_img=self.owner.data.get("ico", "none.png"), spec_path="data/pawns/ico") #type: ignore
         elif self.owner_type == "building":
-            self.owner_ico = Icon(root.window_size[0]//8, int(root.window_size[1]//2), img=self.owner.data.get("img", "none.png"), spec_path="data/buildings/img")#type: ignore 
+            self.owner_ico.update_image(new_img=self.owner.data.get("img", "none.png"), spec_path="data/buildings/img") #type: ignore 
     
     def open(self):
         if not self.game_manager.is_chosen_pawn_default():
@@ -77,12 +112,13 @@ class GUIInventory:
             self.owner = self.game_manager.get_chosen_building()
             self.owner_type = "building"
         else:
-            logger.error("can not open pawn or building", "GUIInventory")
+            logger.error("can not open pawn or building", "GUIInventory.open()")
             back_window_state()
             return
-        
-        self.change_position_for_new_screen_sizes()
+
         self.set_inventory()
+        self.change_position_for_new_screen_sizes()
+        update_gui()
     
     def click(self, *args, **kwargs):
         pass
@@ -92,43 +128,16 @@ class GUIInventory:
         root.screen.fill((100, 100, 100))
 
         if self.owner_ico and self.owner:
-            ico_x, ico_y = self.cell_size//4, root.window_size[1]//2 - self.owner_ico.height//2
-
-            self.owner_ico.change_position((ico_x, ico_y))
             self.owner_ico.draw()
-
-            y_offset = 0
-            x_offset = 0
-            if isinstance(self.owner_inventory, list):
-                for cell, amout in self.owner_inventory:
-                    x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
-                    if  x_pos + cell.width > root.window_size[0]-self.cell_size//4:
-                        y_offset += 1
-                        x_offset = 0
-                        x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
-                    y_pos = ico_y + (cell.height+10)*y_offset
-
-                    cell.change_position((x_pos, y_pos))
-                    amout.change_position((x_pos + (cell.width - amout.text_rect.width - 5), y_pos + amout.text_rect.height//2))
-                    x_offset += 1
-
-            elif isinstance(self.owner_inventory, dict):
-                for i, inventory_type in enumerate(self.owner_inventory_org.keys()): #type: ignore
-                    self.owner_inventory_names[i].change_position((ico_x + self.owner_ico.width + 10, ico_y + (self.cell_size + 10)*y_offset))
-                    y_offset += 1
-                    for cell, amout in self.owner_inventory[inventory_type]:
-                        x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
-                        if x_pos + cell.width > root.window_size[0]-self.cell_size//4:
-                            y_offset += 1
-                            x_offset = 0
-                            x_pos = ico_x + self.owner_ico.width + 10 + (cell.width+10)*x_offset
-                        y_pos = ico_y + (cell.height+10)*y_offset
-
-                        cell.change_position((x_pos, y_pos)) 
-                        amout.change_position((x_pos + (cell.width - amout.text_rect.width - 5), y_pos + amout.text_rect.height//2))
-                        x_offset += 1
-                    y_offset += 1
-                    x_offset = 0
+            for item in self.owner_inventory:
+                if isinstance(self.owner_inventory, list):
+                    item[0].draw()
+                    item[1].draw()
+                elif isinstance(self.owner_inventory, dict):
+                    for inventory_type in self.owner_inventory_org.keys(): #type: ignore
+                        for item in self.owner_inventory[inventory_type]:
+                            item[0].draw()
+                            item[1].draw()
         else:
             logger.error(f"self.owner or self.owner_ico is not difinded. self.owner_ico: {self.owner_ico}; self.owner: {self.owner}", "GUIInventory.draw()")
         root.need_update_gui = False

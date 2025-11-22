@@ -42,7 +42,7 @@ def main():
         if root.game_manager.input_processor.is_move_button_pressed():
             root.game_manager.input_processor.move()
             py.display.update()
-        
+
         root.game_manager.messenger.tick()
 
         if root.need_update_gui:
@@ -58,5 +58,8 @@ def main():
 
 if __name__ == "__main__":
     root.start_the_game("Test Game")
-    main()
+    try: main()
+    except Exception as e:
+        logger.error(f"Fatal error: {e}", "main.py")
+        logger.write_down()
     py.quit()

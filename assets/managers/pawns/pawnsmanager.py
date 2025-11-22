@@ -197,7 +197,7 @@ class PawnsManager:
                         logger.error("job not found", "PawnManager.do_job(...)")
                     event = self.game_manager.turn_manager.add_event_in_queue(job["work_time"] if job["work_time"] > 0 else 1, {"do": "restore_movement_points", "event_data": {"pawn": pawn}})
                     pawn.has_job_to_res_movment_points = event
-            self.game_manager.messenger.print(f"{job["id"]} will_be_finished_after {job["work_time"]} turns")
+            self.game_manager.messenger.print("will_be_finished_after_turns", {"job": job["id"], "time": job["work_time"]})
 
             self.game_manager.world_map.unmark_region("for_move")
             self.game_manager.gui.close_all_extra_windows()

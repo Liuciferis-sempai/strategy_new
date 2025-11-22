@@ -1,8 +1,15 @@
 {
-    "name": "policy_5",
+    "id": "policy_5",
     "desc:": "policy_5_desc",
     "ico": "policy_0.png",
     "color": "#ebc7e4",
     "figure": "octagon",
-    "number": 5
+    "number": 5,
+    "influence": {
+        "categories": ["pop_growth"],
+        "weight": 1,
+        "values": {
+            "pop_growth_factor": 1.2
+        }
+    }
 }

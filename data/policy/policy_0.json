@@ -4,5 +4,12 @@
     "ico": "policy_0.png",
     "color": "#3dfc03",
     "figure": "circle",
-    "number": 0
+    "number": 0,
+    "influence": {
+        "categories": ["pop_growth"],
+        "weight": 1,
+        "values": {
+            "pop_growth_factor": 1.2
+        }
+    }
 }

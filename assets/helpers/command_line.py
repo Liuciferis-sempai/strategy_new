@@ -31,7 +31,8 @@ class CommandLine(py.sprite.Sprite):
             "child": "children",
             "res": "resource",
             "add_res": "add_resource",
-            "re_res": "remove_resource"
+            "re_res": "remove_resource",
+            "pol": "policy"
         }
 
     def __init__(self, color:tuple[int, int, int, int]=(100, 100, 100, 255), font_size:int=30, line_color:tuple[int, int, int, int]=(150, 150, 150, 255)):
@@ -106,9 +107,12 @@ class CommandLine(py.sprite.Sprite):
                     self._process_help_command(command[1:])
                 else:
                     self._process_usual_command(command[0], command[1:])
+            except KeyError as e:
+                logger.error(f"can not process command {command_line} because the key {e} is missing", f"CommandLine.process_input({command_line})")
+                self.add_answer(f"ERROR: the key {e} is missing")
             except Exception as e:
-                logger.error(f"can not process command {command_line} because {e}", f"CommandLine.process_input({command_line})")
-                self.add_answer(f"ERROR: {e}")
+                logger.error(f"can not process command {command_line} because '{e}'", f"CommandLine.process_input({command_line})")
+                self.add_answer(f"ERROR: {repr(e)}")
     
     def _process_set_command(self, splited_command: list[str]):
         attribute = self._translate_value(splited_command[0])
@@ -301,8 +305,10 @@ class CommandLine(py.sprite.Sprite):
                 effect_data["fraction_id"] = root.player_id
             elif "type" in keys and (entry in root.game_manager.buildings_manager.get_all_possible_buildings_names() or entry in root.game_manager.pawns_manager.get_all_pawns_types()):
                 effect_data["type"] = entry
-            elif "add_resource" == effect_name and not effect_data.get("resource"):
+            elif effect_name in ["add_resource", "remove_resource"]and not effect_data.get("resource"):
                 effect_data["resource"] = entry
+            elif effect_name in ["add_policy", "remove_policy"] and not effect_data.get("policy"):
+                effect_data["policy"] = entry
             else:
                 effect_data[entry] = next(command)
 

@@ -7,6 +7,7 @@ from random import randint, seed, choice, uniform, random
 import os
 from ..auxiliary_stuff import read_json_file, timeit, update_gui, get_cell_side_size, get_cell_size
 from ..root import loading, logger
+import copy
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -28,7 +29,7 @@ class WorldMap(py.sprite.Sprite):
 
         self.x_offset = 0
         self.y_offset = 0
-        self.move_distance = get_cell_size()[1]//4
+        self.move_distance = get_cell_side_size()//4
         self.lower_limit = 0
         self.right_limit = 0
 
@@ -206,7 +207,7 @@ class WorldMap(py.sprite.Sprite):
         if root.game_manager.gui.game.main_info_window_content.text != "":
             root.game_manager.gui.game.main_info_window_content.draw()
         #logger.info(f"drawn {len(self.cells_on_screen)}", "WorldMap.draw()")
-    
+
     def _draw_cell(self, cell: "Cell"):
         cell_position = cell.rect.topleft
         cell_position = (cell_position[0] + self.x_offset, cell_position[1] + self.y_offset)
@@ -451,7 +452,7 @@ class WorldMap(py.sprite.Sprite):
                 else:
                     data[modification_type] = modification[0]
 
-        return {"type": cell_type["name"], "desc": cell_type["desc"], "img": cell_type["img"], "temperature": data["temperature"], "height": data["height"], "humidity": data["humidity"], "soil_fertility": data["soil_fertility"], "subdata": cell_type["subdata"]}
+        return {"type": cell_type["name"], "desc": cell_type["desc"], "img": cell_type["img"], "temperature": data["temperature"], "height": data["height"], "humidity": data["humidity"], "soil_fertility": data["soil_fertility"], "subdata": copy.deepcopy(cell_type["subdata"])}
 
     def _define_flora(self, land: dict) -> dict:
         possible_types = self._check_for_frame_conditions(self.types_of_flora, land)

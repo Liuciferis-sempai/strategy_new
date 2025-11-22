@@ -85,8 +85,8 @@ class Cell(py.sprite.Sprite):
 
     def _open_building(self):
         if self.buildings.get("fraction_id") == root.player_id:
-            root.game_manager.gui.game.open_building()
             root.game_manager.set_chosen_building(self.buildings)
+            root.game_manager.gui.game.open_building()
         root.game_manager.gui.game.open_main_info_window(f"*{self.buildings.get("name", "unknow")}")
 
     def change_type(self, new_type: str):

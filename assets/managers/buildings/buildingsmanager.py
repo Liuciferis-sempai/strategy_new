@@ -99,6 +99,8 @@ class BuildingsManager:
         building = self.buildings[str(coord)]
 
         self._remove_from_fraction(building, building.fraction_id)
+        if building.is_town:
+            self.game_manager.town_manager.remove_town(building.town)
 
         self.buildings.pop(str(coord))
         cell = self.game_manager.world_map.get_cell_by_coord(coord)
@@ -115,10 +117,6 @@ class BuildingsManager:
         fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         fraction.statistics["building_count"] -= 1 #type: ignore
         fraction.buildings.remove(building)
-        if building.is_town:
-            fraction.statistics["town_count"] -= 1
-            fraction.towns.remove(building.town)
-            building.town.destroy()
         if building.category == "producer":
             fraction.production["buildings"].remove(building)
 

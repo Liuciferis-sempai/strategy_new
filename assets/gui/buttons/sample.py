@@ -1,14 +1,16 @@
 import pygame as py
 from ... import root
 from ...auxiliary_stuff import update_gui
-from ...root import language, logger
+from ...root import logger
+from typing import Any
 
 class Button(py.sprite.Sprite):
-    def __init__(self, text:str="Button", img:str="", width:int=0, height:int=0, color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), font_size:int=20, position:tuple[int, int]=(5, 5)):
+    def __init__(self, text:str="Button", img:str="", width:int=0, height:int=0, color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), font_size:int=20, position:tuple[int, int]=(5, 5), text_kwargs: dict[str, Any] = {}):
         super().__init__()
         self.name = str(self.__class__).split(".")[-1].replace("'>", "")
 
         self.text = text
+        self.text_kwargs = text_kwargs
         self.width = width if width > 0 else root.button_standard_size[0]
         self.height = height if height > 0 else root.button_standard_size[1]
         self.color = color
@@ -29,7 +31,7 @@ class Button(py.sprite.Sprite):
         self.rect = py.Rect(position[0], position[1], self.width, self.height)
 
         self.font = py.font.Font(None, font_size)
-        self.text_surface = self.font.render(language.get(text), False, (0, 0, 0))
+        self.text_surface = self.font.render(root.language.get(text, text_kwargs), False, (0, 0, 0))
         self.text_rect = self.text_surface.get_rect(center=(self.width // 2, self.height // 2))
         self.image.blit(self.text_surface, self.text_rect)
 

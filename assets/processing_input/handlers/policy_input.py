@@ -23,7 +23,9 @@ class PolicyInputProcessor(BasicInputProcessor):
         mouse_pos = event.pos
         if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
         
-        if event.button == 4:
+        if event.button == 1:
+            self.game_manager.gui.policy.check_click(mouse_pos)
+        elif event.button == 4:
             self.game_manager.gui.policy.scroll_up()
         elif event.button == 5:
             self.game_manager.gui.policy.scroll_down()

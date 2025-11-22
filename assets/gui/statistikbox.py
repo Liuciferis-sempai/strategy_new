@@ -58,6 +58,6 @@ def _convert_data(data:dict) -> str:
     text = ""
     for key, value in data.items():
         key = root.language.get(key)
-        value = root.language.get(value) if isinstance(value, str) else str(value)
-        text = text + " " + key + " " + value + "\n"
+        value = root.language.get(value)
+        text = text + " " + key + " " + str(value) + "\n"
     return text

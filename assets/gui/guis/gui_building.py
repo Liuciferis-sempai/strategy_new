@@ -28,9 +28,9 @@ class GUIBuildings:
         self.building_ico = Icon(cell_size, cell_size, img=f"data/buildings/img/none")
         self.building_name = InputField(root.interface_size*2, 60, place_holder=f"unknow", bg_color=(255, 255, 255, 255), font_size=40, hidden=True)
         game_manager.add_inputfield(self.building_name)
-        self.building_level = TextField(root.interface_size//2, root.interface_size//3, text=f"lvl unknow")
+        self.building_level = TextField(root.interface_size//2, root.interface_size//3, text="lvl unknow")
         self.buildings_queue_name = TextField(root.interface_size//2, root.interface_size//4, text="Queue")
-        self.building_town_population_name = TextField(int(root.interface_size*1.2), root.interface_size//4, text="population *:")
+        self.building_town_population_name = TextField(int(root.interface_size*1.2), root.interface_size//4, text="population")
         self.buildings_queue: list[TextField] = []
         self.buildings_town_population: list[TextField] = []
         self.building_reciept_button = WorkbenchButton()
@@ -115,17 +115,17 @@ class GUIBuildings:
         self.buildings_town_population = []
 
         if self.building.is_town:
-            self.building_town_population_name.set_text(f"population *: *{self.building.town.get_sum_population()}")
+            self.building_town_population_name.set_text("population_titel", text_kwargs={"population": self.building.town.get_sum_population()})
             self.building_town_population_name.update_text_surface()
             for group, size in self.building.town.get_population().items():
                 self.buildings_town_population.append(
-                    TextField(root.interface_size, cell_size, text=f"{group} *: *{size}")
+                    TextField(root.interface_size, cell_size, text="population_group_size", text_kwargs={"group": group, "size": size})
                 )
                 popgroup = self.building.town.get_popgroup(group)
                 if popgroup == None: continue
                 for subgroup, subsize in popgroup.get_population().items():
                     self.buildings_town_population.append(
-                        TextField(root.interface_size, cell_size, text=f"{subgroup} *: *{sum(subsize)}")
+                        TextField(root.interface_size, cell_size, text="population_subgroup_size", text_kwargs={"subgroup": subgroup, "size": len(subsize)})
                     )
 
     #@timeit

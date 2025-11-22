@@ -55,8 +55,9 @@ class InputKeyProcessor:
                 self.game_manager.gui.move_left()
             elif self.k_d_pressed:
                 self.game_manager.gui.move_right()
-            self.game_manager.world_map.draw()
-            self.game_manager.messenger.draw()
+            update_gui()
+            #self.game_manager.world_map.draw()
+            #self.game_manager.messenger.draw()
         else:
             self.k_a_pressed = False
             self.k_d_pressed = False

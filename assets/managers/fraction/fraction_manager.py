@@ -68,6 +68,7 @@ class FractionManager:
             policy = self.game_manager.policy_table.get_policy_by_id(policy.get("id", "unknow"))
         
         fraction.policies.append(policy)
+        self.game_manager.policy_table.set_policy_sinergy(fraction.policies)
         return f"added {policy.id} to {fraction.name} ({fraction.id})"
     
     def remove_policy_to_fraction(self, fraction: int|Fraction, policy: str|dict|PolicyCard) -> str:
@@ -78,7 +79,7 @@ class FractionManager:
             policy = self.game_manager.policy_table.get_policy_by_id(policy)
         elif isinstance(policy, dict):
             policy = self.game_manager.policy_table.get_policy_by_id(policy.get("id", "unknow"))
-        
-        print(fraction.policies)
+
         fraction.policies.remove(policy)
+        self.game_manager.policy_table.set_policy_sinergy(fraction.policies)
         return f"removed {policy.id} by {fraction.name} ({fraction.id})"

@@ -9,19 +9,19 @@ if TYPE_CHECKING:
     from ..buildings.building import Building
 
 class Town:
-    def __init__(self, id: int = -1, name: str = "Unknow", coord: tuple[int, int, int] = (-1, -1, 0), fraction_id: int = -1, data: dict = {}, is_default: bool = True):
+    def __init__(self, id: int = -1, name: str = "Unknow", coord: tuple[int, int, int] = (-1, -1, 0), fraction_id: int = -1, data: dict | None = None, is_default: bool = True):
         self.id = id
         self.name = name
         self.coord: tuple[int, int, int] = coord
         self.is_default = is_default
         if is_default:
             logger.error("created default town", f"Town.__init__({name}, {coord}, {fraction_id}, {data}, {is_default})")
-        self.data = data.copy()
+        self.data = (data or {}).copy()
 
         self.fraction_id = fraction_id
         
         self.popgroups: list[PopGroup] = []
-        for popgroup in data.get("popgroups", ["peasants", "workers", "educated"]):
+        for popgroup in self.data.get("popgroups", ["peasants", "workers", "educated"]):
             self.append_popgroup(popgroup)
         self.conection_lenght = 2
         self.conection: list[Building] = []
@@ -73,10 +73,10 @@ class Town:
     def add_population(self, new_popgroup: str, popsize: dict) -> str:
         for popgroup in self.popgroups:
             if popgroup.name == new_popgroup:
-                popgroup.size["adult"] += popsize.get("adult", 0)
-                popgroup.size["aged"] += popsize.get("aged", 0)
-                if popsize.get("children"):
-                    popgroup.new_generation(popsize["children"])
+                normalized = PopGroup.normalize_size(popsize or {})
+                popgroup.size["adult"].extend(normalized.get("adult", []))
+                popgroup.size["aged"].extend(normalized.get("aged", []))
+                popgroup.size["children"].extend(normalized.get("children", []))
                 return f"successfully added new population to {self}"
         self.append_popgroup({"name": new_popgroup, "size": popsize})
         return f"successfully added new population to {self}"
@@ -85,10 +85,22 @@ class Town:
         if isinstance(popsize, dict):
             for popgroup in self.popgroups:
                 if popgroup.name == new_popgroup:
-                    popgroup.size["adult"] -= popsize.get("adult", 0)
-                    popgroup.size["aged"] -= popsize.get("aged", 0)
-                    popgroup.size["children"] -= popsize.get("children", 0)
-                    if popgroup.size["adult"] < 0 or popgroup.size["aged"] < 0 or popgroup.size["children"]:
+                    # support either integer counts or lists in popsize
+                    for key in ("adult", "aged", "children"):
+                        val = popsize.get(key)
+                        if val is None:
+                            continue
+                        if isinstance(val, int):
+                            for _ in range(val):
+                                if popgroup.size[key]:
+                                    popgroup.size[key].pop()
+                        elif isinstance(val, (list, tuple)):
+                            # remove as many as items specified
+                            for _ in range(len(val)):
+                                if popgroup.size[key]:
+                                    popgroup.size[key].pop()
+                    # if all empty, remove popgroup
+                    if not any(popgroup.size[k] for k in ("adult", "aged", "children")):
                         self.remove_popgroup(popgroup.name)
                     return f"successfully removed population from {self}"
         elif popsize == "all":
@@ -112,7 +124,7 @@ class Town:
             growth_rate_per_turn = (1 + growth_factor) ** time_factor - 1
             #print(growth_rate_per_turn)
             #logger.info(f"{popgroup.name} in {self} growth up on {growth_rate_per_turn} rate ({popgroup.size * growth_rate_per_turn})", "Town.simulation()")
-            popgroup.new_generation(sum(popgroup.size["adult"])/2 * growth_rate_per_turn)
+            popgroup.new_generation(popgroup.get_female_count("adult") * growth_rate_per_turn)
             self.add_in_population_history(popgroup.name, popgroup.get_sum_population())
 
     def add_in_population_history(self, popgroup_name: str, popgroup_population: float):

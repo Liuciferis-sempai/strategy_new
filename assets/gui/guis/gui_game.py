@@ -183,21 +183,21 @@ class GUIGame:
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+10
-                                ), font_size=font_size)
+                                ), font_size=font_size, bg_color=(0, 0, 0, 0))
         cell_info[-1].append(terrain)
         if cell.flora != {} and cell.is_opened:
             flora = TextField(text=cell.flora["name"],
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+terrain.text_rect.height+10
-                                ), font_size=font_size)
+                                ), font_size=font_size, bg_color=(0, 0, 0, 0))
             cell_info[-1].append(flora)
         if cell.fauna != {} and cell.is_opened:
             fauna = TextField(text=cell.fauna["name"],
                                 position=(
                                     mouse_pos[0]+10,
                                     mouse_pos[1]+terrain.text_rect.height+flora.text_rect.height+10 if cell.flora != {} else mouse_pos[1]+terrain.text_rect.height+10 #type: ignore
-                                ), font_size=font_size)
+                                ), font_size=font_size, bg_color=(0, 0, 0, 0))
             cell_info[-1].append(fauna)
         
         y_offset += sum([info.text_rect.height for info in cell_info[-1]])+10
@@ -210,17 +210,17 @@ class GUIGame:
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+10
-                                        ), font_size=font_size)
-            building_service = TextField(text=f"service *{building.get_service()}/{building.get_max_service()}",
+                                        ), font_size=font_size, bg_color=(0, 0, 0, 0))
+            building_service = TextField(text=f"service_level", text_kwargs={"service_now": building.get_service(), "service_max": building.get_max_service()},
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+building_name.text_rect.height+10
-                                        ), font_size=font_size)
-            building_hp = TextField(text=f"hp *{building.get_hp()}/{building.get_max_hp()}",
+                                        ), font_size=font_size, bg_color=(0, 0, 0, 0))
+            building_hp = TextField(text=f"building_hp_level", text_kwargs={"hp_now": building.get_hp(), "hp_max": building.get_max_hp()},
                                     position=(
                                         mouse_pos[0]+10,
                                         mouse_pos[1]+y_offset+building_name.text_rect.height+building_service.text_rect.height+10
-                                    ), font_size=font_size)
+                                    ), font_size=font_size, bg_color=(0, 0, 0, 0))
 
             cell_info[-1].append(building_name)
             cell_info[-1].append(building_service)
@@ -229,11 +229,11 @@ class GUIGame:
             if building.category == "town":
                 population = building.town.get_population()
                 for group, pop in population.items():
-                    town_pop = TextField(text=f"{group} *: *{pop}",
+                    town_pop = TextField(text=f"population_group_size", text_kwargs={"group": group, "size": pop},
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+building_name.text_rect.height+building_hp.text_rect.height+building_service.text_rect.height+10
-                                        ), font_size=font_size)
+                                        ), font_size=font_size, bg_color=(0, 0, 0, 0))
                     cell_info[-1].append(town_pop)
                     y_offset += town_pop.text_rect.height
 
@@ -247,12 +247,12 @@ class GUIGame:
                                        position=(
                                            mouse_pos[0]+10,
                                            mouse_pos[1]+y_offset+10
-                                       ), font_size=font_size)
-                pawns_hp = TextField(text=f"hp *{pawn.get_hp()}/{pawn.get_max_hp()}",
+                                       ), font_size=font_size, bg_color=(0, 0, 0, 0))
+                pawns_hp = TextField(text=f"pawn_hp_level",text_kwargs={"hp_now": pawn.get_hp(), "hp_max": pawn.get_max_hp()},
                                     position=(
                                         mouse_pos[0]+10,
                                         mouse_pos[1]+y_offset+pawns_name.text_rect.height+10
-                                    ), font_size=font_size)
+                                    ), font_size=font_size, bg_color=(0, 0, 0, 0))
 
                 cell_info[-1].append(pawns_name)
                 cell_info[-1].append(pawns_hp)

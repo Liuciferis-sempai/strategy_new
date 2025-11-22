@@ -20,6 +20,51 @@ def can_be_int(value: str) -> bool:
         return True
     except:
         return False
+    
+def wrap_text(text: str, max_width: int, font: py.font.Font | None = None) -> list[str]:
+    if font is None:
+        font = py.font.Font(None, 20)
+    wrapped_lines = []
+    for line in text.splitlines():
+        words = line.split(" ")
+        current_line = ""
+        for word in words:
+            test_line = current_line + word + " "
+            if font.size(test_line)[0] <= max_width:
+                current_line = test_line
+            else:
+                wrapped_lines.append(current_line.strip())
+                current_line = word + " "
+        if current_line:
+            wrapped_lines.append(current_line.strip())
+    return wrapped_lines
+
+def hex_to_rgb(hex) -> tuple[int, int, int]:
+  rgb = []
+  for i in (0, 2, 4):
+    decimal = int(hex[i:i+2], 16)
+    rgb.append(decimal)
+  
+  return tuple(rgb)
+
+def is_color_cold(color_hex: str) -> bool:
+    rgb = hex_to_rgb(color_hex.lstrip('#'))
+    if rgb[0] + rgb[1] < rgb[2]:
+        return True
+    return False
+
+def is_color_warm(color_hex: str) -> bool:
+    rgb = hex_to_rgb(color_hex.lstrip('#'))
+    if rgb[0] + rgb[1] > rgb[2]:
+        return True
+    return False
+
+def cold_degree(color_hex: str) -> float:
+    '''
+    return how cold is color (from 0 to 1)
+    '''
+    rgb = hex_to_rgb(color_hex.lstrip('#'))
+    return max(0, (rgb[2] - (rgb[0] + rgb[1])/2) / 255)
 
 def change_window_state(new_state:str):
     match new_state:
@@ -150,6 +195,7 @@ def start_the_game(game_name: str="New Game", game_seed: int=9999):
     root.loading.draw("Loading preset stuff...")
     with open("data/preset.txt", "r") as f:
         for line in f.readlines():
+            if line.startswith("#") or line.strip() == "": continue
             root.game_manager.command_line.process_input(line)
 
     py.display.set_caption(game_name)

@@ -68,7 +68,7 @@ class GUISpawn:
             if not self._town_has_enought_resources(town, pawn): is_allowed = (False, "town_has_not_en_res")
 
             allowed_img = "allowed.png" if is_allowed[0] else "not_allowed.png"
-            allowed_button = SpawnPawn(width=self.item_width, height=self.item_height, img=allowed_img, value=f"{pawn["type"]}", is_allowed=is_allowed[0], message=is_allowed[1])
+            allowed_button = SpawnPawn(width=self.item_width, height=self.item_height, img=allowed_img, pawn_type=f"{pawn["type"]}", is_allowed=is_allowed[0], message=is_allowed[1])
             self.spawns[-1]["allowed"] = allowed_button
             self.buttons.append(allowed_button)
             
@@ -87,7 +87,7 @@ class GUISpawn:
     def _town_has_enought_people(self, town: "Town", pawn: dict) -> bool:
         for pop in town.popgroups:
             if pop.has_enough_quality(pawn["cost"]["people"]["quality"]):
-                if sum(pop.size["adult"]) >= pawn["cost"]["people"]["amout"]:
+                if len(pop.size["adult"]) >= pawn["cost"]["people"]["amout"]:
                     return True
         return False
 

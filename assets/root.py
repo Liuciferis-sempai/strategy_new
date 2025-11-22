@@ -53,6 +53,7 @@ loading.draw("Config loading...")
 config = read_json_file("data/config.json")
 cell_size_scale = config.get("cell_size_scale", 1)
 
+from .helpers.language import Language
 language = Language(config["language"])
 
 loading.draw("Image manager initializing...")
@@ -62,6 +63,4 @@ image_manager = ImageManager()
 loading.draw("Game initializing...")
 from .gamemanager import GameManager
 game_manager = GameManager()
-#game_manager.initialize()
-#game_manager.gui.initialize()
 game_manager.gui.change_position_for_new_screen_sizes()

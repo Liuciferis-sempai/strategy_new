@@ -176,7 +176,7 @@ class GameManager:
     
     def get_chosen_building(self) -> Building:
         if not self.chosen_building:
-            logger.error(f"query chosen building before it is defined", "GameManager.get_chosen_building")
+            logger.error(f"query chosen building before it is defined", "GameManager.get_chosen_building()")
         return self.chosen_building
 
     def is_chosen_building_defult(self) -> bool:
@@ -188,7 +188,7 @@ class GameManager:
 
         if not building:
             logger.error("new building is default. Something is wrong", f"GameManager.set_chosen_building({building})")
-        logger.info(f"new chosen building is {building}", f"GameManager.get_chosen_building(...)")
+        logger.info(f"new chosen building is {building}", f"GameManager.set_chosen_building(...)")
         self.chosen_building = building
         self.update_chosen_building_coord()
 

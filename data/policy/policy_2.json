@@ -1,8 +1,18 @@
 {
-    "name": "policy_2",
+    "id": "policy_2",
     "desc:": "policy_2_desc",
     "ico": "policy_0.png",
     "color": "#fc03d7",
     "figure": "square",
-    "number": 2
+    "number": 2,
+    "sinergy_with": {
+        "policy_0": 0.1
+    },
+    "influence": {
+        "categories": ["retirement_age"],
+        "weight": 1,
+        "values": {
+            "retirement_age": 70
+        }
+    }
 }

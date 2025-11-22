@@ -2,9 +2,10 @@ import pygame as py
 from .. import root
 from ..gui.textfield import TextField
 from ..auxiliary_stuff import update_gui
+from typing import Any
 
 class Messenger:
-    def __init__(self, font_size: int = 25, font_color: dict[str, tuple[int, int, int]] = {"info": (255, 255, 255), "warning": (255, 0, 0)}, bg_color: tuple[int, int, int]|tuple[int, int, int, int] = (10, 10, 10, 100), position: tuple[int, int] = (10, 10), line_lifespan: int = 5):
+    def __init__(self, font_size: int = 25, font_color: dict[str, tuple[int, int, int]] = {"info": (255, 255, 255), "warning": (255, 0, 0)}, bg_color: tuple[int, int, int]|tuple[int, int, int, int] = (100, 100, 100, 180), position: tuple[int, int] = (10, 10), line_lifespan: int = 7):
         self.font_size = font_size
         self.font_color = font_color
         self.bg_color = bg_color
@@ -15,9 +16,10 @@ class Messenger:
 
         self.lines: list[tuple[int, TextField]] = []
 
-    def print(self, message: str, message_type: str = "info"):
+    def print(self, message: str, message_kwargs: dict[str, Any] = {}, message_type: str = "info"):
+        if len(self.lines) == 0: self.last_tick = 0
         self.lines.append(
-            (self.last_tick, TextField(bg_color=self.bg_color, font_color=self.font_color[message_type], font_size=self.font_size, text=f"{message}", width=0, height=0, width_as_text_width=True))
+            (self.last_tick+100*len(self.lines), TextField(bg_color=self.bg_color, font_color=self.font_color[message_type], font_size=self.font_size, text=f"{message}", height=self.font_size, width_as_text_width=True, text_kwargs=message_kwargs))
         )
         self.change_position()
 
@@ -30,16 +32,12 @@ class Messenger:
         update_gui()
     
     def tick(self):
+        if len(self.lines) == 0: return
         self.last_tick += 1
-        to_remove = []
-        for tick, line in self.lines:
-            if tick+self.line_lifespan > self.last_tick:
-                to_remove.append((tick, line))
-        if to_remove != []:
-            for item in to_remove:
-                self.lines.remove(item)
+        old_line_lenght = len(self.lines)
+        self.lines = [(tick, line) for tick, line in self.lines if tick + self.line_lifespan > self.last_tick]
+        if old_line_lenght != len(self.lines):
             self.change_position()
     
     def draw(self):
-        for _, line in self.lines:
-            line.draw()
+        for _, line in self.lines: line.draw()

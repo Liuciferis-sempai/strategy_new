@@ -1,4 +1,4 @@
-from ...auxiliary_stuff import read_json_file, update_gui
+from ...auxiliary_stuff import read_json_file, update_gui, get_cell_side_size
 import pygame as py
 import os
 from ... import root
@@ -23,6 +23,7 @@ class Techtree:
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
         #self.scale = 1.0
+        self.move_distance = get_cell_side_size()//4
 
         self.techs = []
         loading.draw("Loading technologies...")
@@ -96,20 +97,20 @@ class Techtree:
     
     def scroll_up(self):
         for tech in self.techs:
-            tech.rect.y += root.interface_size//2
+            tech.rect.y += self.move_distance
         update_gui()
     
     def scroll_down(self):
         for tech in self.techs:
-            tech.rect.y -= root.interface_size//2
+            tech.rect.y -= self.move_distance
         update_gui()
     
     def scroll_left(self):
         for tech in self.techs:
-            tech.rect.x += root.interface_size//2
+            tech.rect.x += self.move_distance
         update_gui()
     
     def scroll_right(self):
         for tech in self.techs:
-            tech.rect.x -= root.interface_size//2
+            tech.rect.x -= self.move_distance
         update_gui()

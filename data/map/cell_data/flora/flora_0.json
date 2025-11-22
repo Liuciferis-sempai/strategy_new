@@ -5,7 +5,7 @@
     "priority": 0,
     "frame": {
         "temperature": [0.3, 0.7],
-        "height": [0.0, 0.7],
+        "height": [0.0, 0.5],
         "humidity": [0.2, 0.7],
         "soil_fertility": [0.4, 1.0]
     }
