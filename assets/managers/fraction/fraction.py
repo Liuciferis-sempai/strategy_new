@@ -6,7 +6,7 @@ from typing import Any, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..pawns.pawn import Pawn
     from ..buildings.building import Building
-    from ..towns.town import Town
+    from ..buildings.towns.town import Town
     from ..policy.policycard import PolicyCard
 
 class Fraction:

@@ -12,20 +12,13 @@ class TechnologyInputProcessor(BasicInputProcessor):
 
     #@logger
     def process_keydown(self, event:py.event.Event):
-        if self.process_keydown_for_inputfield(event): return root.update_gui()
-        if self.process_keydown_base(event):
-            return
-
         if event.key == py.K_ESCAPE:
             root.change_window_state("game")
     
     #@logger
-    def process_mousebuttondown(self, event:py.event.Event):
-        mouse_pos = event.pos
-        if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
-        
+    def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
         if event.button == 1:
-            self.game_manager.tech_tree.collidepoint(mouse_pos)
+            self.game_manager.tech_tree.collidepoint(rel_mouse_pos)
         elif event.button == 3:
             self.game_manager.tech_tree.set_none_tech()
         elif event.button == 4:

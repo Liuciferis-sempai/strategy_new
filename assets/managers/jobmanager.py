@@ -210,8 +210,7 @@ class JobManager:
         if hasattr(self.game_manager.trigger_manager, trigger["type"]):
             trigger = self._procces_trigger(trigger, job_name)
             trigger_func = getattr(self.game_manager.trigger_manager, trigger["type"])
-            is_allowed, comment, comment_kwargs = trigger_func(pawn, trigger["args"])
-            if not is_allowed:
-                self.game_manager.messenger.print(comment, comment_kwargs, message_type="warning")
+            is_allowed = trigger_func(pawn, **trigger["args"])
+            if not is_allowed: self.game_manager.messenger.print_buffer()
             return is_allowed
         return False

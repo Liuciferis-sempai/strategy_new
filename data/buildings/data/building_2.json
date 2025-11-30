@@ -14,13 +14,14 @@
     "service_cost": {
         "resource_0": 1
     },
-    "prodaction_time": 1,
+    "prodaction_time": 2,
     "prodaction": {
         "resource_0": 1
     },
     "storage_type": "dict",
     "storage": {"output": []},
     "storage_size": {"output": 10},
+    "default_storage": "none",
     "cost": {
         "resource_0": 2
     },

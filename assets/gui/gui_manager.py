@@ -7,7 +7,7 @@ from .textfield import *
 from .iconbox import *
 from .listof import *
 from .guis.gui_game import GUIGame
-from .guis.gui_policy import GUIGPolicy
+from .guis.gui_policy import PolicyGUIManager
 from .guis.gui_technology import GUITechnology
 from .guis.gui_building import GUIBuildings
 from .guis.gui_writing import GUIWriting
@@ -34,7 +34,7 @@ class GUI:
         loading.draw("Initializing GUIGame...")
         self.game = GUIGame(game_manager)
         loading.draw("Initializing GUIGPolicy...")
-        self.policy = GUIGPolicy(game_manager)
+        self.policy = PolicyGUIManager(game_manager)
         loading.draw("Initializing GUIReciept...")
         self.reciept = GUIReciept(game_manager)
         loading.draw("Initializing GUIShareMenu...")
@@ -56,6 +56,7 @@ class GUI:
         self.sharemenu.change_position_for_new_screen_sizes()
         self.inventory.change_position_for_new_screen_sizes()
         self.policy.update_positions()
+        self.reciept.change_position_for_new_screen_sizes()
 
     def close_all_extra_windows(self):
         self.game.hide_jobs()

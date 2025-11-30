@@ -2,6 +2,7 @@ import pygame as py
 from .. import root
 from ..world.cell import Cell
 from ..auxiliary_stuff import update_gui
+from .basic_input_process import BasicInputProcessor
 from .handlers.building_input import BuildingInputProcessor
 from .handlers.fraction_input import FractionInputProcessor
 from .handlers.game_input import GameInputProcessor
@@ -20,6 +21,8 @@ if TYPE_CHECKING:
 class InputKeyProcessor:
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
+        
+        self.basic_input_processor = BasicInputProcessor(self, game_manager)
 
         self.building_input = BuildingInputProcessor(self, game_manager)
         self.fraction_input = FractionInputProcessor(self, game_manager)
@@ -68,6 +71,13 @@ class InputKeyProcessor:
         pass
 
     #PROCESS_KEYDOWN----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    def keydown(self, event: py.event.Event):
+        if self.basic_input_processor.process_keydown_for_inputfield(event): return root.update_gui()
+        if self.basic_input_processor.process_keydown_base(event): return
+
+        self.process_keydown(event)
+
     #@logger
     def process_keydown(self, event:py.event.Event):
         pass
@@ -94,8 +104,16 @@ class InputKeyProcessor:
             self.k_d_pressed = False
 
     #PROCESS_MOUSEDOWN--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    def mousebuttondown(self, event:py.event.Event):
+        mouse_pos = event.pos
+        rel_mouse_pos = (mouse_pos[0]+self.game_manager.get_x_offset(), mouse_pos[1]+self.game_manager.get_y_offset())
+
+        if self.basic_input_processor.process_mousebutton_for_inputfield(rel_mouse_pos): return root.update_gui()
+
+        self.process_mousebuttondown(event, rel_mouse_pos)
+
     #@logger
-    def process_mousebuttondown(self, event:py.event.Event):
+    def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
         pass #will be replaced in root.change_window_state
 
     #PROCESS_MOUSEUP----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

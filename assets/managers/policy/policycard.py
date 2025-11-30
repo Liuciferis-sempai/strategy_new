@@ -11,7 +11,9 @@ class PolicyCard(py.sprite.Sprite):
         policy_data = copy.deepcopy(policy_data)
 
         self.id = policy_data.get("id")
+        self.is_locked = policy_data.get("is_locked", True)
         self.data = policy_data
+        self.size = size
 
         self.name = policy_data.get("id", "Unknown Policy")
         self.description = policy_data.get("desc", "no_desc_found")
@@ -24,7 +26,7 @@ class PolicyCard(py.sprite.Sprite):
         self.font = py.font.Font(None, 30)
 
         self.image = root.image_manager.get_image(f"data/icons/{self.icon}")
-        self.image = py.transform.scale(self.image, (size, size*2))
+        self.image = py.transform.scale(self.image, (self.size, self.size*2))
         self.rect = self.image.get_rect()
         self.update_info()
         self.rect.topleft = pos
@@ -68,25 +70,56 @@ class PolicyCard(py.sprite.Sprite):
     
         self.number_surface = self.font.render(str(self.number), True, (0, 0, 0))
         self.number_rect = self.number_surface.get_rect(center=(self.figure_surface.get_width() // 2, self.figure_surface.get_height() // 2))
+        self.lock_surface = root.image_manager.get_image("data/icons/lock.png")
+        self.lock_surface = py.transform.scale(self.lock_surface, (self.size//2, self.size//2))
+        self.lock_rect = self.lock_surface.get_rect(center=(self.image.get_width()//2, self.image.get_height()//2))
         #self.figure_surface.blit(self.number_surface, self.number_rect)
         #self.image.blit(self.figure_surface, self.figure_pos)
         #self.image.blit(self.title, self.title_rect)
         #self.image.blit(self.description_surface, self.description_rect)
+        self.blit_fragments()
     
     def __repr__(self) -> str:
         return f"<PolicyCard {self.id}>"
+    
+    def copy(self) -> "PolicyCard":
+        return PolicyCard(self.data, size=self.size)
 
     def change_position(self, new_position: tuple[int, int]):
         self.rect.topleft = new_position
     
-    def draw(self):
-        #self.number_surface = self.font.render(str(self.number), True, (0, 0, 0))
-        #self.number_rect = self.number_surface.get_rect(center=(self.rect.width // 2, (self.rect.height - 60) // 2))
+    def check_available_status(self):
+        if self.data.get("trigger"):
+            if isinstance(self.data["trigger"], list):
+                for trigger in self.data["trigger"]:
+                    self._is_availble(trigger)
+            else:
+                self._is_availble(self.data["trigger"])
+        elif self.is_locked:
+            self.is_locked = False
+            self.blit_fragments()
+    
+    def _is_availble(self, trigger: dict[str, Any]) -> bool:
+        if hasattr(root.game_manager.trigger_manager, trigger["type"]):
+            trigger_func = getattr(root.game_manager.trigger_manager, trigger["type"])
+            is_allowed = trigger_func(**trigger["args"])
+            return is_allowed
+        return False
+
+    def blit_fragments(self):
+        self.image = root.image_manager.get_image(f"data/icons/{self.icon}")
+        self.image = py.transform.scale(self.image, (self.size, self.size*2))
+
+        if self.is_locked: self.image.blit(self.lock_surface, self.lock_rect)
         self.figure_surface.blit(self.number_surface, self.number_rect)
         self.image.blit(self.figure_surface, self.figure_pos)
         self.image.blit(self.title, self.title_rect)
         for desc_surf, desc_rect in zip(self.info_surface, self.info_rect):
             self.image.blit(desc_surf, desc_rect)
+    
+    def draw(self):
+        #self.number_surface = self.font.render(str(self.number), True, (0, 0, 0))
+        #self.number_rect = self.number_surface.get_rect(center=(self.rect.width // 2, (self.rect.height - 60) // 2))
         root.screen.blit(self.image, self.rect)
     
     def get_info(self) -> dict:

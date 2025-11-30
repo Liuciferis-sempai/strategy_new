@@ -1,6 +1,8 @@
 import pygame as py
 from .. import root
 import copy
+from typing import Any
+import time
 
 def get_cell_size() -> tuple[int, int]:
     return root.cell_sizes[root.cell_size_scale]
@@ -8,9 +10,22 @@ def get_cell_size() -> tuple[int, int]:
 def get_cell_side_size() -> int:
     return root.cell_sizes[root.cell_size_scale][0]
 
+def extract_building_data_for_cell(building_data: dict[str, Any]) -> dict[str, str|int]:
+    data = {
+        "name": building_data["name"],
+        "type": building_data["type"],
+        "desc": building_data["desc"],
+        "coord": building_data["coord"],
+        "img": building_data["img"],
+        "fraction_id": building_data["fraction_id"],
+        "type": building_data["type"],
+        "level": building_data["level"]
+    }
+    return data
+
 def update_gui():
     '''
-    update all gui element
+    update all gui element in next tick
     '''
     root.need_update_gui = True
 
@@ -171,6 +186,8 @@ def change_window_state(new_state:str):
         case _:
             root.logger.error(f"Unknown window state: {new_state}", f"change_window_state({new_state})")
             return
+    root.game_manager.set_x_offset(0)
+    root.game_manager.set_y_offset(0)
     root.last_window_state = root.window_state
     root.window_state = new_state
     root.logger.info(f"changed window state from '{root.last_window_state}' to '{root.window_state}'", f"change_window_state({new_state})")
@@ -180,8 +197,8 @@ def change_window_state(new_state:str):
 def back_window_state():
     change_window_state(root.last_window_state)
 
-def start_the_game(game_name: str="New Game", game_seed: int=9999):
-    root.loading.draw("Starting the game...")
+def start_the_game(game_name: str="New Game", player_fraction_name: str = "Player's Fraction", game_seed: int=9999):
+    root.loading.draw("initialization...", f"Starting the '{game_name}'...")
     root.game_manager.game_name = game_name
     root.game_manager.world_map.map_generate(game_seed)
 
@@ -189,7 +206,7 @@ def start_the_game(game_name: str="New Game", game_seed: int=9999):
     change_window_state("game")
 
     root.loading.draw("Create players fraction...")
-    root.game_manager.fraction_manager.create_fraction("Player's Fraction", "player", root.player_id)
+    root.game_manager.fraction_manager.create_fraction(player_fraction_name, "player", root.player_id)
     root.game_manager.gui.fraction.open_player_fraction()
 
     root.loading.draw("Loading preset stuff...")

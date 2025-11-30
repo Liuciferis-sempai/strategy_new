@@ -19,5 +19,6 @@
     "queue": [],
     "storage_type": "list",
     "storage": [],
+    "default_storage": "main",
     "storage_size": 25
 }

@@ -9,7 +9,7 @@ from ..world.cell import Cell
 from .pawns.pawn import Pawn
 from .buildings.building import Building
 from .policy.policytable import PolicyCard
-from .towns.town import Town
+from .buildings.towns.town import Town
 
 class EffectManager:
     def __init__(self, game_manager: "GameManager"):
@@ -18,9 +18,9 @@ class EffectManager:
         self.effects: dict[str, dict[str, Any]] = {
             "clear_the_queue": {"building": "Building", "reciept": dict},
             "restore_movement_points": {"pawn": "Pawn"},
-            "add_resource": {"pawn": "Pawn", "building": "Building", "resource": str, "amout": int}, #pawn and building are mutually exclusive
+            "add_resource": {"pawn": "Pawn", "building": "Building", "resource": str, "amount": int}, #pawn and building are mutually exclusive
             "take_resource": {"pawn": "Pawn", "building": "Building", "resource": str, "anout": int}, #pawn and building are mutually exclusive
-            "take_loot": {"pawn": Pawn, "loot": dict["resource": str, "amout": int]},
+            "take_loot": {"pawn": Pawn, "loot": dict["resource": str, "amount": int]},
             "open_share_menu": {"target": str},
             "stand_here": {"pawn": "Pawn", "target_cell": "Cell"},
             "build_scheme": {"target_building_str": str, "building_coord": tuple[int, int], "building_fraction": int},
@@ -45,11 +45,11 @@ class EffectManager:
             case "restore_movement_points":
                 do_answer = self.restore_movement_points(effect_data["pawn"])
             case "add_resource":
-                if effect_data.get("pawn"): do_answer = self.add_resource_to_pawn(effect_data["pawn"], effect_data["resource"], effect_data["amout"])
-                else: do_answer = self.add_resource_to_building(effect_data["building"], effect_data["resource"], effect_data["amout"])
+                if effect_data.get("pawn"): do_answer = self.add_resource_to_pawn(effect_data["pawn"], effect_data["resource"], effect_data["amount"])
+                else: do_answer = self.add_resource_to_building(effect_data["building"], effect_data["resource"], effect_data["amount"])
             case "take_resource":
-                if effect_data.get("pawn"): do_answer = self.remove_resource_from_pawn(effect_data["pawn"], effect_data["resource"], effect_data["amout"])
-                else: do_answer = self.remove_resource_from_building(effect_data["building"], effect_data["resource"], effect_data["amout"])
+                if effect_data.get("pawn"): do_answer = self.remove_resource_from_pawn(effect_data["pawn"], effect_data["resource"], effect_data["amount"])
+                else: do_answer = self.remove_resource_from_building(effect_data["building"], effect_data["resource"], effect_data["amount"])
             case "take_loot":
                 do_answer = self.take_loot(effect_data["pawn"], effect_data["loot"])
             case "open_share_menu":
@@ -95,27 +95,27 @@ class EffectManager:
         self.game_manager.messenger.print("restored_movement_points", {"pawn_name": pawn.name})
         return self.game_manager.pawns_manager.restore_movement_points(pawn)
     
-    def add_resource_to_pawn(self, pawn: "Pawn", resource: str, amout: int) -> str:
+    def add_resource_to_pawn(self, pawn: "Pawn", resource: str, amount: int) -> str:
         self.game_manager.messenger.print("pawn_get_res", {"pawn_name": pawn.name, "resource": root.language.get(resource)})
-        return self.game_manager.pawns_manager.add_resource(pawn, resource, amout)
+        return self.game_manager.pawns_manager.add_resource(pawn, resource, amount)
 
-    def add_resource_to_building(self, building: "Building", resource: str, amout: int) -> str:
+    def add_resource_to_building(self, building: "Building", resource: str, amount: int) -> str:
         self.game_manager.messenger.print("building_get_res", {"building_name": building.name, "resource": root.language.get(resource)})
-        return self.game_manager.buildings_manager.add_resources(building, resource, amout)
+        return self.game_manager.buildings_manager.add_resources(building, resource, amount)
 
-    def remove_resource_from_pawn(self, pawn: "Pawn", resource: str, amout: int) -> str:
+    def remove_resource_from_pawn(self, pawn: "Pawn", resource: str, amount: int) -> str:
         self.game_manager.messenger.print("pawn_lost_res", {"pawn_name": pawn.name, "resource": root.language.get(resource)})
-        return self.game_manager.pawns_manager.remove_resource(pawn, resource, amout)
+        return self.game_manager.pawns_manager.remove_resource(pawn, resource, amount)
     
-    def remove_resource_from_building(self, building: "Building", resource: str, amout: int) -> str:
+    def remove_resource_from_building(self, building: "Building", resource: str, amount: int) -> str:
         self.game_manager.messenger.print("buildig_lost_res", {"building_name": building.name, "resouce": root.language.get(resource)})
-        return self.game_manager.buildings_manager.remove_resource(building, resource, amout)
+        return self.game_manager.buildings_manager.remove_resource(building, resource, amount)
 
     def take_loot(self, pawn: Pawn, loot: dict[str, int]) -> str:
         answer = ""
-        for resource, amout in loot.items():
+        for resource, amount in loot.items():
             self.game_manager.messenger.print("pawn_get_loot", {"pawn": pawn.name, "resource": root.language.get(resource)})
-            answer += self.game_manager.pawns_manager.add_resource(pawn, resource, amout) + "\n"
+            answer += self.game_manager.pawns_manager.add_resource(pawn, resource, amount) + "\n"
         return answer
     
     def open_share_menu(self, target_of_action: str) -> str:

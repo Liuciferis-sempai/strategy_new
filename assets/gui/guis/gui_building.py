@@ -35,19 +35,18 @@ class GUIBuildings:
         self.buildings_town_population: list[TextField] = []
         self.building_reciept_button = WorkbenchButton()
         self.upgrade_building_button = UpgradeBuildingButton(root.interface_size, root.interface_size//3)
-
-        self.y_global_offset = 0
     
     def change_position_for_new_screen_sizes(self):
         cell_size = get_cell_side_size()
+        y_offset = self.game_manager.get_y_offset()
 
-        self.building_ico.change_position((10, 10+self.y_global_offset))
-        self.building_name.change_position((cell_size+20, 10+self.y_global_offset))
-        self.building_level.change_position((10, self.building_ico.rect.height+20+self.y_global_offset))
+        self.building_ico.change_position((10, 10+y_offset))
+        self.building_name.change_position((cell_size+20, 10+y_offset))
+        self.building_level.change_position((10, self.building_ico.rect.height+20+y_offset))
 
-        y_offset = self.building_ico.rect.height+self.building_level.rect.height+self.y_global_offset+20
+        y_offset = self.building_ico.rect.height+self.building_level.rect.height+y_offset+20
         if self.building.can_be_upgraded():
-            self.upgrade_building_button.change_position((root.interface_size//2+20, self.building_ico.rect.height+self.y_global_offset+20))
+            self.upgrade_building_button.change_position((root.interface_size//2+20, self.building_ico.rect.height+y_offset+20))
             y_offset += self.upgrade_building_button.rect.height+10
 
         if self.building.is_workbench or self.building.is_town:
@@ -72,19 +71,20 @@ class GUIBuildings:
                 y_offset += pop.rect.height+10
 
     def open(self):
-        self.y_global_offset = 0
+        y_offset = self.game_manager.get_y_offset()
+
         building = self.game_manager.get_chosen_building()
         self.building = building
 
         self.building_ico.update_image(f"data/buildings/img/{building.data["img"]}")
-        self.building_ico.change_position((10, 10+self.y_global_offset))
+        self.building_ico.change_position((10, 10+y_offset))
         
         self.building_name.place_holder = f"{building.type}"
         self.building_name.hidden = False
         self.building_name.update_text_surface()
 
         self.building_level.text = f"lvl {building.level}"
-        self.building_level.update_text_surface()
+        self.building_level.render_text()
 
         self._set_building_queue()
         self._set_population()
@@ -102,11 +102,12 @@ class GUIBuildings:
         self.buildings_queue = []
         y_offset = 0
 
-        if self.building.data.get("max_queue", False):
+        if self.building.get_queue_max_lenght() != 0:
+            building_queue = self.building.get_queue()
             y_offset += 2
-            for i in range(self.building.max_queue): #type: ignore
-                if i < len(self.building.queue): #type: ignore
-                    self.buildings_queue.append(Icon(cell_size, cell_size, img=f"{self.building.queue[i]["img"]}", spec_path="data/reciepts/img")) #type: ignore
+            for i in range(self.building.get_queue_max_lenght()):
+                if i < self.building.get_queue_lenght():
+                    self.buildings_queue.append(Icon(cell_size, cell_size, img=f"{building_queue[i]["img"]}", spec_path="data/reciepts/img")) #type: ignore
                 else:
                     self.buildings_queue.append(Icon(cell_size, cell_size, img="empty.png", spec_path="data/reciepts/img")) #type: ignore
 
@@ -116,7 +117,7 @@ class GUIBuildings:
 
         if self.building.is_town:
             self.building_town_population_name.set_text("population_titel", text_kwargs={"population": self.building.town.get_sum_population()})
-            self.building_town_population_name.update_text_surface()
+            self.building_town_population_name.render_text()
             for group, size in self.building.town.get_population().items():
                 self.buildings_town_population.append(
                     TextField(root.interface_size, cell_size, text="population_group_size", text_kwargs={"group": group, "size": size})
@@ -152,13 +153,13 @@ class GUIBuildings:
         root.need_update_gui = False
 
     def move_up(self):
-        if self.y_global_offset < 0:
-            self.y_global_offset += 10
+        if self.game_manager.get_y_offset() < 0:
+            self.game_manager.add_y_offset(10)
             self.change_position_for_new_screen_sizes()
             update_gui()
 
     def move_down(self):
-        self.y_global_offset -= 10
+        self.game_manager.set_y_offset(-10)
         self.change_position_for_new_screen_sizes()
         update_gui()
 

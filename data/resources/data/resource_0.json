@@ -1,6 +1,6 @@
 {
     "name": "resource_0",
     "desc": "resource_0_desc",
-    "max_amout": 3,
+    "max_amount": 3,
     "is_food": false
 }

@@ -5,7 +5,7 @@ from ..auxiliary_stuff import update_gui
 from typing import Any
 
 class Messenger:
-    def __init__(self, font_size: int = 25, font_color: dict[str, tuple[int, int, int]] = {"info": (255, 255, 255), "warning": (255, 0, 0)}, bg_color: tuple[int, int, int]|tuple[int, int, int, int] = (100, 100, 100, 180), position: tuple[int, int] = (10, 10), line_lifespan: int = 7):
+    def __init__(self, font_size: int = 25, font_color: dict[str, tuple[int, int, int]] = {"info": (255, 255, 255), "warning": (255, 0, 0)}, bg_color: tuple[int, int, int]|tuple[int, int, int, int] = (100, 100, 100, 180), position: tuple[int, int] = (10, 10), line_lifespan: int = 4):
         self.font_size = font_size
         self.font_color = font_color
         self.bg_color = bg_color
@@ -15,6 +15,18 @@ class Messenger:
         self.last_tick = 0
 
         self.lines: list[tuple[int, TextField]] = []
+        self.buffer = None
+
+    def set_buffer(self, message: str, message_kwargs: dict[str, Any] = {}, message_type: str = "info"):
+        self.buffer = (message, message_kwargs, message_type)
+    
+    def print_buffer(self):
+        if self.buffer:
+            try:
+                self.print(self.buffer[0], self.buffer[1], self.buffer[2])
+            except:
+                root.logger.error(f"false buffer value: {self.buffer}", "messenger.print_buffer(...)")
+        self.buffer = None
 
     def print(self, message: str, message_kwargs: dict[str, Any] = {}, message_type: str = "info"):
         if len(self.lines) == 0: self.last_tick = 0

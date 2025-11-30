@@ -1,6 +1,7 @@
 import pygame as py
 from ... import root
 from ...root import logger, language
+from ...auxiliary_stuff import *
 
 class Pawn:
     def __init__(self, id: int= -1, coord: tuple[int, int, int]=(0, 0, 0), data: dict= {}, is_default: bool=True):
@@ -10,8 +11,7 @@ class Pawn:
         self.id = id
         self.coord = coord
         
-        self.inventory_size = data.get("inventory_size", 1)
-        self.inventory = []
+        self.inventory = Inventory(data.get("inventory_size", 1), data.get("inventory", []), "main")
         self.data = data.copy()
 
         self.name = language.get(data.get("name", data.get("type", "unknow")))
@@ -35,39 +35,14 @@ class Pawn:
     def __bool__(self) -> bool:
         return not self.is_default
     
-    def add_resource(self, resource:str, amout:int):
-        if len(self.inventory) < self.inventory_size:
-            remainder = amout
-            if self.inventory != []:
-                for item in self.inventory:
-                    if item.name == resource:
-                        remainder = item.add(amout)
-            if remainder > 0:
-                self.inventory.append(root.game_manager.resource_manager.create(resource, remainder))
-            self.optimize_inventory()
+    def add_resource(self, resource:str, amount:int):
+        return self.inventory.add_resouce(resource, amount)
     
-    def remove_resource(self, resource:str, amout:int) -> bool:
-        for item in self.inventory:
-            if item.name == resource:
-                if item.take(amout):
-                    if item.amout <= 0:
-                        self.inventory.remove(item)
-                    self.optimize_inventory()
-                    return True
-        return False
-    
-    def optimize_inventory(self):
-        for j, item in enumerate(self.inventory):
-            for i, item_ in enumerate(self.inventory):
-                if item.name == item_.name and i != j:
-                    remainder = item.add(item_.amout)
-                    if remainder == 0:
-                        self.inventory.remove(item_)
-                    else:
-                        item_.amout = remainder
+    def remove_resource(self, resource:str, amount:int):
+        return self.inventory.remove_resource(resource, amount)
 
     def has_free_space(self) -> bool:
-        return len(self.inventory) < self.inventory_size
+        return True
     
     def get_max_hp(self) -> int:
         max_hp = self.max_hp

@@ -1,5 +1,4 @@
 import datetime
-from .. import root
 
 class Logger:
     def __init__(self):

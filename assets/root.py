@@ -12,6 +12,7 @@ screen = py.display.set_mode((800, 600), py.RESIZABLE)
 #py.display.set_caption("My Game")
 py.display.set_caption("MyCountry")
 
+from .helpers.loading import Loading
 loading = Loading()
 loading.draw("Loading root module...")
 

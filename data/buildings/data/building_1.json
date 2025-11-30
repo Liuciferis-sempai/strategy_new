@@ -17,6 +17,7 @@
     "storage_type": "list",
     "storage": [],
     "storage_size": 20,
+    "default_storage": "main",
     "cost": {
         "resource_0": 2
     },

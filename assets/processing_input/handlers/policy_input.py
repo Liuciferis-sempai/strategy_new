@@ -12,21 +12,15 @@ class PolicyInputProcessor(BasicInputProcessor):
 
     #@logger
     def process_keydown(self, event:py.event.Event):
-        if self.process_keydown_for_inputfield(event): return root.update_gui()
-        if self.process_keydown_base(event):
-            return
         if event.key == py.K_ESCAPE:
             root.change_window_state("game")
 
     #@logger
-    def process_mousebuttondown(self, event:py.event.Event):
-        mouse_pos = event.pos
-        if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
-        
+    def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
         if event.button == 1:
-            self.game_manager.gui.policy.check_click(mouse_pos)
+            self.game_manager.gui.policy.click(rel_mouse_pos)
         elif event.button == 4:
-            self.game_manager.gui.policy.scroll_up()
+            self.game_manager.gui.policy.move_up()
         elif event.button == 5:
-            self.game_manager.gui.policy.scroll_down()
+            self.game_manager.gui.policy.move_down()
         root.update_gui()

@@ -2,6 +2,7 @@ from .fraction import Fraction
 from ... import root
 from ...root import logger
 from typing import Any, TYPE_CHECKING
+from ..policy.policytable import PolicyTable
 from ..policy.policycard import PolicyCard
 
 if TYPE_CHECKING:
@@ -13,11 +14,11 @@ class FractionManager:
         self._default_fraction = self.game_manager.get_default_fraction()
 
         self.fractions: list = []
-        self.allowed_fraction_ids: list[int] = []
+        self.blooked_fraction_ids: list[int] = []
 
     def create_fraction(self, name: str, type: str, id: int = 0, data: dict={}):
-        if id not in self.allowed_fraction_ids: self.allowed_fraction_ids.append(id)
-        else: return self.create_fraction(name, type, id+1)
+        if id not in self.blooked_fraction_ids: self.blooked_fraction_ids.append(id)
+        else: return self.create_fraction(name, type, id+1, data)
         fraction = Fraction(name, type, id, data, False)
         self._add_fraction(fraction)
         return fraction

@@ -18,7 +18,7 @@
     "max_queue": 2,
     "queue": [],
     "necessary_workers": {
-        "amout": 5,
+        "amount": 5,
         "quality": {
             "education": 0.2
         }
@@ -26,6 +26,7 @@
     "storage_type": "dict",
     "storage": {"input": [], "output": []},
     "storage_size": {"input": 5, "output": 2},
+    "default_storage": "input",
     "cost": {
         "resource_0": 2
     },

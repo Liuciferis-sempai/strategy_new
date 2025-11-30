@@ -9,186 +9,219 @@ from ..listof import *
 from ..inputfield import *
 from ... import root
 from ...root import logger
-from ...auxiliary_stuff import timeit, get_cell_side_size, get_cell_size
+from ...auxiliary_stuff import *
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ...gamemanager import GameManager
 
+from ...managers.pawns.pawn import Pawn
+from ...managers.buildings.building import Building
+from ...managers.resources.resource_type import ResourceType
+
 class GUIShareMenu:
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
 
-        self.share_starter = None
-        self.share_target = None
-        self.share_starter_inventory = []
-        self.share_target_inventory = []
-        self.share_starter_inventory_org = []
-        self.share_target_inventory_names = []
-        self.share_starter_ico = None
-        self.share_target_ico = None
-        self.share_target_type = "pawn"
-    
-    def change_position_for_new_screen_sizes(self):
-        if root.window_size[0] >= 1900 and root.window_size[1] >= 1000:
-            self.cell_size = root.interface_size//2
+        self.starter: Pawn|Building|None = None
+        self.starter_ico: Icon = Icon(root.window_size[0]//8, int(root.window_size[1]*0.7), img="none.png")
+        self.starter_inventory: Inventory|None = None
+        self.starter_inventory_cells: dict[str, list[tuple[InventoryCellButton, TextField]]] = {}
+        self.starter_inventory_names: list[TextField] = []
+        self.starter_type: str = "none"
+
+        self.target: Pawn|Building|None = None
+        self.target_ico: Icon = Icon(root.window_size[0]//8, int(root.window_size[1]*0.7), img="none.png")
+        self.target_inventory: Inventory|None = None
+        self.target_inventory_cells: dict[str, list[tuple[InventoryCellButton, TextField]]] = {}
+        self.target_inventory_names: list[TextField] = []
+        self.target_type: str = "none"
+
+        self.cell_size = int(root.interface_size//3)
+
+    def open(self, target: str):
+        if not self.game_manager.is_chosen_pawn_default():
+            self.starter = self.game_manager.get_chosen_pawn()
+            self.starter_type = "pawn"
+        elif not self.game_manager.is_chosen_building_defult():
+            self.starter = self.game_manager.get_chosen_building()
+            self.starter_type = "building"
         else:
-            self.cell_size = root.interface_size//4
+            logger.error("unknow share starter", f"GUIShareMenu.open({target})")
+            return
+        self.starter_inventory = self.starter.inventory
+        
+        self.target = self.game_manager.pawns_manager.get_pawn_by_type(target, self.game_manager.get_target_coord())
+        self.target_type = "pawn"
+        if not self.target:
+            self.target = self.game_manager.buildings_manager.get_building_by_coord(self.game_manager.get_target_coord())
+            self.target_type = "building"
+            if not self.target:
+                logger.error("unknow share target", f"GUIShareMenu.open({target})")
+                return
+        self.target_inventory = self.target.inventory
+        
+        self.set_inventories()
+        self.change_position_for_new_screen_sizes()
     
     def set_inventories(self):
-        if self.share_target and self.share_starter:
-            if hasattr(self.share_target, "is_scheme"):
-                if self.share_target.is_scheme: #type: ignore
-                    logger.info("share target is scheme", "GUIShereMenu.set_inventories()", f"{self.share_target.is_scheme}") #type: ignore
-                    self.share_starter_inventory_org = self.share_target.scheme_inventory #type: ignore
-                    self._set_inventories(self.share_target.scheme_inventory, self.share_target.scheme_inventory_size) #type: ignore
-                    return
-            self.share_starter_inventory_org = self.share_target.inventory #type: ignore
-            self._set_inventories(self.share_target.inventory, self.share_target.inventory_size) #type: ignore
+        if not self.starter or not self.target or not self.starter_inventory or not self.target_inventory: return
 
-    def _set_inventories(self, target_inventory: list|dict, max_target_inventory: int|dict):
-        if self.share_target and self.share_starter:
-            self.share_starter_inventory = []
-            for i in range(self.share_starter.data.get("inventory_size", 1)):
-                if i < len(self.share_starter.inventory):
-                    self.share_starter_inventory.append([Icon(self.cell_size, self.cell_size, img=self.share_starter.inventory[i].name), TextField(text=str(self.share_starter.inventory[i].amout), font_size=50, width=0, height=0)]) #type: ignore
+        self.starter_inventory_cells = {}
+        self.starter_inventory_names = []
+        self.target_inventory_cells = {}
+        self.target_inventory_names = []
+
+        starter_inventory = self.starter_inventory.content_to_dict()
+        starter_inventory_size = self.starter_inventory.size_to_dict()
+        target_inventory = self.target_inventory.content_to_dict()
+        target_inventory_size = self.target_inventory.size_to_dict()
+
+        for category in starter_inventory:
+            self.starter_inventory_names.append(
+                TextField(text=category, font_size=50)
+            )
+            self.starter_inventory_cells[category] = []
+            for i in range(starter_inventory_size[category]):
+                if i < len(starter_inventory[category]):
+                    cell = (
+                        InventoryCellButton(width=self.cell_size, height=self.cell_size, img=starter_inventory[category][i].name, resource_name=starter_inventory[category][i].name, resource_amount=starter_inventory[category][i].amount),
+                        TextField(text=str(starter_inventory[category][i].amount), font_size=50)
+                    )
                 else:
-                    self.share_starter_inventory.append([Icon(self.cell_size, self.cell_size, img="empty_inventory_cell.png"), TextField(text="", font_size=50, width=0, height=0)]) #type: ignore
-
-            if isinstance(target_inventory, list):
-                self.share_target_inventory = []
-                for i in range(max_target_inventory): #type: ignore
-                    if i < len(target_inventory):
-                        self.share_target_inventory.append([Icon(self.cell_size, self.cell_size, img=target_inventory[i].name), TextField(text=str(target_inventory[i].amout), font_size=50, width=0, height=0)]) #type: ignore
-                    else:
-                        self.share_target_inventory.append([Icon(self.cell_size, self.cell_size, img="empty_inventory_cell.png"), TextField(text="", font_size=50, width=0, height=0)]) #type: ignore
-            else:
-                self.share_target_inventory = {}
-                self.share_target_inventory_names = []
-                for inventory_type in target_inventory.keys(): #type: ignore
-                    self.share_target_inventory_names.append(TextField(text=inventory_type, font_size=50, width=0, height=0))
-                    self.share_target_inventory[inventory_type] = []
-                    for i in range(max_target_inventory[inventory_type]): #type: ignore
-                        if i < len(target_inventory[inventory_type]):
-                            self.share_target_inventory[inventory_type].append([Icon(self.cell_size, self.cell_size, img=target_inventory[inventory_type][i].name), TextField(text=str(target_inventory[inventory_type][i].amout), font_size=50, width=0, height=0)]) #type: ignore
-                        else:
-                            self.share_target_inventory[inventory_type].append([Icon(self.cell_size, self.cell_size, img="empty_inventory_cell.png"), TextField(text="", font_size=50, width=0, height=0)]) #type: ignore
-            
-            self.share_starter_ico = Icon(root.window_size[0]//8, int(root.window_size[1]*0.7), img=self.share_starter.data.get("ico", "none.png"), spec_path="data/pawns/ico")
-            if self.share_target_type == "pawn":
-                self.share_target_ico = Icon(root.window_size[0]//8, int(root.window_size[1]*0.7), img=self.share_target.data.get("ico", "none.png"), spec_path="data/pawns/ico")
-            elif self.share_target_type == "building":
-                self.share_target_ico = Icon(root.window_size[0]//8, int(root.window_size[1]//2), img=self.share_target.data.get("img", "none.png"), spec_path="data/buildings/img")
-        else:
-            logger.error("Share starter or target not found", f"GUIShareMenu._set_inventories({target_inventory}, {max_target_inventory})")
-    
-    def open(self, target:str):
-        self.share_starter = self.game_manager.pawns_manager.get_pawn_by_id(self.game_manager.get_chosen_pawn().id)
-        self.share_target = self.game_manager.pawns_manager.get_pawn_by_type(target, self.game_manager.get_target_coord())
-
-        if self.share_target.is_default:
-            self.share_target = self.game_manager.buildings_manager.get_building_by_coord(self.game_manager.get_target_coord())
-            self.share_target_type = "building"
-        else:
-            self.share_target_type = "pawn"
+                    cell = (
+                        InventoryCellButton(width=self.cell_size, height=self.cell_size, img="empty_inventory_cell.png", resource_name="none", resource_amount=0),
+                        TextField(text="", font_size=50)
+                    )
+                self.starter_inventory_cells[category].append(cell)
+        if self.starter_type == "pawn":
+            self.starter_ico.update_image(new_img=self.starter.data.get("ico", "none.png"), spec_path="data/pawns/ico")
+        elif self.starter_type == "building":
+            self.starter_ico.update_image(new_img=self.starter.data.get("img", "none.png"), spec_path="data/buildings/img")
         
-        self.change_position_for_new_screen_sizes()
-        self.set_inventories()
+        for category in target_inventory:
+            self.target_inventory_names.append(
+                TextField(text=category, font_size=50)
+            )
+            self.target_inventory_cells[category] = []
+            for i in range(target_inventory_size[category]):
+                if i < len(target_inventory[category]):
+                    cell = (
+                        InventoryCellButton(width=self.cell_size, height=self.cell_size, img=target_inventory[category][i].name, resource_name=target_inventory[category][i].name, resource_amount=target_inventory[category][i].amount),
+                        TextField(text=str(target_inventory[category][i].amount), font_size=50)
+                    )
+                else:
+                    cell = (
+                        InventoryCellButton(width=self.cell_size, height=self.cell_size, img="empty_inventory_cell.png", resource_name="none", resource_amount=0),
+                        TextField(text="", font_size=50)
+                    )
+                self.target_inventory_cells[category].append(cell)
+        if self.target_type == "pawn":
+            self.target_ico.update_image(new_img=self.target.data.get("ico", "none.png"), spec_path="data/pawns/ico")
+        elif self.target_type == "building":
+            self.target_ico.update_image(new_img=self.target.data.get("img", "none.png"), spec_path="data/buildings/img")
     
-    def click(self, cell: Icon, inventory_type: str, button: int):
-        if inventory_type == "starter":
-            for inv_cell, amout in self.share_starter_inventory:
-                if inv_cell == cell:
-                    if cell.img != "empty_inventory_cell.png": #type: ignore
-                        if self.share_target.has_free_space(): #type: ignore
-                            self.share_target.add_resource(cell.img, int(int(amout.text)//2) if button == 3 else int(amout.text)) #type: ignore
-                            self.share_starter.remove_resource(cell.img, int(int(amout.text)//2) if button == 3 else int(amout.text)) #type: ignore
-                            self.set_inventories()
-                            update_gui()
-                            return
-        elif inventory_type == "target":
-            if isinstance(self.share_target_inventory, list):
-                for inv_cell, amout in self.share_target_inventory:
-                    if inv_cell == cell:
-                        if cell.img != "empty_inventory_cell.png": #type: ignore
-                            if self.share_starter.has_free_space(): #type: ignore
-                                self.share_starter.add_resource(cell.img, int(int(amout.text)//2) if button == 3 else int(amout.text)) #type: ignore
-                                self.share_target.remove_resource(cell.img, int(int(amout.text)//2) if button == 3 else int(amout.text)) #type: ignore
-                                self.set_inventories()
-                                update_gui()
-                                return
-            elif isinstance(self.share_target_inventory, dict):
-                for inventory_type in self.share_target.inventory.keys(): #type: ignore
-                    for inv_cell, amout in self.share_target_inventory[inventory_type]: #type: ignore
-                        if inv_cell == cell:
-                            if cell.img != "empty_inventory_cell.png": #type: ignore
-                                if self.share_starter.has_free_space(): #type: ignore
-                                    self.share_starter.add_resource(cell.img, int(int(amout.text)//2) if button == 3 else int(amout.text)) #type: ignore
-                                    self.share_target.remove_resource(cell.img, int(int(amout.text)//2) if button == 3 else int(amout.text), inventory_type) #type: ignore
-                                    self.set_inventories()
-                                    update_gui()
-                                    return
-        else:
-            logger.error(f"Unknown inventory type '{inventory_type}' in GUIShareMenu click method", f"GUIShareMenu.click({cell}, {inventory_type}, {button})")
-            #print("unknown inventory type")
-    
-    #@timeit
-    def draw(self):
-        root.screen.fill((100, 100, 100))
-        py.draw.line(root.screen, (255, 255, 255), (root.window_size[0]//2, 0), (root.window_size[0]//2, root.window_size[1]), 2)
+    def change_position_for_new_screen_sizes(self):
+        if not self.starter_inventory or not self.target_inventory: return
 
-        cell_side_size = get_cell_side_size()
+        margin = self.cell_size//4
+        starter_inventory_margin = self.starter_ico.width+margin*2
+        target_inventory_margin = self.target_ico.width+margin*2
 
-        self.share_starter_ico.change_position((cell_side_size//4, root.window_size[1]//2 - self.share_starter_ico.height//2)) #type: ignore
-        self.share_starter_ico.draw() #type: ignore
+        self.starter_ico.change_position((margin, root.window_size[1]//2 - self.starter_ico.height//2))
+        self.target_ico.change_position((root.window_size[0]-margin-self.target_ico.width, root.window_size[1]//2 - self.target_ico.height//2))
 
-        self.share_target_ico.change_position((root.window_size[0]-cell_side_size//4-self.share_target_ico.width, root.window_size[1]//2 - self.share_target_ico.height//2)) #type: ignore
-        self.share_target_ico.draw() #type: ignore
-
-        y_offset = 0
-        x_offset = 0
-        for cell, amout in self.share_starter_inventory:
-            if cell_side_size//4+self.share_starter_ico.width+cell_side_size//4 + (cell.width+10)*(x_offset+1) > root.window_size[0]//2+cell_side_size//4: #type:ignore
-                y_offset += 1
-                x_offset = 0
-
-            cell.change_position((cell_side_size//2+self.share_starter_ico.width + (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_starter_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
-            amout.change_position((cell_side_size//2+self.share_starter_ico.width + (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_starter_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
-            x_offset += 1
-
-        y_offset = 0
-        x_offset = 0
-        if isinstance(self.share_target_inventory, list):
-            for cell, amout in self.share_target_inventory:
-                if root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset < root.window_size[0]//2-cell_side_size//4: #type:ignore
+        y_offset = self.game_manager.get_y_offset()
+        x_offset = self.game_manager.get_x_offset()
+        for i, category in enumerate(self.starter_inventory_cells):
+            self.starter_inventory_names[i].change_position((starter_inventory_margin, root.window_size[1]//2 - self.starter_ico.height//2 + (self.cell_size+10)*y_offset))
+            y_offset += 1
+            for cell, amount in self.starter_inventory_cells[category]:
+                if starter_inventory_margin + (self.cell_size+10)*(x_offset+1) > root.window_size[0]//2+margin:
                     y_offset += 1
                     x_offset = 0
 
-                cell.change_position((root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
-                amout.change_position((root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
+                cell.change_position(
+                    (starter_inventory_margin + (self.cell_size+10)*x_offset,
+                    root.window_size[1]//2 - self.starter_ico.height//2 + (self.cell_size+10)*y_offset)
+                    )
+                amount.change_position(
+                    (starter_inventory_margin + (self.cell_size+10)*x_offset + (self.cell_size - amount.text_rect.width - 5),
+                    root.window_size[1]//2 - self.starter_ico.height//2 + (self.cell_size+10)*y_offset + amount.text_rect.height//2))
                 x_offset += 1
-        elif isinstance(self.share_target_inventory, dict):
-            for i, inventory_type in enumerate(self.share_starter_inventory_org.keys()): #type: ignore
-                self.share_target_inventory_names[i].change_position((root.window_size[0]//2+10, root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset)) #type:ignore
-                y_offset += 1
-                for cell, amout in self.share_target_inventory[inventory_type]:
-                    if root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset < root.window_size[0]//2-cell_side_size//4: #type:ignore
-                        y_offset += 1
-                        x_offset = 0
 
-                    cell.change_position((root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset, root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset)) #type: ignore
-                    amout.change_position((root.window_size[0] - cell_side_size//2 - self.share_target_ico.width - cell.width - (cell.width+10)*x_offset + (cell.width - amout.text_rect.width - 5), root.window_size[1]//2 - self.share_target_ico.height//2 + (cell.height+10)*y_offset + amout.text_rect.height//2)) #type: ignore
-                    x_offset += 1
-                y_offset += 1
-                x_offset = 0
+        y_offset = self.game_manager.get_y_offset()
+        x_offset = self.game_manager.get_x_offset()
+        for i, category in enumerate(self.target_inventory_cells):
+            self.target_inventory_names[i].change_position(
+                        (root.window_size[0] - target_inventory_margin - self.cell_size+10 - self.cell_size,
+                        root.window_size[1]//2 - self.starter_ico.height//2 + (self.cell_size+10)*y_offset))
+            y_offset += 1
+            for cell, amount in self.target_inventory_cells[category]:
+                if target_inventory_margin + (self.cell_size+10)*(x_offset+1) > root.window_size[0]//2-margin:
+                    y_offset += 1
+                    x_offset = self.game_manager.get_x_offset()
+
+                cell.change_position(
+                    (root.window_size[0] - target_inventory_margin - (self.cell_size+10)*x_offset - self.cell_size,
+                    root.window_size[1]//2 - self.target_ico.height//2 + (self.cell_size+10)*y_offset)
+                    )
+                amount.change_position(
+                    (root.window_size[0] - target_inventory_margin - (self.cell_size+10)*x_offset - (self.cell_size - amount.text_rect.width - 5),
+                    root.window_size[1]//2 - self.target_ico.height//2 + (self.cell_size+10)*y_offset + amount.text_rect.height//2))
+                x_offset += 1
+            x_offset = 0
+            y_offset += 1
     
+    def draw(self):
+        root.screen.fill((100, 100, 100))
+
+        self.starter_ico.draw()
+        for i, cat in enumerate(self.starter_inventory_cells):
+            self.starter_inventory_names[i].draw()
+            for cell, amount in self.starter_inventory_cells[cat]:
+                cell.draw()
+                amount.draw()
+
+        self.target_ico.draw()
+        for i, cat in enumerate(self.target_inventory_cells):
+            self.target_inventory_names[i].draw()
+            for cell, amount in self.target_inventory_cells[cat]:
+                cell.draw()
+                amount.draw()
+
         root.need_update_gui = False
+
+    def click(self, button: int, mouse_pos: tuple[int, int]):
+        if not self.starter or not self.target: return
+        if mouse_pos[0] < root.window_size[0]//2:
+            for category in self.starter_inventory_cells:
+                for cell, _ in self.starter_inventory_cells[category]:
+                    if cell.rect.collidepoint(mouse_pos):
+                        resource = self.starter.inventory.get_resource(resource_name=cell.resource_name, resource_amount="all" if button == 1 else 1, with_remove=True)
+                        if not resource: return
+                        self.target.inventory.add_resouce(resource=resource)
+                        self.open(self.target.name.strip())
+                        update_gui()
+                        return
+        elif mouse_pos[0] > root.window_size[0]//2:
+            for category in self.target_inventory_cells:
+                for cell, _ in self.target_inventory_cells[category]:
+                    if cell.rect.collidepoint(mouse_pos):
+                        resource = self.target.inventory.get_resource(resource_name=cell.resource_name, resource_amount="all" if button == 1 else 1, with_remove=True)
+                        if not resource: return
+                        self.starter.inventory.add_resouce(resource=resource)
+                        self.open(self.target.name.strip())
+                        update_gui()
+                        return
     
     def move_up(self):
-        pass
+        self.game_manager.add_y_offset(1)
+        self.change_position_for_new_screen_sizes()
 
     def move_down(self):
-        pass
+        self.game_manager.add_y_offset(-1)
+        self.change_position_for_new_screen_sizes()
 
     def move_left(self):
         pass

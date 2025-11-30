@@ -13,14 +13,12 @@ from ...auxiliary_stuff import timeit, back_window_state
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from managers.towns.town import Town
+    from managers.buildings.towns.town import Town
     from ...gamemanager import GameManager
 
 class GUISpawn:
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
-
-        self.y_offset = 0
 
         self.spawns: list[dict] = []
         self.buttons: list[SpawnPawn] = []
@@ -28,24 +26,26 @@ class GUISpawn:
         self.item_height = root.interface_size//4
 
     def change_position_for_new_screen_sizes(self):
+        y_offset = self.game_manager.get_y_offset()
+
         y = 10
         for spawn in self.spawns:
             x = 0
-            spawn["pawn_img"].change_position((x+10, self.y_offset + y))
+            spawn["pawn_img"].change_position((x+10, y_offset + y))
             x += self.item_width+10
 
-            for resorce, amout in zip(spawn["resorces"], spawn["amout"]):
-                resorce.change_position((x+10, y+self.y_offset))
+            for resorce, amount in zip(spawn["resorces"], spawn["amount"]):
+                resorce.change_position((x+10, y+y_offset))
                 x += self.item_width+10
-                amout.change_position((x+10, y+self.y_offset))
+                amount.change_position((x+10, y+y_offset))
                 x += self.item_width+10
 
             x += self.item_width//2
-            spawn["time"].change_position((x+10, y+self.y_offset))
+            spawn["time"].change_position((x+10, y+y_offset))
             x += self.item_width+10
-            spawn["time_cost"].change_position((x+10, y+self.y_offset))
+            spawn["time_cost"].change_position((x+10, y+y_offset))
             x += self.item_width+10
-            spawn["allowed"].change_position((root.window_size[0]-self.item_width-10, y+self.y_offset))
+            spawn["allowed"].change_position((root.window_size[0]-self.item_width-10, y+y_offset))
             x += self.item_width+10
 
     def open(self):
@@ -74,29 +74,29 @@ class GUISpawn:
             
             self.spawns[-1]["pawn_img"] = Icon(self.item_width, self.item_height, img=pawn["img"], spec_path="data/pawns/img")
             self.spawns[-1]["time"] = Icon(self.item_width, self.item_height, img="time.png")
-            self.spawns[-1]["time_cost"] = TextField(self.item_width, self.item_height, text=pawn["cost"]["time"])
+            self.spawns[-1]["time_cost"] = TextField(self.item_width, self.item_height, text=str(pawn["cost"]["time"]))
 
             self.spawns[-1]["resorces"] = [
                 Icon(self.item_width, self.item_height, img=resource) for resource in pawn["cost"]["resources"].keys()
             ]
-            self.spawns[-1]["amout"] = [
-                TextField(self.item_width, self.item_height, text=amout) for amout in pawn["cost"]["resources"].values()
+            self.spawns[-1]["amount"] = [
+                TextField(self.item_width, self.item_height, text=str(amount)) for amount in pawn["cost"]["resources"].values()
             ]
         self.change_position_for_new_screen_sizes()
             
     def _town_has_enought_people(self, town: "Town", pawn: dict) -> bool:
         for pop in town.popgroups:
             if pop.has_enough_quality(pawn["cost"]["people"]["quality"]):
-                if len(pop.size["adult"]) >= pawn["cost"]["people"]["amout"]:
+                if len(pop.size["adult"]) >= pawn["cost"]["people"]["amount"]:
                     return True
         return False
 
     def _town_has_enought_resources(self, town: "Town", pawn: dict) -> bool:
-        if self.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], town)[0]:
+        if self.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], town):
             return True
         for building in town.conection:
-            if building.category == "storage":
-                if self.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], building)[0]:
+            if building.is_storage:
+                if self.game_manager.trigger_manager.target_has_resources(pawn["cost"]["resources"], building):
                     return True
         return False
 
@@ -131,10 +131,12 @@ class GUISpawn:
         root.need_update_gui = False
     
     def move_up(self):
-        pass
+        self.game_manager.add_y_offset(root.interface_size//8)
+        update_gui()
 
     def move_down(self):
-        pass
+        self.game_manager.add_y_offset(-root.interface_size//8)
+        update_gui()
 
     def move_left(self):
         pass

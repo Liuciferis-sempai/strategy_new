@@ -22,13 +22,15 @@ class GUIReciept:
         self.reciepts = None
         self.buttons: list[UseReciept] = []
         self.reciepts_list = []
-        self.reciept_y_offset = 0
 
         self.item_width = root.interface_size//4
         self.item_height = root.interface_size//4
     
     def open(self):
-        self.reciept_y_offset = 0
+        self.set_reciepts()
+        self.change_position_for_new_screen_sizes()
+    
+    def set_reciepts(self):
         chosen_cell = self.game_manager.get_chosen_cell()
 
         self.reciepts_list = []
@@ -41,56 +43,74 @@ class GUIReciept:
         self.reciepts = [reciept for reciept in self.reciepts if reciept["id"] in player_fraction.reciepts]
         building = self.game_manager.get_chosen_building()
         for reciept in self.reciepts:
-            is_allowed = self.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building)[0]
+            is_allowed = self.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building)
             is_allowed_img = "allowed.png" if is_allowed else "not_allowed.png"
             is_allowed_message = "building_has_not_en_res" if is_allowed else ""
 
             time = Icon(self.item_width, self.item_height, img="time.png")
-            time_cost = TextField(self.item_width,  self.item_height, text=reciept["time"])
+            time_cost = TextField(self.item_width,  self.item_height, text=str(reciept["time"]), width_as_text_width=False)
             necessary = [Icon(self.item_width, self.item_height, img=resource) for resource in reciept["necessary"]]
-            necessary_count = [TextField(self.item_width, self.item_height, text=reciept["necessary"][resource]) for resource in reciept["necessary"]]
+            necessary_count = [TextField(self.item_width, self.item_height, text=str(reciept["necessary"][resource]), width_as_text_width=False) for resource in reciept["necessary"]]
             production = [Icon(self.item_width, self.item_height, img=production) for production in reciept["production"]]
-            production_count = [TextField(self.item_width, self.item_height, text=reciept["production"][resource]) for resource in reciept["production"]]
+            production_count = [TextField(self.item_width, self.item_height, text=str(reciept["production"][resource]), width_as_text_width=False) for resource in reciept["production"]]
             use_reciept = UseReciept(width=self.item_width, height=self.item_height, img=is_allowed_img, is_allowed=is_allowed, reciept_id=f"{reciept["id"]}", message=is_allowed_message)
             allowed = use_reciept
             self.buttons.append(use_reciept)
             self.reciepts_list.append({"necessary": necessary, "necessary_count": necessary_count, "time": time, "time_cost": time_cost, "production": production, "production_count": production_count, "allowed": allowed})
-    
-    #@timeit
-    def draw(self):
-        root.screen.fill((0, 0, 0))
+
+    def change_position_for_new_screen_sizes(self):
+        y_offset = self.game_manager.get_y_offset()
 
         y = 0
         for reciept in self.reciepts_list:
             x = 0
             for necessary, necessary_count in zip(reciept["necessary"], reciept["necessary_count"]):
-                necessary.change_position((x+10, y*self.item_height+10+10*y+self.reciept_y_offset))
+                necessary.change_position((x+10, y*self.item_height+10+10*y+y_offset))
                 x += self.item_width+10
-                necessary_count.change_position((x+10, y*self.item_height+10+10*y+self.reciept_y_offset))
+                necessary_count.change_position((x+10, y*self.item_height+10+10*y+y_offset))
                 x += self.item_width+10
 
-            reciept["time"].change_position((x+20, y*self.item_height+10+10*y+self.reciept_y_offset))
+            reciept["time"].change_position((x+20, y*self.item_height+10+10*y+y_offset))
             x += self.item_width+20
-            reciept["time_cost"].change_position((x+10, y*self.item_height+10+10*y+self.reciept_y_offset))
+            reciept["time_cost"].change_position((x+10, y*self.item_height+10+10*y+y_offset))
             x += self.item_width+30
 
             for production, production_count in zip(reciept["production"], reciept["production_count"]):
-                production.change_position((x+10, y*self.item_height+10+10*y+self.reciept_y_offset))
+                production.change_position((x+10, y*self.item_height+10+10*y+y_offset))
                 x += self.item_width+10
-                production_count.change_position((x+10, y*self.item_height+10+10*y+self.reciept_y_offset))
+                production_count.change_position((x+10, y*self.item_height+10+10*y+y_offset))
                 x += self.item_width+10
             
-            reciept["allowed"].change_position((root.window_size[0]-self.item_width-10, y*self.item_height+10+10*y+self.reciept_y_offset))
+            reciept["allowed"].change_position((root.window_size[0]-self.item_width-10, y*self.item_height+10+10*y+y_offset))
             y += 1
+
+    #@timeit
+    def draw(self):
+        root.screen.fill((0, 0, 0))
+        
+        for reciept in self.reciepts_list:
+            for necessary, necessary_count in zip(reciept["necessary"], reciept["necessary_count"]):
+                necessary.draw()
+                necessary_count.draw()
+            
+            reciept["time"].draw()
+            reciept["time_cost"].draw()
+
+            for production, production_count in zip(reciept["production"], reciept["production_count"]):
+                production.draw()
+                production_count.draw()
+            
+            reciept["allowed"].draw()
+
         root.need_update_gui = False
     
     def move_up(self):
-        if self.reciept_y_offset < 0:
-            self.reciept_y_offset += root.interface_size//8
+        if self.game_manager.get_y_offset() < 0:
+            self.game_manager.add_y_offset(root.interface_size//8)
             update_gui()
 
     def move_down(self):
-        self.reciept_y_offset -= root.interface_size//8
+        self.game_manager.add_y_offset(-root.interface_size//8)
         update_gui()
 
     def move_left(self):

@@ -3,7 +3,7 @@ from . import root
 from .gui.gui_manager import GUI
 from .managers.pawns.pawnsmanager import PawnsManager
 from .managers.pawns.pawn import Pawn
-from .managers.reciept import RecieptsManager
+from .managers.reciept_manager import RecieptsManager
 from .managers.turnmanager import TurnManager
 from .world.worldmap import WorldMap
 from .world.cell import Cell
@@ -19,7 +19,10 @@ from .managers.jobmanager import JobManager
 from .managers.resources.resourcemanager import ResourceManager
 from .processing_input.proccessing_input import InputKeyProcessor
 from .helpers.command_line import CommandLine
-from .managers.towns.towns_manager import TownManager
+from .managers.towns_manager import TownManager
+from .managers.storage_manager import StorageManager
+from .managers.producer_manager import ProducerManager
+from .managers.workbench_manager import WorkbenchManager
 from .helpers.messenger import Messenger
 
 class GameManager:
@@ -28,6 +31,9 @@ class GameManager:
         Main Manager of game
         '''
         self.game_name = "Noname"
+
+        self.x_offset = 0
+        self.y_offset = 0
 
         self._default_cell = Cell(is_default=False)
         self._default_cell.is_default = True
@@ -55,7 +61,7 @@ class GameManager:
         self.world_map = WorldMap()
 
         self.command_line = CommandLine()
-        self.input_fields.append(self.command_line.inputfield)
+        self.add_inputfield(self.command_line.inputfield)
 
         self.fraction_manager = FractionManager(self)
         self.gui = GUI(self)
@@ -71,6 +77,9 @@ class GameManager:
         self.resource_manager = ResourceManager(self)
         self.input_processor = InputKeyProcessor(self)
         self.town_manager = TownManager(self)
+        self.storage_manager = StorageManager(self)
+        self.producer_manager = ProducerManager(self)
+        self.workbench_manager = WorkbenchManager(self)
 
         logger.info("gamemanager ended initialization", "GameManager.initialize()")
 
@@ -85,8 +94,25 @@ class GameManager:
     
     def update_positions(self):
         self.gui.change_position_for_new_screen_sizes()
-        self.gui.policy.update_positions()
         self.command_line.change_position_for_new_screen_sizes()
+
+    def get_x_offset(self) -> int:
+        return self.x_offset
+    
+    def set_x_offset(self, value: int):
+        self.x_offset = value
+    
+    def add_x_offset(self, value: int):
+        self.x_offset += value
+
+    def get_y_offset(self) -> int:
+        return self.y_offset
+    
+    def set_y_offset(self, value: int):
+        self.y_offset = value
+    
+    def add_y_offset(self, value: int):
+        self.y_offset += value
 
     def get_default_cell(self) -> Cell:
         return self._default_cell

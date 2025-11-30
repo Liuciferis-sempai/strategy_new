@@ -1,11 +1,7 @@
 open area 0,0 149,149
 build town 1,0 0
-add policy policy_0 0
-add policy policy_01 0
-add policy policy_02 0
-add policy policy_1 0
-add policy policy_2 0
-add policy policy_3 0
-add policy policy_4 0
-add policy policy_5 0
+build manufactory 2,0 0
+build storage 3,0 0
+build lumberjack 4,0 0
 spawn pawn_0 1,1 0
+add resource resource_0 1,1 5

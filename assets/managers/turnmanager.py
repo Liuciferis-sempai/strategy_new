@@ -20,12 +20,10 @@ class TurnManager:
                 logger.info(f"Executing turn event: {event}", f"TurnManager.do_step()")
                 self.game_manager.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
         for fraction in self.game_manager.fraction_manager.get_all_fractions():
-            for producer in fraction.production["buildings"]:
-                if self.turn >= producer.last_prodaction_at + producer.prodaction_time:
-                    producer.last_prodaction_at = self.turn
-                    producer.produce(producer)
+            for producer_building in fraction.production["buildings"]:
+                producer_building.producer.turn()
             for town in fraction.towns:
-                town.simulation()
+                town.turn()
 
     def add_event_in_queue(self, time: int, event: dict) -> None|dict:
         '''

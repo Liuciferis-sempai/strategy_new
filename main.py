@@ -8,6 +8,10 @@ from assets.root import logger
 from assets.auxiliary_stuff import update_gui
 
 def main():
+    '''
+    game loop
+    '''
+
     clock = py.time.Clock()
 
     time_withoute_mouse_moving = 0
@@ -26,9 +30,9 @@ def main():
                 time_withoute_mouse_moving = 0
                 root.game_manager.input_processor.process_mousemotion(event)
             elif event.type == py.MOUSEBUTTONDOWN:
-                root.game_manager.input_processor.process_mousebuttondown(event)
+                root.game_manager.input_processor.mousebuttondown(event)
             elif event.type == py.KEYDOWN:
-                root.game_manager.input_processor.process_keydown(event)
+                root.game_manager.input_processor.keydown(event)
             elif event.type == py.KEYUP:
                 root.game_manager.input_processor.process_keyup(event)
             elif event.type == py.MOUSEBUTTONUP:
@@ -52,14 +56,31 @@ def main():
             logger.write_down()
 
         clock.tick(root.config["FPS"])
-        print(f"FPS: {clock.get_fps():.2f}\r", end="")
+        #print(f"FPS: {clock.get_fps():.2f}\r", end="")
         #fps = int(clock.get_fps())
         #py.display.set_caption(f"FPS: {fps}")
 
+def error_run(error_message: str = "Fatal error: UnknowError", sub_message: str = ""):
+    '''
+    show error message
+    '''
+    clock = py.time.Clock()
+
+    root.loading.draw(sub_message, error_message)
+
+    running = True
+    while running:
+        for event in py.event.get():
+            if event.type == py.QUIT:
+                running = False
+        clock.tick(1)
+
 if __name__ == "__main__":
     root.start_the_game("Test Game")
-    try: main()
-    except Exception as e:
-        logger.error(f"Fatal error: {e}", "main.py")
-        logger.write_down()
+    #try:
+    main()
+    #except Exception as e:
+    #    logger.error(f"Fatal error: {type(e).__qualname__} -> {repr(e)}", "main.py")
+    #    logger.write_down()
+    #    error_run(f"Fatal error: {type(e).__qualname__}", f"{repr(e)}")
     py.quit()

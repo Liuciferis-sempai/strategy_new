@@ -1,6 +1,7 @@
 import os
 from ...auxiliary_stuff import read_json_file, update_gui, is_color_cold, is_color_warm, cold_degree
 from .policycard import PolicyCard
+from .policystack import PolicyStack
 from ... import root
 from ...root import logger, loading
 from typing import TYPE_CHECKING
@@ -20,36 +21,44 @@ class PolicyTable:
 
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
+        self.all_stacks: list[PolicyStack] = []
         self.all_policiec: list[PolicyCard] = []
         self.card_size = int(root.interface_size * 1.6)
 
         loading.draw("Loading policy cards...")
+        self.load_policies_stacks()
         self.load_policies_cards()
 
     def load_policies_cards(self):
-        for policyfile in os.listdir("data/policy"):
+        for policyfile in os.listdir("data/policy/policy_cards"):
             if policyfile.endswith(".json"):
-                policy_data = read_json_file(f"data/policy/{policyfile}")
+                policy_data = read_json_file(f"data/policy/policy_cards/{policyfile}")
                 self.all_policiec.append(PolicyCard(policy_data, (0, 0), self.card_size))
-
-    def update_positions(self):
-        player_fraction = self.game_manager.fraction_manager.get_player_fraction()
-
-        x = 0
-        y = 0
-        for policy in player_fraction.policies:
-            if self.card_size*x+self.card_size//2+self.card_size > root.window_size[0]:
-                x = 0
-                y += 1
-            policy.change_position((self.card_size*x+self.card_size//2, (self.card_size*2)*y))
-            x += 1
+    
+    def load_policies_stacks(self):
+        for stackfile in os.listdir("data/policy/policy_stacks"):
+            if stackfile.endswith(".json"):
+                stack_data = read_json_file(f"data/policy/policy_stacks/{stackfile}")
+                self.all_stacks.append(PolicyStack(stack_data))
 
     def get_policy_by_id(self, policy_id: str) -> PolicyCard:
         for policy in self.all_policiec:
             if policy.id == policy_id:
-                return policy
+                policy_card = policy.copy()
+                policy_card.check_available_status()
+                return policy_card
         logger.error(f"can not find policy by id {policy_id}", f"PolicyTable.get_policy_by_id({policy_id})")
         return PolicyCard({})
+    
+    def get_policy_stack(self, policy: PolicyCard) -> list[PolicyCard]|None:
+        policy_stack = []
+        for stack in self.all_stacks:
+            if policy.id in stack.cards:
+                for card in stack.cards:
+                    policy_card = self.get_policy_by_id(card)
+                    policy_card.check_available_status()
+                    policy_stack.append(policy_card)
+                return policy_stack
     
     def set_policy_sinergy(self, policies: list[PolicyCard]):
         if len(policies) <= 1: #if only one policy is set, no sinergy calculation needed

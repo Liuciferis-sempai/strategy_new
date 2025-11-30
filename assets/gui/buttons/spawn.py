@@ -13,3 +13,4 @@ class SpawnPawn(Button):
             root.game_manager.town_manager.get_town_by_coord(root.game_manager.get_chosen_cell_coord()).spawn(self.pawn_type)
         else:
             root.game_manager.messenger.print(self.message, {"pawn_type": self.pawn_type}, "warning")
+        super().click()

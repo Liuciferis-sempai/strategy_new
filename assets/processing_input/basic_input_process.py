@@ -4,9 +4,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..gamemanager import GameManager
+    from .proccessing_input import InputKeyProcessor
 
 class BasicInputProcessor:
-    def __init__(self, root_prcessor_input, game_manager: "GameManager"):
+    def __init__(self, root_prcessor_input: "InputKeyProcessor", game_manager: "GameManager"):
         self.root_processor = root_prcessor_input
         self.game_manager = game_manager
 

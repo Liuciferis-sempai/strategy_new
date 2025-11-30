@@ -1,5 +1,5 @@
 import os
-from ...auxiliary_stuff import read_json_file
+from ...auxiliary_stuff import *
 from .building import Building
 from ... import root
 from ...world.cell import Cell
@@ -73,22 +73,24 @@ class BuildingsManager:
         data["name"] = "scheme of_" + data["name"]
         data["img"] = data["img"].replace(".png", "_scheme.png")
         data["scheme"] = True
+        data["coord"] = coord
         cell = self.game_manager.world_map.get_cell_by_coord(coord)
         building = Building(coord, cell, data.copy(), False)
         self.buildings[str(coord)] = building
 
-        cell.add_building({"name": data["name"], "desc": data["desc"], "coord": coord, "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
+        cell.add_building(extract_building_data_for_cell(data))
         self._add_to_fraction(building, fraction_id)
 
     def _build(self, data: dict, coord: tuple[int, int, int], fraction_id: int):
         data = data.copy()
 
         data["fraction_id"] = fraction_id
+        data["coord"] = coord
         cell = self.game_manager.world_map.get_cell_by_coord(coord)
         building = Building(coord, cell, data, False)
         self.buildings[str(coord)] = building
 
-        cell.add_building({"name": data["name"], "desc": data["desc"], "coord": coord, "img": data["img"], "fraction_id": data["fraction_id"], "type": data["type"], "level": data["level"]})
+        cell.add_building(extract_building_data_for_cell(data))
         self._add_to_fraction(building, fraction_id)
         
         fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
@@ -110,14 +112,14 @@ class BuildingsManager:
         fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         fraction.statistics["building_count"] += 1
         fraction.buildings.append(building)
-        if building.category == "producer":
+        if building.is_producer:
             fraction.production["buildings"].append(building)
     
     def _remove_from_fraction(self, building: "Building", fraction_id: int):
         fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         fraction.statistics["building_count"] -= 1 #type: ignore
         fraction.buildings.remove(building)
-        if building.category == "producer":
+        if building.is_producer:
             fraction.production["buildings"].remove(building)
 
     def get_building_by_coord(self, coord:tuple[int, int, int]) -> Building:
@@ -173,16 +175,16 @@ class BuildingsManager:
         if self.buildings.get(str(cell.coord), None) == None:
             self.build_scheme(self.game_manager.gui.game.sticked_object.img.replace(".png", ""), cell.coord, root.player_id) #type: ignore
         
-    def remove_resource(self, target: Cell|Building, resource: str, amout: int, inv_type: str = "input") -> str:
+    def remove_resource(self, target: Cell|Building, resource: str, amount: int, inv_type: str = "input") -> str:
         if isinstance(target, Cell):
             building = self.buildings[str(target.coord)]
         else:
             building = target
-        return building.remove_resource(resource, amout, inv_type)
+        return building.remove_resource(resource, amount, inv_type=inv_type)
 
-    def add_resources(self, target: Cell|Building, resource: str, amout: int, inv_type: str = "output") -> str:
+    def add_resources(self, target: Cell|Building, resource: str, amount: int, inv_type: str = "output") -> str:
         if isinstance(target, Cell):
             building = self.buildings[str(target.coord)]
         else:
             building = target
-        return building.add_resource(resource, amout, inv_type)
+        return building.add_resource(resource, amount, inv_type=inv_type)

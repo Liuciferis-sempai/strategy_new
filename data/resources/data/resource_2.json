@@ -1,7 +1,7 @@
 {
     "name": "resource_2",
     "desc": "resource_2_desc",
-    "max_amout": 2,
+    "max_amount": 2,
     "is_food": true,
     "food_value": 2
 }

@@ -12,9 +12,6 @@ class WritingInputProcessor(BasicInputProcessor):
 
     #@logger
     def process_keydown(self, event:py.event.Event):
-        if self.process_keydown_for_inputfield(event): return root.update_gui()
-        if self.process_keydown_base(event): return
-
         if event.key == py.K_RETURN:
             self.game_manager.gui.writing.submit_input()
         elif event.key == py.K_BACKSPACE:
@@ -27,10 +24,7 @@ class WritingInputProcessor(BasicInputProcessor):
         self.game_manager.gui.writing.update_input_field()
     
     #@logger
-    def process_mousebuttondown(self, event:py.event.Event):
-        mouse_pos = event.pos
-        if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
-        
-        if self.game_manager.gui.writing.submit_button.rect.collidepoint(mouse_pos):
+    def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
+        if self.game_manager.gui.writing.submit_button.rect.collidepoint(rel_mouse_pos):
                 self.game_manager.gui.writing.submit_button.click()
         root.update_gui()

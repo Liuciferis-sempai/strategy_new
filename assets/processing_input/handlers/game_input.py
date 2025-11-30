@@ -17,10 +17,6 @@ class GameInputProcessor(BasicInputProcessor):
 
     #@logger
     def process_keydown(self, event:py.event.Event):
-        if self.process_keydown_for_inputfield(event): return root.update_gui()
-        if self.process_keydown_base(event):
-            return
-
         if event.key == py.K_w:
             self.k_w_pressed = True
         elif event.key == py.K_s:
@@ -86,52 +82,49 @@ class GameInputProcessor(BasicInputProcessor):
             root.update_gui()
 
     #@logger
-    def process_mousebuttondown(self, event:py.event.Event):
-        mouse_pos = event.pos
-        if self.process_mousebutton_for_inputfield(mouse_pos): return root.update_gui()
-
+    def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
         if event.button == 1:
             if self.game_manager.gui.game.jobs_list:
-                if self.game_manager.gui.game.jobs_list.rect.collidepoint(mouse_pos):
+                if self.game_manager.gui.game.jobs_list.rect.collidepoint(rel_mouse_pos):
                     self.game_manager.gui.game.jobs_list.click()
                     return
 
             if self.game_manager.gui.game.action_list:
-                if self.game_manager.gui.game.action_list.rect.collidepoint(mouse_pos):
+                if self.game_manager.gui.game.action_list.rect.collidepoint(rel_mouse_pos):
                     self.game_manager.gui.game.action_list.click()
                     return
 
             if self.game_manager.gui.game.buildings_types_list:
-                if self.game_manager.gui.game.buildings_types_list.rect.collidepoint(mouse_pos):
+                if self.game_manager.gui.game.buildings_types_list.rect.collidepoint(rel_mouse_pos):
                     self.game_manager.gui.game.buildings_types_list.click()
                     return
                 
                 for scheme in self.game_manager.gui.game.scheme_list:
-                    if scheme.bg_rect.collidepoint(mouse_pos):
+                    if scheme.bg_rect.collidepoint(rel_mouse_pos):
                         self.game_manager.gui.game.choise_scheme(scheme)
                         return
 
             if self.game_manager.world_map:
-                if self.game_manager.world_map.rect.collidepoint(mouse_pos):
+                if self.game_manager.world_map.rect.collidepoint(rel_mouse_pos):
                     self.game_manager.gui.close_all_extra_windows()
-                    self.game_manager.world_map.click(mouse_pos, 1)
+                    self.game_manager.world_map.click(rel_mouse_pos, 1)
                     return
 
             screen_middle = (root.window_size[0] // 2, root.window_size[1] // 2)
 
-            if mouse_pos[1] < screen_middle[1]:
+            if rel_mouse_pos[1] < screen_middle[1]:
                 for item in self.game_manager.gui.game.header_content:
-                    if item.rect.collidepoint(mouse_pos):
+                    if item.rect.collidepoint(rel_mouse_pos):
                         item.click()
                         return
-            elif mouse_pos[1] > screen_middle[1]:
+            elif rel_mouse_pos[1] > screen_middle[1]:
                 for item in self.game_manager.gui.game.footer_content:
-                    if item.rect.collidepoint(mouse_pos):
+                    if item.rect.collidepoint(rel_mouse_pos):
                         item.click()
                         return
-            #if mouse_pos[0] > screen_middle[0]:
+            #if rel_mouse_pos[0] > screen_middle[0]:
             #    if gui.main_info_window_content:
-            #        if gui.main_info_window_content.rect.collidepoint(mouse_pos):
+            #        if gui.main_info_window_content.rect.collidepoint(rel_mouse_pos):
             #            gui.main_info_window_content.click()
             #            return
 
@@ -142,9 +135,9 @@ class GameInputProcessor(BasicInputProcessor):
             
         elif event.button == 3:
             if self.game_manager.world_map:
-                if self.game_manager.world_map.rect.collidepoint(mouse_pos):
+                if self.game_manager.world_map.rect.collidepoint(rel_mouse_pos):
                     self.game_manager.gui.close_all_extra_windows()
-                    self.game_manager.world_map.click(mouse_pos, 3)
+                    self.game_manager.world_map.click(rel_mouse_pos, 3)
                     return
 
         #elif event.button == 4:
