@@ -49,8 +49,8 @@ class TownManager:
 
     def remove_town(self, town_: Town) -> bool:
         if town_ in self.towns:
+            town_.destroy()
             self.towns.remove(town_)
-            town_.destory()
             fraction = self.game_manager.fraction_manager.get_fraction_by_id(town_.fraction_id)
             if town_ in fraction.towns:
                 fraction.towns.remove(town_)
@@ -79,3 +79,12 @@ class TownManager:
             if town.coord == coord:
                 return town
         return Town()
+    
+    def check_conection(self, fraction_id: int):
+        for town in self.towns:
+            if town.fraction_id == fraction_id:
+                town.check_conection()
+
+    def turn(self):
+        for town in self.towns:
+            town.turn()

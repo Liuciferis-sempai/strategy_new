@@ -5,3 +5,4 @@ build storage 3,0 0
 build lumberjack 4,0 0
 spawn pawn_0 1,1 0
 add resource resource_0 1,1 5
+open building

@@ -85,12 +85,8 @@ class GameManager:
 
     def draw(self):
         self.gui.draw()
-        if self.command_line.is_active:
-            self.command_line.draw()
+        if self.command_line.is_active: self.command_line.draw()
         self.messenger.draw()
-        #for input in self.input_fields:
-        #    if not input.hidden:
-        #        input.draw()
     
     def update_positions(self):
         self.gui.change_position_for_new_screen_sizes()

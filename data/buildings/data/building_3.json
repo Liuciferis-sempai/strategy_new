@@ -1,0 +1,24 @@
+{
+    "name": "big_storage",
+    "type": "big_storage",
+    "desc": "big_storage_desc",
+    "img": "big_storage.png",
+    "category": "storage",
+    "can_be_builded": true,
+    "level": 0,
+    "max_hp": 800,
+    "max_service": 800,
+    "repair_cost": {
+        "resource_0": 2
+    },
+    "service_cost": {
+        "resource_0": 1
+    },
+    "storage_type": "list",
+    "storage": [],
+    "storage_size": 35,
+    "default_storage": "main",
+    "cost": {
+        "resource_0": 2
+    }
+}

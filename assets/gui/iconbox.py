@@ -20,8 +20,8 @@ class Icon(py.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=position)
 
     def draw(self):
-        root.screen.blit(self.image, self.bg_rect)
         root.screen.blit(self.bg_image, self.bg_rect)
+        root.screen.blit(self.image, self.bg_rect)
     
     def update_image(self, new_img: str, new_width: int = -1, new_height: int = -1, spec_path: str="data/icons"):
         self.spec_path = spec_path

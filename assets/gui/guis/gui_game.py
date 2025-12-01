@@ -133,26 +133,35 @@ class GUIGame:
     def open_scheme(self):
         self.footer_content = [self.next_turn_button, self.open_scheme_button]
 
-    def open_scheme_type(self, building_type: str):
+    def open_scheme_type(self, building_category: str):
         self.scheme_list = []
         cell_side_size = get_cell_side_size()
-        for i, building in enumerate(self.buildings_list.get(building_type, [])):
-            self.scheme_list.append(Icon(cell_side_size, cell_side_size, position=(root.interface_size+10+(cell_side_size*i), self.game_manager.world_map.rect.bottomleft[1]-cell_side_size), img=f"{building.data['img']}", spec_path="data/buildings/img", bg=(125, 125, 125, 255))) #type: ignore
+        for i, building in enumerate(self.buildings_list.get(building_category, [])):
+            self.scheme_list.append(
+                Icon(cell_side_size, cell_side_size,
+                    position=(
+                        root.interface_size+10+(cell_side_size*i),
+                        self.game_manager.world_map.rect.bottomleft[1]-cell_side_size
+                    ),
+                    img=f"{building['img']}",
+                    spec_path="data/buildings/img/",
+                    bg=(125, 125, 125, 255))
+                )
         #self.change_position_for_new_screen_sizes()
         update_gui()
 
     def open_scheme_list(self):
-        self.buildings_list = self.game_manager.buildings_manager.get_all_unique_buildings_sorted_by_types(True)
+        self.buildings_list = self.game_manager.buildings_manager.get_all_unique_buildings_sorted_by_categories(True)
         self.buildings_types_list = ListOf(list(self.buildings_list.keys()), position=(0, self.game_manager.world_map.rect.bottomleft[1]), type_of_list="scheme_list", open_direction="up")
         #self.change_position_for_new_screen_sizes()
         update_gui()
 
     def open_building(self):
-        buildings = self.game_manager.get_chosen_building()
+        building = self.game_manager.get_chosen_building()
         self.footer_content = [self.next_turn_button, self.open_building_interface_button, self.open_inventory_button]
-        if buildings.is_workbench:
+        if building.is_workbench and not building.is_scheme:
             self.footer_content.append(self.open_reciept_button)
-        if buildings.is_town:
+        if building.is_town and not building.is_scheme:
             self.footer_content.append(self.open_spawn_button)
         self.update_footer_tab_content()
         update_gui()

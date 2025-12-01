@@ -21,7 +21,7 @@ class Producer:
 
         self.prodaction_time = self.building_data.get("prodaction_time", 1)
         self.last_prodaction_at = self.building_data.get("last_prodaction_at", root.game_manager.turn_manager.turn)
-        self.prodaction = self.building_data.get("prodaction", {})
+        self.prodaction: dict[str, int] = self.building_data.get("prodaction", {})
 
     def __repr__(self):
         if not self:
@@ -39,7 +39,6 @@ class Producer:
         if not self.can_work: return
 
         turn = root.game_manager.turn_manager.turn
-        print(self.last_prodaction_at + self.prodaction_time <= turn, turn, self.last_prodaction_at, self.prodaction_time)
         if self.last_prodaction_at + self.prodaction_time <= turn:
             self.last_prodaction_at = turn
             self_building = root.game_manager.buildings_manager.get_building_by_coord(self.coord)

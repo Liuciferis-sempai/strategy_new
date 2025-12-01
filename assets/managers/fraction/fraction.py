@@ -28,16 +28,16 @@ class Fraction:
                 "pawn_count": 0,
                 "building_count": 0
             }
-        self.production = data.get("production", {"buildings": []})
-        self.technologies = data.get("technologies", []) #id only
+        self.production: dict[str, list[Any]] = data.get("production", {"buildings": []})
+        self.technologies: list[str] = data.get("technologies", []) #id only
         self.policies: list[PolicyCard] = [] #full policy
         for policy_name in data.get("policies", []):
             self.policies.append(root.game_manager.policy_table.get_policy_by_id(policy_name))
-        self.research_technology = data.get("research_technology", "none_technology")
-        self.achievements = data.get("achievements", []) #id only
-        self.reciepts = data.get("reciepts", ["reciept_0", "reciept_1"]) #id only
-        self.allowed_buildings =  data.get("allowed_buildings", ["manufactory", "storage", "lumberjack"]) #id (name) only
-        self.allowed_pawns = data.get("allowed_pawns", []) #id (name) only
+        self.research_technology: str = data.get("research_technology", "none_technology")
+        self.achievements: list[str] = data.get("achievements", []) #id only
+        self.reciepts: list[str] = data.get("reciepts", ["reciept_0", "reciept_1"]) #id only
+        self.allowed_buildings: list[str] =  data.get("allowed_buildings", ["manufactory", "storage", "lumberjack"]) #id (name) only
+        self.allowed_pawns: list[str] = data.get("allowed_pawns", []) #id (name) only
 
         self.pawns: list[Pawn] = []
         self.buildings: list[Building] = []

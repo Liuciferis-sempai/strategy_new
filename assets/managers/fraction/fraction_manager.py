@@ -13,7 +13,7 @@ class FractionManager:
         self.game_manager = game_manager
         self._default_fraction = self.game_manager.get_default_fraction()
 
-        self.fractions: list = []
+        self.fractions: list[Fraction] = []
         self.blooked_fraction_ids: list[int] = []
 
     def create_fraction(self, name: str, type: str, id: int = 0, data: dict={}):
@@ -38,7 +38,7 @@ class FractionManager:
     
     def get_player_fraction(self) -> Fraction:
         for fraction in self.fractions:
-            if fraction.type == "player" and fraction.id == root.player_id:
+            if fraction.id == root.player_id:
                 return fraction
         logger.error(f"player fraction not found", "AllFactions.get_fraction_by_name()")
         return self._default_fraction

@@ -46,6 +46,7 @@ class Building:
 
         self.set_type(self.data)
         
+        self.is_scheme = False
         if self.data.get("scheme", False):
             self.is_scheme = True
             scheme_inventory_size = 0
@@ -55,8 +56,6 @@ class Building:
                     scheme_inventory_size += 1
             scheme_inventory_size = {"cost": scheme_inventory_size, "inventory": scheme_inventory_size}
             self.scheme_inventory = Inventory(scheme_inventory_size, {"cost": [root.game_manager.resource_manager.create(name, amount) for name, amount in self.data["cost"].items()], "inventory": []})
-        else:
-            self.is_scheme = False
 
         self.set_inventory(self.data)
     
@@ -173,9 +172,9 @@ class Building:
         self.can_work = value
         if self.is_workbench:
             self.workbench.can_work = value
-        elif self.is_storage:
+        if self.is_storage:
             self.storage.can_work = value
-        elif self.is_producer:
+        if self.is_producer:
             self.producer.can_work = value
 
     def get_food_value_in_storage(self) -> int:
@@ -291,19 +290,18 @@ class Building:
         return True
 
     def add_in_queue(self, reciept: dict|str):
+        turn = root.game_manager.turn_manager.turn
         if self.is_workbench:
-            self.workbench.add_in_queue(reciept)
-        elif self.is_town:
-            self.town.add_in_queue(reciept)
-
-    def remove_from_queue(self, reciept:dict|str) -> str:
-        if self.is_workbench:
-            return self.workbench.remove_from_queue(reciept)
-        elif self.is_town:
-            return self.town.remove_from_queue(reciept)
-        else:
-            return "has no queue"
+            self.workbench.add_in_queue(reciept, turn)
+        if self.is_town:
+            self.town.add_in_queue(reciept, turn)
     
+    def clear_the_queue(self):
+        if self.is_workbench:
+            self.workbench.clear_the_queue()
+        if self.is_town:
+            self.town.clear_the_queue()
+
     def build(self):
         if self.is_scheme:
             self.name = self.name.replace("scheme of_", "")

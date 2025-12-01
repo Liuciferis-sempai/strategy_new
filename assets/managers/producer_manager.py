@@ -14,7 +14,7 @@ class ProducerManager:
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
 
-        self.producers = []
+        self.producers: list[Producer] = []
         self.bloocked_producer_ids: list[int] = []
 
     def build_producer(self, id: int, producer_type: Producer|None, coord: tuple[int, int, int], fraction_id: int, building_data: dict = {}) -> Producer:
@@ -35,3 +35,7 @@ class ProducerManager:
             producer.destroy()
             return True
         return False
+    
+    def turn(self):
+        for producer in self.producers:
+            producer.turn()

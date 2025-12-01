@@ -23,7 +23,7 @@ class Workbench:
         self.conection: list[Building] = []
 
         self.max_queue = self.building_data.get("max_queue", 1)
-        self.queue = self.building_data.get("queue", [])
+        self.queue: list[dict] = self.building_data.get("queue", [])
 
     def __repr__(self):
         if not self:
@@ -41,17 +41,13 @@ class Workbench:
         if not self.can_work: return
         pass
 
-    def add_in_queue(self, reciept: dict|str):
+    def add_in_queue(self, reciept: dict|str, turn: int):
         if len(self.queue) <= self.max_queue:
-            if isinstance(reciept, dict):
-                self.queue.append(reciept)
-            else:
-                self.queue.append(root.game_manager.reciept_manager.get_reciept_by_id(reciept))
-
-    def remove_from_queue(self, reciept:dict|str) -> str:
-        if isinstance(reciept, dict):
-            self.queue.remove(reciept)
-        else:
-            reciept = root.game_manager.reciept_manager.get_reciept_by_id(reciept)
-            self.queue.remove(reciept)
-        return f"recipe {reciept.get("id", reciept.get("type", "ERROR"))} has been successfully removed from the queue"
+            if isinstance(reciept, str):
+                reciept = root.game_manager.reciept_manager.get_reciept_by_id(reciept)
+            
+            reciept["added_at"] = turn
+            self.queue.append(reciept)
+    
+    def clear_the_queue(self):
+        self.queue = []

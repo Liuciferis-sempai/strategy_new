@@ -1,14 +1,23 @@
 import pygame as py
 from .. import root
 import copy
-from typing import Any
+from typing import Any, TypeGuard
 import time
+from random import randint, choice
 
 def get_cell_size() -> tuple[int, int]:
     return root.cell_sizes[root.cell_size_scale]
 
 def get_cell_side_size() -> int:
     return root.cell_sizes[root.cell_size_scale][0]
+
+def random_name(key_word: str = "none", lenght: tuple[int, int] = (5, 7)) -> str: # @TODO rewrite generation
+    word_lenght = randint(lenght[0], lenght[1])
+    word = ""
+    for _ in range(word_lenght):
+        word += choice(["q", "w", "e", "r", "t", "z", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "y", "x", "c", "v", "b", "n", "m"])
+
+    return word.capitalize()
 
 def extract_building_data_for_cell(building_data: dict[str, Any]) -> dict[str, str|int]:
     data = {
@@ -29,7 +38,7 @@ def update_gui():
     '''
     root.need_update_gui = True
 
-def can_be_int(value: str) -> bool:
+def can_be_int(value: Any) -> TypeGuard[int|str|bytes|bytearray]:
     try:
         int(value)
         return True

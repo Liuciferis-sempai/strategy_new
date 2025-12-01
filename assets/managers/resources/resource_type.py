@@ -34,3 +34,8 @@ class ResourceType:
     def copy(self) -> "ResourceType":
         data = {name: getattr(self, name) for name in dir(self) if not callable(getattr(self, name))}
         return ResourceType(data, self.amount)
+    
+    def is_equal(self, resource: "ResourceType") -> bool:
+        if self.name == resource.name:
+            return True
+        return False

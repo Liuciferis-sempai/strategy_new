@@ -23,6 +23,8 @@ class GUIFraction:
     
     def open_player_fraction(self):
         self.player_fraction = self.game_manager.fraction_manager.get_player_fraction()
+        print(self.player_fraction)
+        print(self.player_fraction.name)
         if not self.player_fraction:
             logger.error("Cannot find player fraction", "GUIFraction.open_player_fraction()")
             return

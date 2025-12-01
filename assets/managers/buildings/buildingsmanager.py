@@ -17,7 +17,9 @@ class BuildingsManager:
          
         self.buildings: dict[str, Building] = {}
         self.types_of_buildings: list[dict] = []
-        self.names: list[str] = []
+
+        self.types: list[str] = []
+        self.caterories: list[str] = []
 
         loading.draw("Loading building types...")
         self.load_types_of_buildings()
@@ -28,9 +30,12 @@ class BuildingsManager:
             if buildingsfile.endswith(".json"):
                 type = read_json_file(f"data/buildings/data/{buildingsfile}")
                 self.types_of_buildings.append(type)
-        self.names = []
+        
+        self.types = []
+        self.caterories = []
         for building in self.types_of_buildings:
-            self.names.append(building.get("name", "unknow"))
+            self.types.append(building["type"])
+            self.caterories.append(building["category"])
 
     def build(self, data: str|dict, coord: tuple[int, int, int], fraction_id: int) -> bool:
         '''
@@ -93,9 +98,8 @@ class BuildingsManager:
         cell.add_building(extract_building_data_for_cell(data))
         self._add_to_fraction(building, fraction_id)
         
-        fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
-        for town in fraction.towns:
-            town.check_conection()
+        self.game_manager.town_manager.check_conection(fraction_id)
+        self.game_manager.storage_manager.check_conection(fraction_id)
 
     def remove(self, coord: tuple[int, int, int]):
         building = self.buildings[str(coord)]
@@ -139,37 +143,37 @@ class BuildingsManager:
                         buildings.append(self.buildings[str((nx, ny))])
         return buildings
     
-    def get_all_possible_buildings_names(self) -> list[str]:
-        return self.names
+    def get_all_possible_buildings_categories(self) -> list[str]:
+        return self.caterories
+
+    def get_all_possible_buildings_types(self) -> list[str]:
+        return self.types
         
-    def get_all_unique_buildings_sorted_by_types(self, only_allowed_for_players_fraction: bool=True) -> dict:
-        buildings_by_types = {}
+    def get_all_unique_buildings_sorted_by_categories(self, only_allowed_for_players_fraction: bool=True) -> dict[str, list[dict]]:
+        buildings_by_category: dict[str, list[dict]] = {}
         uniqu_buildings = []
         if only_allowed_for_players_fraction:
             player_fraction = self.game_manager.fraction_manager.get_player_fraction()
             if not player_fraction:
                 logger.error("No player fraction found in get_all_buildings_sorted_by_types", f"BuildingsManager.get_all_buildings_sorted_by_types({only_allowed_for_players_fraction})")
-                return buildings_by_types
+                return buildings_by_category
 
-        for building in self.buildings.values():
+        for building in self.types_of_buildings:
             if only_allowed_for_players_fraction:
-                if building.type not in player_fraction.allowed_buildings: #type: ignore
+                if building["type"] not in player_fraction.allowed_buildings: #type: ignore
                     continue
-            if not building.data.get("can_be_builded", True):
-                continue
+            if not building.get("can_be_builded", True): continue
 
-            if building.type not in uniqu_buildings:
-                uniqu_buildings.append(building.type)
-            else:
-                continue
-            building_type = building.data.get("type", "general")
-            if buildings_by_types.get(building_type, False):
-                buildings_by_types[building_type].append(building)
-            else:
-                buildings_by_types[building_type] = []
-                buildings_by_types[building_type].append(building)
+            if building["type"] not in uniqu_buildings:
+                uniqu_buildings.append(building["type"])
+            else: continue
 
-        return buildings_by_types
+            building_category = building["category"]
+            if not buildings_by_category.get(building_category, False):
+                buildings_by_category[building_category] = []
+            buildings_by_category[building_category].append(copy.deepcopy(building))
+
+        return buildings_by_category
     
     def try_to_build_on_cell(self, cell: "Cell"):
         if self.buildings.get(str(cell.coord), None) == None:

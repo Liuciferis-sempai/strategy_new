@@ -19,11 +19,11 @@ class TurnManager:
             if event["turn"] == self.turn:
                 logger.info(f"Executing turn event: {event}", f"TurnManager.do_step()")
                 self.game_manager.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
-        for fraction in self.game_manager.fraction_manager.get_all_fractions():
-            for producer_building in fraction.production["buildings"]:
-                producer_building.producer.turn()
-            for town in fraction.towns:
-                town.turn()
+
+        self.game_manager.town_manager.turn()
+        self.game_manager.storage_manager.turn()
+        self.game_manager.producer_manager.turn()
+        self.game_manager.workbench_manager.turn()
 
     def add_event_in_queue(self, time: int, event: dict) -> None|dict:
         '''

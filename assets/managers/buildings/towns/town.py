@@ -26,9 +26,8 @@ class Town:
             self.append_popgroup(popgroup)
         self.conection_lenght = 2
         self.conection: list[Building] = []
-        self.check_conection()
         self.max_queue = self.building_data.get("max_queue", 1)
-        self.queue = self.building_data.get("queue", [])
+        self.queue: list[dict] = self.building_data.get("queue", [])
 
         self.population_history: dict[str, list[float]] = {}
         for popgroup in self.popgroups:
@@ -186,24 +185,19 @@ class Town:
             time = pawn_sample["cost"]["time"] // building.data["speed_of_work_mod"]
             if time < 0:
                 time = 1
-            building.add_in_queue(pawn_sample)
-            root.game_manager.turn_manager.add_event_in_queue(time, {"do": "spawn", "event_data": {"type": pawn_type, "coord": self.coord, "fraction_id": self.fraction_id}})
-            root.game_manager.turn_manager.add_event_in_queue(time, {"do": "clear_the_queue", "event_data": {"building": "Building", "reciept": pawn_sample}})
+            pawn_sample["cost"]["time"] = time
+            self.add_in_queue(pawn_sample, root.game_manager.turn_manager.turn)
 
-    def add_in_queue(self, reciept: dict|str):
+    def add_in_queue(self, reciept: dict|str, turn: int):
         if len(self.queue) <= self.max_queue:
-            if isinstance(reciept, dict):
-                self.queue.append(reciept)
-            else:
-                self.queue.append(root.game_manager.reciept_manager.get_reciept_by_id(reciept))
-
-    def remove_from_queue(self, reciept:dict|str) -> str:
-        if isinstance(reciept, dict):
-            self.queue.remove(reciept)
-        else:
-            reciept = root.game_manager.reciept_manager.get_reciept_by_id(reciept)
-            self.queue.remove(reciept)
-        return f"recipe {reciept.get("id", reciept.get("type", "ERROR"))} has been successfully removed from the queue"
+            if isinstance(reciept, str):
+                reciept = root.game_manager.reciept_manager.get_reciept_by_id(reciept)
+            
+            reciept["added_at"] = turn
+            self.queue.append(reciept)
+    
+    def clear_the_queue(self):
+        self.queue = []
 
     def get_sum_population(self) -> int:
         population = 0

@@ -16,6 +16,7 @@ class Storage:
         self.fraction_id = fraction_id
         self.can_work = self.data.get("can_work", False)
         
+        self.bandwidth = 5
         self.conection_lenght = 1
         self.conection: list[Building] = []
 
@@ -43,6 +44,14 @@ class Storage:
     def turn(self):
         if not self.can_work: return
 
+        self_building = root.game_manager.buildings_manager.get_building_by_coord(self.coord)
+        remainder_bandwidth = self.bandwidth
         for building in self.conection:
             if building.is_producer:
-                pass # @TODO take resource from producer
+                for production in building.producer.prodaction.keys():
+                    while building.inventory.has_resource(production, inv_type="output") and remainder_bandwidth > 0:
+                        resource = building.inventory.get_resource(resource_name=production, resource_amount=remainder_bandwidth, category="output")
+                        if resource:
+                            remainder_bandwidth -= resource.amount
+                            self_building.add_resource(resource=resource)
+                            building.inventory.remove_resource(resource=resource, inv_type="output")

@@ -3,7 +3,7 @@ from typing import Any, TYPE_CHECKING
 from .. import root
 from ..root import logger
 from ..world.cell import Cell
-from ..auxiliary_stuff import update_gui, can_be_int
+from ..auxiliary_stuff import *
 from ..gui.inputfield import InputField
 from ..gui.textfield import TextField
 
@@ -109,6 +109,9 @@ class CommandLine(py.sprite.Sprite):
                     self._process_help_command(command[1:])
                 else:
                     self._process_usual_command(command[0], command[1:])
+            except IndexError as e:
+                logger.error(f"can not process command {command_line} because the key is missing ({e})", f"CommandLine.process_input({command_line})")
+                self.add_answer(f"ERROR: the key {e} is missing")
             except KeyError as e:
                 logger.error(f"can not process command {command_line} because the key {e} is missing", f"CommandLine.process_input({command_line})")
                 self.add_answer(f"ERROR: the key {e} is missing")
@@ -123,11 +126,13 @@ class CommandLine(py.sprite.Sprite):
                 new_value = self._process_value(splited_command[1:])
                 if len(new_value) == 1:
                     new_value = new_value[0]
+                    if can_be_int(new_value):
+                        new_value = int(new_value)
                 elif len(new_value) == 0:
                     self.add_answer(f"new value has an impossible value: '{new_value}'")
                     return
                 setattr(storage, attribute, new_value)
-                self.add_answer(f"{attribute} new value is '{new_value}'")
+                self.add_answer(f"new {attribute} is '{new_value}'")
                 return
 
     def _process_get_command(self, splited_command: list[str]):
@@ -226,30 +231,43 @@ class CommandLine(py.sprite.Sprite):
                 effect_data["end_coord"] = (int(end_coord[0]), int(end_coord[1]), int(end_coord[2]))
 
             self.add_answer(root.game_manager.effect_manager.do("open_area", effect_data))
+
         elif splited_command[0] == "building":
             try: fraction_id = int(splited_command[1])
-            except: raise Exception("necessary fraction_id as int")
+            except: fraction_id = root.player_id
             fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
-            all_buildings = root.game_manager.buildings_manager.get_all_possible_buildings_names()
-            for building_name in all_buildings:
-                if building_name not in fraction.allowed_buildings:
-                    fraction.allowed_buildings.append(building_name)
+            all_buildings = root.game_manager.buildings_manager.get_all_possible_buildings_types()
+            opened_buildings_amount = 0
+            for building_type in all_buildings:
+                if building_type not in fraction.allowed_buildings:
+                    fraction.allowed_buildings.append(building_type)
+                    opened_buildings_amount += 1
+            self.add_answer(f"opened {opened_buildings_amount} buildings")
+
         elif splited_command[0] == "pawn":
             try: fraction_id = int(splited_command[1])
-            except: raise Exception("necessary fraction_id as int")
+            except: fraction_id = root.player_id
             fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
             all_pawns = root.game_manager.pawns_manager.get_all_pawns_types()
+            opened_pawns_amount = 0
             for pawn_type in all_pawns:
                 if pawn_type not in fraction.allowed_pawns:
                     fraction.allowed_pawns.append(pawn_type)
+                    opened_pawns_amount += 1
+            self.add_answer(f"opened {opened_pawns_amount}")
+
         elif splited_command[0] == "reciept":
             try: fraction_id = int(splited_command[1])
-            except: raise Exception("necessary fraction_id as int")
+            except: fraction_id = root.player_id
             fraction = root.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
             all_reciepts = root.game_manager.reciept_manager.get_all_reciepts_id()
+            opened_reciepts_amount = 0
             for reciept in all_reciepts:
                 if reciept not in fraction.reciepts:
                     fraction.reciepts.append(reciept)
+                    opened_reciepts_amount += 1
+            self.add_answer(f"opened {opened_reciepts_amount} reciept")
+
         else:
             raise Exception("second argument must be name of object to open")
 
@@ -272,7 +290,16 @@ class CommandLine(py.sprite.Sprite):
             elif not effect_data.get("type"):
                 effect_data["type"] = entry
             else:
-                effect_data[entry] = next(command)
+                if "=" in entry:
+                    key, value, *_ = entry.split("=")
+                    effect_data[key] = value
+                else:
+                    effect_data[entry] = next(command)
+        
+        if not effect_data.get("type", False):
+            effect_data["type"] = "bot"
+        if not effect_data.get("name", False):
+            effect_data["name"] = random_name()
 
         self.add_answer(root.game_manager.effect_manager.do(effect, effect_data))
 
@@ -332,14 +359,18 @@ class CommandLine(py.sprite.Sprite):
                     effect_data["size"] = int(entry)
             elif "fraction_id" in keys and entry == "player_id" and not effect_data.get("fraction_id"):
                 effect_data["fraction_id"] = root.player_id
-            elif "type" in keys and (entry in root.game_manager.buildings_manager.get_all_possible_buildings_names() or entry in root.game_manager.pawns_manager.get_all_pawns_types()):
+            elif "type" in keys and (entry in root.game_manager.buildings_manager.get_all_possible_buildings_types() or entry in root.game_manager.pawns_manager.get_all_pawns_types()):
                 effect_data["type"] = entry
             elif effect_name in ["add_resource", "remove_resource"]and not effect_data.get("resource"):
                 effect_data["resource"] = entry
             elif effect_name in ["add_policy", "remove_policy"] and not effect_data.get("policy"):
                 effect_data["policy"] = entry
             else:
-                effect_data[entry] = next(command)
+                if "=" in entry:
+                    key, value, *_ = entry.split("=")
+                    effect_data[key] = value
+                else:
+                    effect_data[entry] = next(command)
 
         self.add_answer(root.game_manager.effect_manager.do(effect_name, effect_data))
 

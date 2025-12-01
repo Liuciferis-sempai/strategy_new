@@ -53,8 +53,13 @@ class Inventory:
 
         if resource:
             for cat in inv:
-                self.inventory[cat].remove(resource)
-                return f"removed resource {resource.name} to inventory"
+                if resource in self.inventory[cat]:
+                    self.inventory[cat].remove(resource)
+                    return f"removed resource {resource.name} to inventory"
+            for cat in inv:
+                for res in self.inventory[cat]:
+                    if res.is_equal(resource):
+                        self.inventory[cat].remove(res)
             return f"can not remove resource {resource.name}"
 
         remainder = resource_amount

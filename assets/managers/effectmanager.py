@@ -16,7 +16,7 @@ class EffectManager:
         self.game_manager = game_manager
 
         self.effects: dict[str, dict[str, Any]] = {
-            "clear_the_queue": {"building": "Building", "reciept": dict},
+            "clear_the_queue": {"building": "Building"},
             "restore_movement_points": {"pawn": "Pawn"},
             "add_resource": {"pawn": "Pawn", "building": "Building", "resource": str, "amount": int}, #pawn and building are mutually exclusive
             "take_resource": {"pawn": "Pawn", "building": "Building", "resource": str, "anout": int}, #pawn and building are mutually exclusive
@@ -41,7 +41,7 @@ class EffectManager:
         do_answer: str = ""
         match effect_type:
             case "clear_the_queue":
-                do_answer = self.cleat_the_queue(effect_data["building"], effect_data["reciept"])
+                do_answer = self.cleat_the_queue(effect_data["building"])
             case "restore_movement_points":
                 do_answer = self.restore_movement_points(effect_data["pawn"])
             case "add_resource":
@@ -87,9 +87,10 @@ class EffectManager:
         logger.info(do_answer, f"EffectManager.do(...)")
         return do_answer
 
-    def cleat_the_queue(self, building: "Building", reciept: dict) -> str:
-        self.game_manager.messenger.print("building_finished_reciept", {"building_name": building.name, "reciept_id": reciept["id"]})
-        return building.remove_from_queue(reciept)
+    def cleat_the_queue(self, building: "Building") -> str:
+        self.game_manager.messenger.print("cleared_queue_by_building", {"building_name": building.name})
+        building.clear_the_queue()
+        return f"cleared queue by {building.name}"
     
     def restore_movement_points(self, pawn: "Pawn") -> str:
         self.game_manager.messenger.print("restored_movement_points", {"pawn_name": pawn.name})

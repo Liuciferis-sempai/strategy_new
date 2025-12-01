@@ -14,7 +14,7 @@ class WorkbenchManager:
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
 
-        self.workbenchs = []
+        self.workbenchs: list[Workbench] = []
         self.bloocked_workbench_ids: list[int] = []
 
     def build_workbench(self, id: int, workbench_type: Workbench|None, coord: tuple[int, int, int], fraction_id: int, building_data: dict = {}) -> Workbench:
@@ -22,7 +22,7 @@ class WorkbenchManager:
         else: return self.build_workbench(id+1, workbench_type, coord, fraction_id)
     
         if not workbench_type:
-            workbench = Workbench(id, coord, fraction_id, building_data, is_default=False)
+            workbench = Workbench(id, coord=coord, fraction_id=fraction_id, building_data=building_data, is_default=False)
         else:
             workbench = workbench_type
         
@@ -35,3 +35,7 @@ class WorkbenchManager:
             workbench.destroy()
             return True
         return False
+    
+    def turn(self):
+        for workbench in self.workbenchs:
+            workbench.turn()

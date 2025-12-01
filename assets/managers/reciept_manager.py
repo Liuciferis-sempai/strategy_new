@@ -51,7 +51,7 @@ class RecieptsManager:
         for reciept in self.get_reciepts_for_workbench(building.type, building.level):
             if reciept["id"] == reciept_id:
                 if  not root.game_manager.is_chosen_cell_default():
-                    if root.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building) and building.get_queue_lenght() < building.max_queue:
+                    if root.game_manager.trigger_manager.target_has_resources(reciept["necessary"], building) and building.get_queue_lenght() < building.get_queue_max_lenght():
                         reciept["time"] /= building.data["speed_of_work_mod"]
                         if "." in str(reciept["time"]):
                             reciept["time"] = str(reciept["time"]).split(".")
@@ -62,10 +62,7 @@ class RecieptsManager:
 
                         for resource, amount in reciept["necessary"].values():
                             root.game_manager.buildings_manager.remove_resource(building, resource, amount)
-                        for resource, amount in reciept["production"]:
-                            root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "add_resource", "event_data": {"building": "Building", "resource": resource, "amount": amount}})
-                        root.game_manager.turn_manager.add_event_in_queue(reciept["time"], {"do": "clear_the_queue", "event_data": {"building": "Building", "reciept": reciept}})
-                        building.add_in_queue(reciept.copy())
+                        building.add_in_queue(copy.deepcopy(reciept))
                         logger.info(f"added reciept {reciept["id"]} in queue for {building}", f"RecieptManager.use_reciept({reciept_id})")
                         return
                     else:

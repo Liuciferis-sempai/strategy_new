@@ -14,7 +14,7 @@ class StorageManager:
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
 
-        self.storages = []
+        self.storages: list[Storage] = []
         self.bloocked_storage_ids: list[int] = []
 
     def build_storage(self, id: int, storage_type: Storage|None, coord: tuple[int, int, int], fraction_id: int, building_data: dict = {}) -> Storage:
@@ -35,3 +35,12 @@ class StorageManager:
             storage.destroy()
             return True
         return False
+    
+    def check_conection(self, fraction_id: int):
+        for storage in self.storages:
+            if storage.fraction_id == fraction_id:
+                storage.check_conection()
+
+    def turn(self):
+        for storage in self.storages:
+            storage.turn()
