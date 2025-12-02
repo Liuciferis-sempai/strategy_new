@@ -1,10 +1,11 @@
 {
-    "name": "manufactory",
-    "type": "manufactory",
-    "desc": "manufactory_desc",
-    "img": "manufactory.png",
+    "name": "town_manufactory",
+    "type": "town_manufactory",
+    "desc": "town_manufactory_desc",
+    "img": "town_manufactory.png",
     "category": "workbench",
     "is_workbench": true,
+    "is_town": true,
     "can_be_builded": true,
     "level": 0,
     "max_hp": 300,
@@ -25,8 +26,8 @@
         }
     },
     "storage_type": "dict",
-    "storage": {"input": [], "output": []},
-    "storage_size": {"input": 5, "output": 2},
+    "storage": {"input": [], "output": [], "main": []},
+    "storage_size": {"input": 5, "output": 2, "main": 1},
     "default_storage": "input",
     "cost": {
         "resource_0": 2

@@ -4,6 +4,7 @@
     "desc": "town_desc",
     "img": "town.png",
     "category": "town",
+    "is_town": true,
     "can_be_builded": false,
     "level": 0,
     "max_hp": 800,

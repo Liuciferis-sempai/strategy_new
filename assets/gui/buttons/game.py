@@ -49,6 +49,15 @@ class BuildingButton(Button):
         update_gui()
         super().click()
 
+class CancelUpgradeButton(Button):
+    def __init__(self):
+        super().__init__(text="Cancel", width=100, height=50, color=(200, 200, 200), font_size=20, position=(10, 10))
+    
+    def click(self):
+        root.game_manager.get_chosen_building().cancel_upgrade_mod()
+        update_gui()
+        super().click()
+
 class RecieptButton(Button):
     def __init__(self):
         super().__init__(text="Reciept", width=100, height=50, color=(200, 200, 200), font_size=20, position=(10, 10))

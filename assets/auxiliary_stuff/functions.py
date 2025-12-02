@@ -28,7 +28,8 @@ def extract_building_data_for_cell(building_data: dict[str, Any]) -> dict[str, s
         "img": building_data["img"],
         "fraction_id": building_data["fraction_id"],
         "type": building_data["type"],
-        "level": building_data["level"]
+        "level": building_data["level"],
+        "is_scheme": building_data.get("is_scheme", False)
     }
     return data
 

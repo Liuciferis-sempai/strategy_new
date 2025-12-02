@@ -72,12 +72,11 @@ class BuildingsManager:
         return False
     
     def _build_scheme(self, data: dict, coord: tuple[int, int, int], fraction_id: int):
-        data = data.copy()
+        data = copy.deepcopy(data)
 
         data["fraction_id"] = fraction_id
         data["name"] = "scheme of_" + data["name"]
-        data["img"] = data["img"].replace(".png", "_scheme.png")
-        data["scheme"] = True
+        data["is_scheme"] = True
         data["coord"] = coord
         cell = self.game_manager.world_map.get_cell_by_coord(coord)
         building = Building(coord, cell, data.copy(), False)
@@ -87,7 +86,7 @@ class BuildingsManager:
         self._add_to_fraction(building, fraction_id)
 
     def _build(self, data: dict, coord: tuple[int, int, int], fraction_id: int):
-        data = data.copy()
+        data = copy.deepcopy(data)
 
         data["fraction_id"] = fraction_id
         data["coord"] = coord
@@ -192,3 +191,9 @@ class BuildingsManager:
         else:
             building = target
         return building.add_resource(resource, amount, inv_type=inv_type)
+
+    def check_conection(self):
+        self.game_manager.town_manager.turn()
+        self.game_manager.storage_manager.turn()
+        self.game_manager.producer_manager.turn()
+        self.game_manager.workbench_manager.turn()

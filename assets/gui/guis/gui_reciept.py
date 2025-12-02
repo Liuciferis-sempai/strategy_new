@@ -34,6 +34,7 @@ class GUIReciept:
         chosen_cell = self.game_manager.get_chosen_cell()
 
         self.reciepts_list = []
+        self.buttons = []
         player_fraction = self.game_manager.fraction_manager.get_player_fraction()
         if not player_fraction:
             logger.error("Player fraction not found when opening GUIReciept", "GUIReciept.open()")
@@ -55,8 +56,17 @@ class GUIReciept:
             production_count = [TextField(self.item_width, self.item_height, text=str(reciept["production"][resource]), width_as_text_width=False) for resource in reciept["production"]]
             use_reciept = UseReciept(width=self.item_width, height=self.item_height, img=is_allowed_img, is_allowed=is_allowed, reciept_id=f"{reciept["id"]}", message=is_allowed_message)
             allowed = use_reciept
+
             self.buttons.append(use_reciept)
-            self.reciepts_list.append({"necessary": necessary, "necessary_count": necessary_count, "time": time, "time_cost": time_cost, "production": production, "production_count": production_count, "allowed": allowed})
+            self.reciepts_list.append(
+                {"necessary": necessary,
+                 "necessary_count": necessary_count,
+                 "time": time,
+                 "time_cost": time_cost,
+                 "production": production,
+                 "production_count": production_count,
+                 "allowed": allowed}
+                )
 
     def change_position_for_new_screen_sizes(self):
         y_offset = self.game_manager.get_y_offset()

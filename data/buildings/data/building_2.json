@@ -4,6 +4,7 @@
     "desc": "lumberjack_desc",
     "img": "lumberjack.png",
     "category": "producer",
+    "is_producer": true,
     "can_be_builded": true,
     "level": 0,
     "max_hp": 250,

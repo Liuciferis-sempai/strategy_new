@@ -30,6 +30,9 @@ class Cell(py.sprite.Sprite):
         self.mark_image = py.Surface((cell_side_size+10, cell_side_size+10), py.SRCALPHA)
         self.mark_image.fill((0, 0, 0, 0))
         self.mark_image.set_alpha(0)
+
+        self.icon = data.get("icon", "none")
+
         self.surface = py.Surface((cell_side_size, cell_side_size), py.SRCALPHA)
         self.surface.fill((180, 180, 180))
         self._set_graph()
@@ -130,17 +133,22 @@ class Cell(py.sprite.Sprite):
         self.mark_image.fill((0, 0, 0, 0))
         self.mark_image.set_alpha(0)
 
-    def draw(self, position: tuple[int, int], image: py.surface.Surface, display_mode: str = "norlam"):
+    def draw(self, position: tuple[int, int], image: py.surface.Surface, display_mode: str = "normal"):
         image.blit(self.mark_image, (position[0]-5, position[1]-5))
         if self.is_opened and display_mode == "normal":
             image.blit(self.bg_image, position)
         else:
             if self.display_mode != display_mode:
                 self.change_display_mode(display_mode)
+            if display_mode == "fraction":
+                self._set_fraction_color()
+                image.blit(self.bg_image, position)
             image.blit(self.surface, position)
     
     def change_display_mode(self, display_mode: str):
         self.display_mode = display_mode
+        self.surface.set_alpha(255)
+
         if display_mode == "temperature":
             self.surface.fill((255*self.data["temperature"], 0, 0))
         elif display_mode == "humidity":
@@ -150,10 +158,35 @@ class Cell(py.sprite.Sprite):
         elif display_mode == "soil_fertility":
             self.surface.fill((255*self.data["soil_fertility"], 255*self.data["soil_fertility"]/2, 0))
         elif display_mode == "difficulty":
-            diff = self.data["subdata"]["difficulty"] / 10
-            self.surface.fill((255*diff, 0, 255*diff))
+            diff = 255 * (self.data["subdata"]["difficulty"] / 5)
+            self.surface.fill((255-diff, 255-diff, 255-diff))
+        elif display_mode == "fraction":
+            self._set_fraction_color()
         else:
             self.surface.fill((180, 180, 180))
+
+    def _set_fraction_color(self):
+        if self.buildings != {}: fraction = root.game_manager.fraction_manager.get_fraction_by_id(self.buildings["fraction_id"])
+        elif self.pawns != []: fraction = root.game_manager.fraction_manager.get_fraction_by_id(self.pawns[0]["fraction_id"])
+        else: fraction = None
+            
+        if fraction:
+            self.surface.fill(fraction.color)
+            self.surface.set_alpha(130)
+        else:
+            self.surface.set_alpha(0)
+    
+    def set_icon(self, new_icon: str|None = None):
+        if new_icon == self.icon: return
+        if new_icon: self.icon = new_icon
+        
+        if self.icon != "none":
+            self.icon_image = root.image_manager.get_image(f"data/icons/{self.icon}.png")
+            self.bg_image.blit(self.icon_image, (0, 0))
+    
+    def remove_icon(self):
+        self.icon = "none"
+        self._set_graph()
 
     def _set_graph(self):
         self.bg_image = root.image_manager.get_worldcell_image(f"land/{self.land}", "land")
@@ -172,6 +205,8 @@ class Cell(py.sprite.Sprite):
         if self.buildings != {}:
             self.buildings_image = root.image_manager.get_image(f"data/buildings/img/{self.buildings.get("img")}", "data/buildings/img/none.png")
             self.buildings_image = py.transform.scale(self.buildings_image, get_cell_size())
+            if self.buildings["is_scheme"]:
+                self.buildings_image.set_alpha(150)
             self.bg_image.blit(self.buildings_image, (0, 0))
         
         if self.pawns != []:
@@ -182,5 +217,23 @@ class Cell(py.sprite.Sprite):
             for pawn_image in self.pawns_image_list:
                 pawn_image = py.transform.scale(pawn_image, get_cell_size())
                 self.bg_image.blit(pawn_image, (0, 0))
-
+        
+        self.set_icon()
         self.rect = self.bg_image.get_rect(topleft=self.position)
+    
+    def get(self, att: str) -> str|int|float|None:
+        match att:
+            case "temperature":
+                return round(self.data["temperature"], 2)
+            case "height":
+                return round(self.data["height"], 2)
+            case "humidity":
+                return round(self.data["humidity"], 2)
+            case "soil_fertility":
+                return round(self.data["soil_fertility"], 2)
+            case "difficulty":
+                return self.data["subdata"]["difficulty"]
+            case "fraction":
+                if self.buildings != {}: return root.game_manager.fraction_manager.get_fraction_by_id(self.buildings["fraction_id"]).name
+                elif self.pawns != []: return root.game_manager.fraction_manager.get_fraction_by_id(self.pawns[0]["fraction_id"]).name
+                else: return None

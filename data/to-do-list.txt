@@ -2,4 +2,3 @@
 -add grave (or something like that) after pawn death
 -add cancel for reciept
 -rewrite fraction edit (writing) code
--move town manager from buildings folder into managers folder (town himself must be in buildings)

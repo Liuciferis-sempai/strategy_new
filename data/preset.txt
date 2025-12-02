@@ -1,5 +1,5 @@
-open area 0,0 149,149
-build town 1,0 0
+# open area 0,0 149,149
+build town 1,1 0
 build manufactory 2,0 0
 build storage 3,0 0
 build lumberjack 4,0 0

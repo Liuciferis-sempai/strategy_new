@@ -5,6 +5,8 @@ from .. import root
 class TextField(py.sprite.Sprite):
     def __init__(self, width:int=0, height:int=0, font_color: tuple[int, int, int] = (0, 0, 0), bg_color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), text:str="", font_size:int=40, translate: bool = True, positioning: str = "left", width_as_text_width: bool = True, text_kwargs: dict[str, Any]={}):
         super().__init__()
+        if len(bg_color) == 3:
+            bg_color = (bg_color[0], bg_color[1], bg_color[2], 255)
 
         self.width = width
         self.height = height
@@ -35,7 +37,7 @@ class TextField(py.sprite.Sprite):
     def set_image(self):
         self.image = py.Surface((self.width, self.height), py.SRCALPHA)
         self.image.fill(self.bg_color)
-        if len(self.bg_color) == 4: self.image.set_alpha(self.bg_color[-1])
+        self.image.set_alpha(self.bg_color[3])
         self.rect = self.image.get_rect()
         self.change_position(self.position)
 

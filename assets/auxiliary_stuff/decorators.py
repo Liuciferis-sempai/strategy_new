@@ -29,7 +29,6 @@ def timeit(func):
         if execution_time >= TIMEIT_THRESHOLD:
             try:
                 root.logger.time(f"function '{func.__name__}' executed in {execution_time:.6f} seconds.", f"{func.__module__}.{func.__name__}")
-            except Exception:
-                pass
+            except Exception: pass
         return result
     return wrapper

@@ -43,7 +43,6 @@ class GameManager:
         self._default_building.is_default = True
         self._default_fraction = Fraction(is_default=False)
         self._default_fraction.is_default = True
-
         self._default_chosen_inputfield = InputField()
 
         self.chosen_cell = self._default_cell
@@ -91,6 +90,9 @@ class GameManager:
     def update_positions(self):
         self.gui.change_position_for_new_screen_sizes()
         self.command_line.change_position_for_new_screen_sizes()
+
+    def get_cell_under_mouse(self) -> Cell:
+        return self.input_processor.game_input.cell_under_mouse
 
     def get_x_offset(self) -> int:
         return self.x_offset

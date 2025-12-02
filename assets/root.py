@@ -28,7 +28,7 @@ world_map_size = (150, 150)
 food_sufficiency_factor_frame = (0, 1.2)
 food_sufficiency_factor_center = 0.6
 river_count = 10
-time_for_show_info = 30
+time_for_show_info = 60
 
 #Variables
 window_state = "game"

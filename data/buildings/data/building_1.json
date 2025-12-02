@@ -4,6 +4,7 @@
     "desc": "storage_desc",
     "img": "storage.png",
     "category": "storage",
+    "is_storage": true,
     "can_be_builded": true,
     "level": 0,
     "max_hp": 500,

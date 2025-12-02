@@ -59,7 +59,10 @@ class GUIShareMenu:
             if not self.target:
                 logger.error("unknow share target", f"GUIShareMenu.open({target})")
                 return
-        self.target_inventory = self.target.inventory
+        if isinstance(self.target, Building) and self.target.is_scheme:
+            self.target_inventory = self.target.scheme_inventory
+        else:
+            self.target_inventory = self.target.inventory
         
         self.set_inventories()
         self.change_position_for_new_screen_sizes()
@@ -193,25 +196,25 @@ class GUIShareMenu:
         root.need_update_gui = False
 
     def click(self, button: int, mouse_pos: tuple[int, int]):
-        if not self.starter or not self.target: return
+        if not self.starter or not self.target or not self.target_inventory or not self.starter_inventory: return
         if mouse_pos[0] < root.window_size[0]//2:
             for category in self.starter_inventory_cells:
                 for cell, _ in self.starter_inventory_cells[category]:
                     if cell.rect.collidepoint(mouse_pos):
-                        resource = self.starter.inventory.get_resource(resource_name=cell.resource_name, resource_amount="all" if button == 1 else 1, with_remove=True)
+                        resource = self.starter_inventory.get_resource(resource_name=cell.resource_name, resource_amount="all" if button == 1 else 1, with_remove=True)
                         if not resource: return
-                        self.target.inventory.add_resouce(resource=resource)
-                        self.open(self.target.name.strip())
+                        self.target_inventory.add_resouce(resource=resource)
+                        self.open(self.target.type.strip())
                         update_gui()
                         return
         elif mouse_pos[0] > root.window_size[0]//2:
             for category in self.target_inventory_cells:
                 for cell, _ in self.target_inventory_cells[category]:
                     if cell.rect.collidepoint(mouse_pos):
-                        resource = self.target.inventory.get_resource(resource_name=cell.resource_name, resource_amount="all" if button == 1 else 1, with_remove=True)
+                        resource = self.target_inventory.get_resource(resource_name=cell.resource_name, resource_amount="all" if button == 1 else 1, with_remove=True)
                         if not resource: return
-                        self.starter.inventory.add_resouce(resource=resource)
-                        self.open(self.target.name.strip())
+                        self.starter_inventory.add_resouce(resource=resource)
+                        self.open(self.target.type.strip())
                         update_gui()
                         return
     

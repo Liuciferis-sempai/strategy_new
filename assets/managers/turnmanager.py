@@ -20,10 +20,7 @@ class TurnManager:
                 logger.info(f"Executing turn event: {event}", f"TurnManager.do_step()")
                 self.game_manager.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
 
-        self.game_manager.town_manager.turn()
-        self.game_manager.storage_manager.turn()
-        self.game_manager.producer_manager.turn()
-        self.game_manager.workbench_manager.turn()
+        self.game_manager.buildings_manager.check_conection()
 
     def add_event_in_queue(self, time: int, event: dict) -> None|dict:
         '''

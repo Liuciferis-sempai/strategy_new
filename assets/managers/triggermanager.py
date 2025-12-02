@@ -124,6 +124,7 @@ class TriggerManager:
             return self.has_cell_pawn(cell, cell_has)
         elif "building" in cell_has:
             return self.has_cell_building(cell, cell_has)
+        return False
 
     def has_cell_scheme(self, cell: Cell) -> bool:
         if cell.buildings == {}:
@@ -174,12 +175,12 @@ class TriggerManager:
             return False
     
     def has_cell_building(self, cell: Cell, cell_has: str) -> bool:
-        if cell.building == {}:
+        if cell.buildings == {}:
             self.game_manager.messenger.set_buffer("cell_has_no_building")
             return False
         else:
             nec_building = cell_has.replace("building:", "")
-            if cell.building["type"] == nec_building:
+            if cell.buildings["type"] == nec_building:
                 return True
             else:
                 self.game_manager.messenger.set_buffer("no_necessary_building_there", {"nec_building": nec_building})
@@ -206,7 +207,7 @@ class TriggerManager:
         building = self.game_manager.buildings_manager.get_building_by_coord(self.game_manager.get_chosen_cell_coord())
         if building.is_scheme:
             total = {}
-            for resource in building.scheme_inventory[pay_inv]:
+            for resource in building.scheme_inventory.get_inventory(pay_inv):
                 if total.get(resource, False):
                     total[resource.name] += resource.amount
                 else:

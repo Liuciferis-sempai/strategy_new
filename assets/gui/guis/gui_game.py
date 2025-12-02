@@ -34,13 +34,14 @@ class GUIGame:
         self.open_inventory_button = OpenInventoryButton()
         self.open_scheme_button = OpenInventoryButton()
         self.open_spawn_button = OpneSpawnButton()
+        self.cancel_upgrade_button = CancelUpgradeButton()
 
         self.jobs_list = None
         self.action_list = None
         self.buildings_list = {}
         self.buildings_types_list = None
         self.scheme_list = []
-        self.cell_info = []
+        self.cell_info: list[TextField|Icon] = []
 
         self.set_standard_footer()
 
@@ -51,7 +52,7 @@ class GUIGame:
         self.change_position_for_new_screen_sizes()
 
     def set_standard_footer(self):
-        self.footer_content = [self.next_turn_button, self.show_scheme_list_button]
+        self.footer_content: list[Button] = [self.next_turn_button, self.show_scheme_list_button]
 
     def update_header_info_content(self) -> int:
         # Change position of header info content
@@ -158,7 +159,12 @@ class GUIGame:
 
     def open_building(self):
         building = self.game_manager.get_chosen_building()
-        self.footer_content = [self.next_turn_button, self.open_building_interface_button, self.open_inventory_button]
+        self.footer_content = [self.next_turn_button]
+        if not building.is_scheme:
+            self.footer_content.append(self.open_building_interface_button)
+        else:
+            self.footer_content.append(self.cancel_upgrade_button)
+        self.footer_content.append(self.open_inventory_button)
         if building.is_workbench and not building.is_scheme:
             self.footer_content.append(self.open_reciept_button)
         if building.is_town and not building.is_scheme:
@@ -177,7 +183,8 @@ class GUIGame:
         update_gui()
 
     def show_info_about_cell_under_mouse(self):
-        cell = self.game_manager.input_processor.game_input.cell_under_mouse
+        cell = self.game_manager.get_cell_under_mouse()
+        if cell.is_default: return
         mouse_pos = py.mouse.get_pos()
 
         cell_info: list[list[TextField]] = [[]]
@@ -185,30 +192,40 @@ class GUIGame:
         y_offset = 0
         font_size = 25
 
-        tettain_name = cell.type if cell.is_opened else "not researched cell"
-        move_points = f"*[{cell.data["subdata"].get("movement_points")}]" if cell.data["subdata"].get("movement_points") != None else ""
-        auxiliary_cell_info = f"*(x:{cell.coord[0]} *y:{cell.coord[1]}) {move_points}"
-        terrain = TextField(text=f"{tettain_name} {auxiliary_cell_info}",
+        fraction = self.game_manager.fraction_manager.get_player_fraction()
+
+        if self.game_manager.world_map.display_mode == "normal":
+            tettain_name = cell.type if cell.is_opened else "not researched cell"
+            move_points = f"[{cell.data["subdata"].get("movement_points")}]" if cell.data["subdata"].get("movement_points") != None else ""
+            auxiliary_cell_info = f"(x:{cell.coord[0]} y:{cell.coord[1]}) {move_points}"
+            
+            terrain = TextField(text="terrain_name", text_kwargs={"name": tettain_name, "auxiliary_cell_info": auxiliary_cell_info},
+                                    position=(
+                                        mouse_pos[0]+10,
+                                        mouse_pos[1]
+                                    ), font_size=font_size, bg_color=(0, 0, 0, 0))
+            cell_info[-1].append(terrain)
+            if cell.flora != {} and cell.is_opened:
+                flora = TextField(text=cell.flora["name"],
+                                    position=(
+                                        mouse_pos[0]+10,
+                                        mouse_pos[1]+terrain.text_rect.height
+                                    ), font_size=font_size, bg_color=(0, 0, 0, 0))
+                cell_info[-1].append(flora)
+            if cell.fauna != {} and cell.is_opened:
+                fauna = TextField(text=cell.fauna["name"],
+                                    position=(
+                                        mouse_pos[0]+10,
+                                        mouse_pos[1]+terrain.text_rect.height+flora.text_rect.height if cell.flora != {} else mouse_pos[1]+terrain.text_rect.height #type: ignore
+                                    ), font_size=font_size, bg_color=(0, 0, 0, 0))
+                cell_info[-1].append(fauna)
+        else:
+            terrain = TextField(text="terrain_characteristic", text_kwargs={"key": self.game_manager.world_map.display_mode, "value": cell.get(self.game_manager.world_map.display_mode)},
                                 position=(
-                                    mouse_pos[0]+10,
-                                    mouse_pos[1]+10
-                                ), font_size=font_size, bg_color=(0, 0, 0, 0))
-        cell_info[-1].append(terrain)
-        if cell.flora != {} and cell.is_opened:
-            flora = TextField(text=cell.flora["name"],
-                                position=(
-                                    mouse_pos[0]+10,
-                                    mouse_pos[1]+terrain.text_rect.height+10
-                                ), font_size=font_size, bg_color=(0, 0, 0, 0))
-            cell_info[-1].append(flora)
-        if cell.fauna != {} and cell.is_opened:
-            fauna = TextField(text=cell.fauna["name"],
-                                position=(
-                                    mouse_pos[0]+10,
-                                    mouse_pos[1]+terrain.text_rect.height+flora.text_rect.height+10 if cell.flora != {} else mouse_pos[1]+terrain.text_rect.height+10 #type: ignore
-                                ), font_size=font_size, bg_color=(0, 0, 0, 0))
-            cell_info[-1].append(fauna)
-        
+                                        mouse_pos[0]+10,
+                                        mouse_pos[1]
+                                    ), font_size=font_size, bg_color=(0, 0, 0, 0))
+            cell_info[-1].append(terrain)
         y_offset += sum([info.text_rect.height for info in cell_info[-1]])+10
 
         if cell.buildings != {}:
@@ -220,53 +237,66 @@ class GUIGame:
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+10
                                         ), font_size=font_size, bg_color=(0, 0, 0, 0))
-            building_service = TextField(text=f"service_level", text_kwargs={"service_now": building.get_service(), "service_max": building.get_max_service()},
+            building_service = TextField(text="service_level", text_kwargs={"service_now": building.get_service(), "service_max": building.get_max_service()},
                                         position=(
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+building_name.text_rect.height+10
                                         ), font_size=font_size, bg_color=(0, 0, 0, 0))
-            building_hp = TextField(text=f"building_hp_level", text_kwargs={"hp_now": building.get_hp(), "hp_max": building.get_max_hp()},
+            building_hp = TextField(text="building_hp_level", text_kwargs={"hp_now": building.get_hp(), "hp_max": building.get_max_hp()},
                                     position=(
                                         mouse_pos[0]+10,
                                         mouse_pos[1]+y_offset+building_name.text_rect.height+building_service.text_rect.height+10
                                     ), font_size=font_size, bg_color=(0, 0, 0, 0))
+            building_belongs = TextField(text="building_belongs", text_kwargs={"fraction_name": fraction.name},
+                                        position=(
+                                            mouse_pos[0]+10,
+                                            mouse_pos[1]+y_offset+building_name.text_rect.height+building_service.text_rect.height+building_hp.text_rect.height+10
+                                        ), font_size=font_size, bg_color=(0, 0, 0, 0))
 
             cell_info[-1].append(building_name)
             cell_info[-1].append(building_service)
             cell_info[-1].append(building_hp)
+            cell_info[-1].append(building_belongs)
 
-            if building.category == "town":
+            y_offset += sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height, building_belongs.text_rect.height])
+
+            if building.is_town:
                 population = building.town.get_population()
                 for group, pop in population.items():
                     town_pop = TextField(text=f"population_group_size", text_kwargs={"group": group, "size": pop},
                                         position=(
                                             mouse_pos[0]+10,
-                                            mouse_pos[1]+y_offset+building_name.text_rect.height+building_hp.text_rect.height+building_service.text_rect.height+10
+                                            mouse_pos[1]+y_offset+10
                                         ), font_size=font_size, bg_color=(0, 0, 0, 0))
                     cell_info[-1].append(town_pop)
                     y_offset += town_pop.text_rect.height
-
-            y_offset += sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height])+10
+                y_offset += 10
 
         if cell.pawns != []:
             for pawn_in_cell in cell.pawns:
                 cell_info.append([])
                 pawn = self.game_manager.pawns_manager.get_pawn_by_id(pawn_in_cell["id"])
-                pawns_name = TextField(text=f"*{pawn.name}",
+                pawn_name = TextField(text=f"*{pawn.name}",
                                        position=(
                                            mouse_pos[0]+10,
                                            mouse_pos[1]+y_offset+10
                                        ), font_size=font_size, bg_color=(0, 0, 0, 0))
-                pawns_hp = TextField(text=f"pawn_hp_level",text_kwargs={"hp_now": pawn.get_hp(), "hp_max": pawn.get_max_hp()},
+                pawn_hp = TextField(text="pawn_hp_level",text_kwargs={"hp_now": pawn.get_hp(), "hp_max": pawn.get_max_hp()},
                                     position=(
                                         mouse_pos[0]+10,
-                                        mouse_pos[1]+y_offset+pawns_name.text_rect.height+10
+                                        mouse_pos[1]+y_offset+pawn_name.text_rect.height+10
                                     ), font_size=font_size, bg_color=(0, 0, 0, 0))
+                pawn_belongs = TextField(text="pawn_belongs", text_kwargs={"fraction_name": fraction.name},
+                                        position=(
+                                            mouse_pos[0]+10,
+                                            mouse_pos[1]+y_offset+pawn_name.text_rect.height+pawn_hp.text_rect.height+10
+                                        ), font_size=font_size, bg_color=(0, 0, 0, 0))
 
-                cell_info[-1].append(pawns_name)
-                cell_info[-1].append(pawns_hp)
+                cell_info[-1].append(pawn_name)
+                cell_info[-1].append(pawn_hp)
+                cell_info[-1].append(pawn_belongs)
 
-                y_offset += sum([pawns_name.text_rect.height, pawns_hp.text_rect.height])+10
+                y_offset += sum([pawn_name.text_rect.height, pawn_hp.text_rect.height, pawn_belongs.text_rect.height])+10
 
         if cell_info != []:
             y_offset = 0
@@ -342,6 +372,8 @@ class GUIGame:
     #@timeit
     def draw(self):
         root.screen.fill((0, 0, 0))
+        self.show_info_about_cell_under_mouse()
+
         # Draw world map
         if self.game_manager.world_map:
             self.game_manager.world_map.draw()

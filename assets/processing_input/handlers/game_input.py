@@ -66,18 +66,21 @@ class GameInputProcessor(BasicInputProcessor):
             self.game_manager.world_map.change_display_mode("normal")
             root.update_gui()
         elif event.key == py.K_F2:
-            self.game_manager.world_map.change_display_mode("temperature")
+            self.game_manager.world_map.change_display_mode("fraction")
             root.update_gui()
         elif event.key == py.K_F3:
-            self.game_manager.world_map.change_display_mode("humidity")
+            self.game_manager.world_map.change_display_mode("temperature")
             root.update_gui()
         elif event.key == py.K_F4:
-            self.game_manager.world_map.change_display_mode("height")
+            self.game_manager.world_map.change_display_mode("humidity")
             root.update_gui()
         elif event.key == py.K_F5:
-            self.game_manager.world_map.change_display_mode("soil_fertility")
+            self.game_manager.world_map.change_display_mode("height")
             root.update_gui()
         elif event.key == py.K_F6:
+            self.game_manager.world_map.change_display_mode("soil_fertility")
+            root.update_gui()
+        elif event.key == py.K_F7:
             self.game_manager.world_map.change_display_mode("difficulty")
             root.update_gui()
 

@@ -11,7 +11,6 @@ def main():
     '''
     game loop
     '''
-
     clock = py.time.Clock()
 
     time_withoute_mouse_moving = 0
@@ -38,7 +37,7 @@ def main():
             elif event.type == py.MOUSEBUTTONUP:
                 root.game_manager.input_processor.process_mousebuttonup(event)
 
-        if time_withoute_mouse_moving >= root.time_for_show_info and not root.game_manager.input_processor.game_input.cell_under_mouse.is_default and root.game_manager.gui.game.cell_info == []:
+        if time_withoute_mouse_moving >= root.time_for_show_info and not root.game_manager.get_cell_under_mouse().is_default:
             root.game_manager.gui.show_info_under_mouse()
         else:
             time_withoute_mouse_moving += 1
@@ -56,7 +55,7 @@ def main():
             logger.write_down()
 
         clock.tick(root.config["FPS"])
-        #print(f"FPS: {clock.get_fps():.2f}\r", end="")
+        print(f"FPS: {clock.get_fps():.2f}\r", end="")
         #fps = int(clock.get_fps())
         #py.display.set_caption(f"FPS: {fps}")
 

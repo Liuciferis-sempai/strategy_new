@@ -8,10 +8,10 @@ class Inventory:
         self.default_inv_cat = default_inv_cat
         if isinstance(inv_self, dict) and isinstance(inv_max_size, dict):
             for key in inv_self.keys():
-                self.inventory[key] = []
+                self.inventory[key] = inv_self[key]
                 self.inv_max_size[key] = inv_max_size[key]
         elif isinstance(inv_self, list) and isinstance(inv_max_size, int):
-            self.inventory = {"main": []}
+            self.inventory = {"main": inv_self}
             self.inv_max_size["main"] = inv_max_size
         else:
             self.inventory = {"main": []}
@@ -164,3 +164,9 @@ class Inventory:
 
         for item, inv in to_remove:
             self.inventory[inv].remove(item)
+    
+    def get_inventory(self, inventory_category: str) -> list[ResourceType]:
+        if inventory_category in self.inventory.keys():
+            return self.inventory[inventory_category]
+        else:
+            return []
