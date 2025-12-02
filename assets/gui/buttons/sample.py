@@ -5,7 +5,7 @@ from ...root import logger
 from typing import Any
 
 class Button(py.sprite.Sprite):
-    def __init__(self, text:str="Button", img:str="", width:int=0, height:int=0, color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), font_size:int=20, position:tuple[int, int]=(5, 5), text_kwargs: dict[str, Any] = {}):
+    def __init__(self, text:str="Button", img:str="", width:int=0, height:int=0, color:tuple[int, int, int]|tuple[int, int, int, int]=(255, 255, 255), font_size:int=20, position:tuple[int, int]=(5, 5), text_kwargs: dict[str, Any] = {}, button_state: str = "none", auto_process: bool = True):
         super().__init__()
         self.name = str(self.__class__).split(".")[-1].replace("'>", "")
 
@@ -16,6 +16,8 @@ class Button(py.sprite.Sprite):
         self.color = color
         self.font_size = font_size
         self.position = position
+
+        self.auto_process = auto_process
 
         #self.image = py.Surface((self.width, self.height))
         #self.image.fill(color)
@@ -35,13 +37,15 @@ class Button(py.sprite.Sprite):
         self.text_rect = self.text_surface.get_rect(center=(self.width // 2, self.height // 2))
         self.image.blit(self.text_surface, self.text_rect)
 
+        root.game_manager.add_button(self, button_state)
+
     def __repr__(self) -> str:
         return f"<{self.name}>"
     
-    def click(self):
+    def click(self, button: int, mouse_pos: tuple[int, int]) -> bool:
         logger.info(f"Button '{self}' clicked", "Button.click()")
         #print(f"{self.text} button clicked!")
-        pass
+        return True
 
     def draw(self):
         self.image.blit(self.text_surface, self.text_rect)

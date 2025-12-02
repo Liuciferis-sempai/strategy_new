@@ -25,6 +25,10 @@ from .managers.producer_manager import ProducerManager
 from .managers.workbench_manager import WorkbenchManager
 from .helpers.messenger import Messenger
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .gui.buttons import Button
+
 class GameManager:
     def __init__(self):
         '''
@@ -55,6 +59,7 @@ class GameManager:
         self.chosen_inputfield = self._default_chosen_inputfield
 
         self.input_fields: list[InputField] = []
+        self.buttons: dict[str, list["Button"]] = {}
 
         self.messenger = Messenger()
         self.world_map = WorldMap()
@@ -62,6 +67,9 @@ class GameManager:
         self.command_line = CommandLine()
         self.add_inputfield(self.command_line.inputfield)
 
+        logger.info("gamemanager ended initialization", "GameManager.initialize()")
+    
+    def init_managers(self):
         self.fraction_manager = FractionManager(self)
         self.gui = GUI(self)
         self.pawns_manager = PawnsManager(self)
@@ -79,8 +87,6 @@ class GameManager:
         self.storage_manager = StorageManager(self)
         self.producer_manager = ProducerManager(self)
         self.workbench_manager = WorkbenchManager(self)
-
-        logger.info("gamemanager ended initialization", "GameManager.initialize()")
 
     def draw(self):
         self.gui.draw()
@@ -269,3 +275,15 @@ class GameManager:
     
     def add_inputfield(self, inputfield: InputField):
         self.input_fields.append(inputfield)
+
+    def add_button(self, button: "Button", button_game_state: str):
+        if not self.buttons.get(button_game_state):
+            self.buttons[button_game_state] = []
+        self.buttons[button_game_state].append(button)
+    
+    def remove_button(self, button_to_remove: "Button"):
+        for state in self.buttons:
+            for button in self.buttons[state]:
+                if button == button_to_remove or button.text == button_to_remove:
+                    self.buttons[state].remove(button)
+                    return

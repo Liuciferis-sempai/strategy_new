@@ -1,11 +1,11 @@
 import pygame as py
 from .. import root
-from .buttons import JobButton
+from .buttons import ListButton
+from functools import partial
 
 class ListOf(py.sprite.Sprite):
-    def __init__(self, list_:list=[], color:tuple[int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), font_size:int=20, open_direction:str="up", type_of_list="job_list"):
+    def __init__(self, list_:list=[], color:tuple[int, int, int]=(255, 255, 255), position:tuple[int, int]=(10, 10), font_size:int=20, open_direction:str="up", window_state: str = "none", func: partial|None = None):
         super().__init__()
-        self.type_of_list = type_of_list
 
         self.height = len(list_)*(font_size+5)
         self.width = root.interface_size
@@ -20,21 +20,14 @@ class ListOf(py.sprite.Sprite):
         self.image.fill(color)
         self.rect = py.Rect(self.position[0], self.position[1], self.width, self.height)
 
-        self.jobs = [JobButton(e, (self.position[0], self.position[1]+(i*(font_size+5)))) for i, e in enumerate(list_)]
+        self.list = [ListButton(e, (self.position[0], self.position[1]+(i*(font_size+5))), button_state=window_state, processor=self) for i, e in enumerate(list_)]
+        self.function = func
     
     def draw(self):
         root.screen.blit(self.image, self.rect)
-        for job in self.jobs:
-            job.draw()
+        for button in self.list:
+            button.draw()
 
-    def click(self):
-        mouse_pos = py.mouse.get_pos()
-        if self.type_of_list == "job_list":
-            for job in self.jobs:
-                if job.rect.collidepoint(mouse_pos):
-                    if not root.game_manager.is_chosen_pawn_default():
-                        root.game_manager.pawns_manager.do_job(root.game_manager.get_chosen_pawn(), job.text)
-        elif self.type_of_list == "scheme_list":
-            for job in self.jobs:
-                if job.rect.collidepoint(mouse_pos):
-                    root.game_manager.gui.game.open_scheme_type(job.text)
+    def click(self, button_text: str):
+        if self.function:
+            self.function(button_text)

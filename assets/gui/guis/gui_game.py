@@ -24,7 +24,7 @@ class GUIGame:
         self.turn_counter = ContentBox(position=(10, 10), value=0, img="turn_ico.png", allowed_range=[0, 9999])
         self.header_info_content = [self.turn_counter]
 
-        self.header_content = [FractionButton(), TechnologyButton(), PolicyButton()]
+        self.header_content: list[Button] = [FractionButton(), TechnologyButton(), PolicyButton()]
 
         self.next_turn_button = NextTurnButton()
         self.show_scheme_list_button = SchemeListButton()
@@ -36,8 +36,8 @@ class GUIGame:
         self.open_spawn_button = OpneSpawnButton()
         self.cancel_upgrade_button = CancelUpgradeButton()
 
-        self.jobs_list = None
-        self.action_list = None
+        self.jobs_list: None|ListOf = None
+        self.action_list: None|ListOf = None
         self.buildings_list = {}
         self.buildings_types_list = None
         self.scheme_list = []
@@ -153,7 +153,13 @@ class GUIGame:
 
     def open_scheme_list(self):
         self.buildings_list = self.game_manager.buildings_manager.get_all_unique_buildings_sorted_by_categories(True)
-        self.buildings_types_list = ListOf(list(self.buildings_list.keys()), position=(0, self.game_manager.world_map.rect.bottomleft[1]), type_of_list="scheme_list", open_direction="up")
+        self.buildings_types_list = ListOf(
+            list(self.buildings_list.keys()),
+            position=(0, self.game_manager.world_map.rect.bottomleft[1]),
+            open_direction="up",
+            window_state="game",
+            func=partial(root.game_manager.gui.game.open_scheme_type)
+            )
         #self.change_position_for_new_screen_sizes()
         update_gui()
 
@@ -179,7 +185,12 @@ class GUIGame:
     
     def show_jobs(self):
         if not self.game_manager.is_chosen_pawn_default():
-            self.jobs_list = ListOf(self.game_manager.job_manager.get_jobs_id_for_pawn(self.game_manager.get_chosen_pawn()), position=self.show_job_button.rect.topleft, type_of_list="job_list")
+            self.jobs_list = ListOf(
+                self.game_manager.job_manager.get_jobs_id_for_pawn(self.game_manager.get_chosen_pawn()),
+                position=self.show_job_button.rect.topleft,
+                window_state="game",
+                func=partial(self.game_manager.pawns_manager.do_job, root.game_manager.get_chosen_pawn())
+            )
         update_gui()
 
     def show_info_about_cell_under_mouse(self):
@@ -366,7 +377,13 @@ class GUIGame:
                     action_list.append("stand_here")
             elif buildings != {}:
                 action_list.append(f"attack.{buildings["name"]}")
-            self.action_list = ListOf(action_list, position=mouse_pos, open_direction=open_direction, type_of_list="job_list")
+            self.action_list = ListOf(
+                action_list,
+                position=mouse_pos,
+                open_direction=open_direction,
+                window_state="game",
+                func=partial(self.game_manager.pawns_manager.do_job, root.game_manager.get_chosen_pawn())
+            )
         update_gui()
 
     #@timeit

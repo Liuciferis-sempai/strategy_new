@@ -17,11 +17,11 @@ class RecieptInputProcessor(BasicInputProcessor):
     
     #@logger
     def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
-        if event.button == 1:
-            for button in self.game_manager.gui.reciept.buttons:
-                if button.rect.collidepoint(rel_mouse_pos):
-                    button.click()
-        elif event.button == 4:
+        #if event.button == 1:
+        #    for button in self.game_manager.gui.reciept.buttons:
+        #        if button.rect.collidepoint(rel_mouse_pos):
+        #            button.click()
+        if event.button == 4:
             root.game_manager.gui.reciept.move_up()
         elif event.button == 5:
             root.game_manager.gui.reciept.move_down()

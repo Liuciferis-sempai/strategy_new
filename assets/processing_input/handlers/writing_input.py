@@ -25,6 +25,7 @@ class WritingInputProcessor(BasicInputProcessor):
     
     #@logger
     def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
-        if self.game_manager.gui.writing.submit_button.rect.collidepoint(rel_mouse_pos):
-                self.game_manager.gui.writing.submit_button.click()
-        root.update_gui()
+        #if self.game_manager.gui.writing.submit_button.rect.collidepoint(rel_mouse_pos):
+        #        self.game_manager.gui.writing.submit_button.click()
+        #root.update_gui()
+        pass

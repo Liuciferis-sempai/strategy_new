@@ -17,5 +17,6 @@ class ShareMenuInputProcessor(BasicInputProcessor):
     
     #@logger
     def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
-        if event.button in [1, 3]:
-            self.game_manager.gui.sharemenu.click(event.button, rel_mouse_pos)
+        #if event.button in [1, 3]:
+        #    self.game_manager.gui.sharemenu.click(event.button, rel_mouse_pos)
+        pass

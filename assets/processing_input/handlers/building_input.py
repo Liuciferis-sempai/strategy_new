@@ -18,11 +18,12 @@ class BuildingInputProcessor(BasicInputProcessor):
     
     #@logger
     def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
-        if event.button == 1:
-            if self.game_manager.gui.building.building.is_workbench:
-                if self.game_manager.gui.building.building_reciept_button.rect.collidepoint(rel_mouse_pos):
-                    self.game_manager.gui.building.building_reciept_button.click()
-            if self.game_manager.gui.building.building.can_be_upgraded():
-                if self.game_manager.gui.building.upgrade_building_button.rect.collidepoint(rel_mouse_pos):
-                    self.game_manager.gui.building.upgrade_building_button.click()
-        root.update_gui()
+        #if event.button == 1:
+        #    if self.game_manager.gui.building.building.is_workbench:
+        #        if self.game_manager.gui.building.building_reciept_button.rect.collidepoint(rel_mouse_pos):
+        #            self.game_manager.gui.building.building_reciept_button.click()
+        #    if self.game_manager.gui.building.building.can_be_upgraded():
+        #        if self.game_manager.gui.building.upgrade_building_button.rect.collidepoint(rel_mouse_pos):
+        #            self.game_manager.gui.building.upgrade_building_button.click()
+        #root.update_gui()
+        pass

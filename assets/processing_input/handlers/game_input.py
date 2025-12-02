@@ -87,20 +87,20 @@ class GameInputProcessor(BasicInputProcessor):
     #@logger
     def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
         if event.button == 1:
-            if self.game_manager.gui.game.jobs_list:
-                if self.game_manager.gui.game.jobs_list.rect.collidepoint(rel_mouse_pos):
-                    self.game_manager.gui.game.jobs_list.click()
-                    return
+            #if self.game_manager.gui.game.jobs_list:
+            #    if self.game_manager.gui.game.jobs_list.rect.collidepoint(rel_mouse_pos):
+            #        self.game_manager.gui.game.jobs_list.click()
+            #        return
 
-            if self.game_manager.gui.game.action_list:
-                if self.game_manager.gui.game.action_list.rect.collidepoint(rel_mouse_pos):
-                    self.game_manager.gui.game.action_list.click()
-                    return
+            #if self.game_manager.gui.game.action_list:
+            #    if self.game_manager.gui.game.action_list.rect.collidepoint(rel_mouse_pos):
+            #        self.game_manager.gui.game.action_list.click()
+            #        return
 
             if self.game_manager.gui.game.buildings_types_list:
-                if self.game_manager.gui.game.buildings_types_list.rect.collidepoint(rel_mouse_pos):
-                    self.game_manager.gui.game.buildings_types_list.click()
-                    return
+            #    if self.game_manager.gui.game.buildings_types_list.rect.collidepoint(rel_mouse_pos):
+            #        self.game_manager.gui.game.buildings_types_list.click()
+            #        return
                 
                 for scheme in self.game_manager.gui.game.scheme_list:
                     if scheme.bg_rect.collidepoint(rel_mouse_pos):
@@ -115,15 +115,15 @@ class GameInputProcessor(BasicInputProcessor):
 
             screen_middle = (root.window_size[0] // 2, root.window_size[1] // 2)
 
-            if rel_mouse_pos[1] < screen_middle[1]:
-                for item in self.game_manager.gui.game.header_content:
-                    if item.rect.collidepoint(rel_mouse_pos):
-                        item.click()
-                        return
-            elif rel_mouse_pos[1] > screen_middle[1]:
+            #if rel_mouse_pos[1] < screen_middle[1]:
+            #    for item in self.game_manager.gui.game.header_content:
+            #        if item.rect.collidepoint(rel_mouse_pos):
+            #            item.click(1, rel_mouse_pos)
+            #            return
+            if rel_mouse_pos[1] > screen_middle[1]:
                 for item in self.game_manager.gui.game.footer_content:
                     if item.rect.collidepoint(rel_mouse_pos):
-                        item.click()
+                        item.click(1, rel_mouse_pos)
                         return
             #if rel_mouse_pos[0] > screen_middle[0]:
             #    if gui.main_info_window_content:

@@ -64,4 +64,5 @@ image_manager = ImageManager()
 loading.draw("Game initializing...")
 from .gamemanager import GameManager
 game_manager = GameManager()
+game_manager.init_managers()
 game_manager.gui.change_position_for_new_screen_sizes()

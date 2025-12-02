@@ -17,9 +17,9 @@ class TechnologyInputProcessor(BasicInputProcessor):
     
     #@logger
     def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
-        if event.button == 1:
-            self.game_manager.tech_tree.collidepoint(rel_mouse_pos)
-        elif event.button == 3:
+        #if event.button == 1:
+        #    self.game_manager.tech_tree.collidepoint(rel_mouse_pos)
+        if event.button == 3:
             self.game_manager.tech_tree.set_none_tech()
         elif event.button == 4:
             if self.root_processor.is_shift_pressed:
