@@ -183,20 +183,37 @@ class TriggerManager:
                 self.game_manager.messenger.set_buffer("no_necessary_building_there", {"nec_building": nec_building})
                 return False
 
-    def is_near(self, chosen: Pawn|Building|Cell|None, target: Pawn|Building|Cell|None, distance: int|str, **kwargs) -> bool:
+    def is_near(self, chosen: Pawn|Building|Cell|tuple[int, int, int]|tuple[int, int]|None, target: Pawn|Building|Cell|tuple[int, int, int]|tuple[int, int]|None, distance: int|str, **kwargs) -> bool:
         if not chosen or not target:
             logger.warning(f"target or chosen is not recognized", f"TriggerManager.target_is_near({chosen}, {target}, {distance})")
             self.game_manager.messenger.set_buffer("no_target_there")
             return False
 
-        if isinstance(distance, str): distance = int(chosen.data.get("distance", 1))
+        if isinstance(chosen, tuple):
+            chosen_coord_x = chosen[0]
+            chosen_coord_y = chosen[1]
+        else:
+            chosen_coord_x = chosen.coord[0]
+            chosen_coord_y = chosen.coord[1]
+
+        if isinstance(target, tuple):
+            target_coord_x = target[0]
+            target_coord_y = target[1]
+        else:
+            target_coord_x = target.coord[0]
+            target_coord_y = target.coord[1]
+
+        if isinstance(distance, str):
+            if isinstance(chosen, Pawn): distance = int(chosen.data.get("distance", 1))
+            elif can_be_int(distance): distance = int(distance)
+            else: distance = 0
 
         if (
-            (abs(chosen.coord[0]-target.coord[0]) <= distance or abs(root.world_map_size[0]-chosen.coord[0]-target.coord[0]) <= distance) and
-            (abs(chosen.coord[1]-target.coord[1]) <= distance or abs(root.world_map_size[1]-chosen.coord[1]-target.coord[1]) <= distance)
+            (abs(chosen_coord_x-target_coord_x) <= distance or abs(root.world_map_size[0]-chosen_coord_x+target_coord_x) <= distance or abs(root.world_map_size[0]+chosen_coord_x-target_coord_x) <= distance) and
+            (abs(chosen_coord_y-target_coord_y) <= distance or abs(root.world_map_size[1]-chosen_coord_y+target_coord_y) <= distance or abs(root.world_map_size[1]+chosen_coord_y-target_coord_y) <= distance)
             ):
             return True
-        logger.warning(f"target is too far. pawn stand on {chosen.coord}, target stand on {target.coord}. distance must be {distance} or less", f"TriggerManager.target_is_near({chosen}, {target}, {distance})")
+        logger.warning(f"target is too far. chosen stand on x:{chosen_coord_x} y: {chosen_coord_y}, target stand on x:{target_coord_x} y:{target_coord_y}. distance must be {distance} or less", f"TriggerManager.target_is_near({chosen}, {target}, {distance})")
         self.game_manager.messenger.set_buffer("target_is_too_far")
         return False
 
