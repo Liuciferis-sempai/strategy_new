@@ -31,7 +31,7 @@ class RecieptsManager:
             if reciept["id"] == reciept_id:
                 return copy.deepcopy(reciept)
         logger.error(f"reciept id {reciept_id} not found", f"RecieptsManager.get_reciept_by_id({reciept_id})")
-        return {}
+        return {}.copy()
     
     def get_reciepts_for_workbench(self, workbench_type: str, workbench_level: int) -> list:
         allowed_reciepts = []

@@ -1,6 +1,6 @@
 import pygame as py
 from .. import root
-from ..gui.textfield import TextField
+from ..gui.buttons import *
 from ..auxiliary_stuff import update_gui
 from typing import Any
 
@@ -14,24 +14,34 @@ class Messenger:
 
         self.last_tick = 0
 
-        self.lines: list[tuple[int, TextField]] = []
+        self.lines: list[tuple[int, MessageLine]] = []
         self.buffer = None
 
-    def set_buffer(self, message: str, message_kwargs: dict[str, Any] = {}, message_type: str = "info"):
-        self.buffer = (message, message_kwargs, message_type)
+    def set_buffer(self, message: str, message_kwargs: dict[str, Any] = {}, messanger_target: None|tuple[int, int, int] = None, message_type: str = "info"):
+        self.buffer = (message, message_kwargs, messanger_target, message_type)
     
     def print_buffer(self):
         if self.buffer:
             try:
-                self.print(self.buffer[0], self.buffer[1], self.buffer[2])
+                self.print(self.buffer[0], self.buffer[1], self.buffer[2], self.buffer[3])
             except:
                 root.logger.error(f"false buffer value: {self.buffer}", "messenger.print_buffer(...)")
         self.buffer = None
 
-    def print(self, message: str, message_kwargs: dict[str, Any] = {}, message_type: str = "info"):
+    def print(self, message: str, message_kwargs: dict[str, Any] = {}, messanger_target: None|tuple[int, int, int] = None, message_type: str = "info"):
         if len(self.lines) == 0: self.last_tick = 0
         self.lines.append(
-            (self.last_tick+100*len(self.lines), TextField(bg_color=self.bg_color, font_color=self.font_color[message_type], font_size=self.font_size, text=f"{message}", height=self.font_size, width_as_text_width=True, text_kwargs=message_kwargs))
+            (self.last_tick+100*len(self.lines),
+             MessageLine(
+                bg_color=self.bg_color,
+                font_color=self.font_color[message_type],
+                font_size=self.font_size, text=f"{message}",
+                height=self.font_size,
+                text_kwargs=message_kwargs,
+                button_state=root.window_state,
+                messanger_target=messanger_target
+             )
+            )
         )
         self.change_position()
 

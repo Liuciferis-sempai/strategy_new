@@ -41,6 +41,6 @@ class Producer:
         turn = root.game_manager.turn_manager.turn
         if self.last_prodaction_at + self.prodaction_time <= turn:
             self.last_prodaction_at = turn
-            self_building = root.game_manager.buildings_manager.get_building_by_coord(self.coord)
+            self_building = root.game_manager.get_building(coord=self.coord)
             for resource, amout in self.prodaction.items():
                 self_building.add_resource(resource_name=resource, resource_amount=amout, inv_type="output")

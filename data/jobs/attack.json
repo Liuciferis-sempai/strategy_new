@@ -6,6 +6,16 @@
     "pawn_category": ["any"],
     "pawn_types": ["any"],
     "work_time": 0,
-    "trigger": {"type": "target_is_near", "args": {"target_of_action": "target_of_action", "distance": "attack_distance"}},
-    "result": {"type": "attack", "args": {}}
+
+    "trigger": {
+        "type": "is_near",
+            "chosen": "chosen_pawn",
+            "target": "target_any",
+            "distance": "attack_distance"
+    },
+    "result": {
+        "effect_type": "attack",
+            "target": "target_any",
+            "data": "@ target pawn attack"
+    }
 }

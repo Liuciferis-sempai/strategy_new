@@ -2,35 +2,24 @@ from ...auxiliary_stuff import read_json_file, update_gui, get_cell_side_size
 import pygame as py
 import os
 from ... import root
-from .tech import Tech
+from .tech import Tech, Link
 from ...root import loading
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ...gamemanager import GameManager
 
-class Link(py.sprite.Sprite):
-    def __init__(self, prerequisite: Tech, tech: Tech):
-        super().__init__()
-
-        self.prerequisite = prerequisite
-        self.tech = tech
-
-    def draw(self):
-        py.draw.line(root.screen, (255, 0, 0), (self.prerequisite.rect.right, self.prerequisite.rect.centery), (self.tech.rect.left, self.tech.rect.centery))
-
 class Techtree:
-    def __init__(self, game_manager: "GameManager"):
-        self.game_manager = game_manager
+    def __init__(self, tech_tree_data: list[dict], fraction_id: int):
         #self.scale = 1.0
+        self.fraction_id = fraction_id
         self.move_distance = get_cell_side_size()//4
 
-        self.techs = []
-        loading.draw("Loading technologies...")
-        self.load_techs()
+        self.techs: list[Tech] = []
+        for tech in tech_tree_data:
+            self.techs.append(Tech(tech))
 
-        loading.draw("Setting up technology links...")
-        self.links = []
+        self.links: list[Link] = []
         for tech in self.techs:
             if tech.data.get("prerequisites", []) != []:
                 for prerequisite in tech.data["prerequisites"]:
@@ -41,18 +30,21 @@ class Techtree:
                         self.links.append(link)
         self.chosen_tech = None
 
-    def load_techs(self):
-        self.techs = []
-        for techfile in os.listdir("data/technologies"):
-            if techfile.endswith(".json"):
-                tech_data = read_json_file(f"data/technologies/{techfile}")
-                self.techs.append(Tech(tech_data))
+    def __repr__(self) -> str:
+        return f"<Techtree has {len(self.techs)} Techs>"
+
+    def get_tech(self, tech_id: str) -> Tech:
+        for tech in self.techs:
+            if tech.id == tech_id:
+                return tech
+
+        return root.game_manager.get_default_technology()
 
     def collidepoint(self, mouse_pos: tuple[int, int]) -> bool:
         for tech in self.techs:
             if tech.rect.collidepoint(mouse_pos):
                 if tech.is_allowed():
-                    self.game_manager.fraction_manager.edit_fraction(id=root.player_id, data={"set": True, "research_technology": tech.data.get("id")})
+                    root.game_manager.fraction_manager.get_fraction_by_id(self.fraction_id).set_research_technology(tech.id)
                     if self.chosen_tech is not None:
                         self.chosen_tech.chosen = False
                         self.chosen_tech.chosen_tech()
@@ -64,7 +56,7 @@ class Techtree:
         return False
 
     def set_none_tech(self):
-        self.game_manager.fraction_manager.edit_fraction(id=root.player_id, data={"set": True, "research_technology": "none_technology"})
+        root.game_manager.fraction_manager.get_fraction_by_id(self.fraction_id).reset_research_technology()
         if self.chosen_tech is not None:
             self.chosen_tech.chosen = False
             self.chosen_tech.chosen_tech()

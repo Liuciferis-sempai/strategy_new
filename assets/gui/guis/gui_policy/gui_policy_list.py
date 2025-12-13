@@ -9,7 +9,7 @@ from ...listof import *
 from ...inputfield import *
 from .... import root
 from ....root import logger
-from ....auxiliary_stuff import timeit, get_cell_side_size
+from ....auxiliary_stuff import *
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:

@@ -13,5 +13,15 @@ class ListButton(Button):
     
     def click(self, button: int, mouse_pos: tuple[int, int]) -> bool:
         if button != 1: return False
-        self.processor.click(self.text)
+        self.processor.click(self.text.strip())
+        return super().click(button, mouse_pos)
+
+class MessageLine(Button):
+    def __init__(self, bg_color: tuple[int, int, int]|tuple[int, int, int, int], font_color: tuple[int, int, int], font_size: int, text: str, height: int, text_kwargs: dict, button_state: str, messanger_target: tuple[int, int, int]|None):
+        super().__init__(text=text, text_kwargs=text_kwargs, height=height, color=bg_color, font_color=font_color, font_size=font_size, position=(10, 10), button_state=button_state, auto_width=True)
+        self.messanger_target = messanger_target
+
+    def click(self, button: int, mouse_pos: tuple[int, int]) -> bool:
+        if self.messanger_target:
+            root.game_manager.world_map.show_cell(self.messanger_target)
         return super().click(button, mouse_pos)

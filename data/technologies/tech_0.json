@@ -4,7 +4,7 @@
     "icon": "none.png",
     "cost": {
         "type_science_0": 10,
-        "type_science_1": 5
+        "type_science_1": 6
     },
     "era": "base_tech_0_era",
     "x": 0,
@@ -12,6 +12,23 @@
     "prerequisites": [],
     "unlocks": [
         "building_0",
-        "unit_0"
+        "unit_0",
+        "unit_1",
+        "unit_2",
+        "unit_3",
+        "unit_4",
+        "unit_5",
+        "unit_6",
+        "unit_7",
+        "unit_8",
+        "unit_9"
+    ],
+    "effect": [
+        {
+            "result": {
+                "type": "reseach_building",
+                    "building_type": "big_storage"
+            }
+        }
     ]
 }

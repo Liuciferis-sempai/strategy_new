@@ -1,0 +1,14 @@
+{
+    "id": "event3",
+    "desc": "event3desc",
+    "choices": [
+        {
+            "choice_name": "choice3A",
+            "choice_color": [50, 120, 100],
+            "result": {
+                "effect_type": "give_achievment",
+                    "name": "first_try"
+            }
+        }
+    ]
+}

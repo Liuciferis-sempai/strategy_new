@@ -17,18 +17,18 @@ class TechnologyInputProcessor(BasicInputProcessor):
     
     #@logger
     def process_mousebuttondown(self, event:py.event.Event, rel_mouse_pos:tuple[int, int]):
-        #if event.button == 1:
-        #    self.game_manager.tech_tree.collidepoint(rel_mouse_pos)
-        if event.button == 3:
-            self.game_manager.tech_tree.set_none_tech()
+        if event.button == 1:
+            self.game_manager.gui.technology.techtree.collidepoint(rel_mouse_pos)
+        elif event.button == 3:
+            self.game_manager.gui.technology.techtree.set_none_tech()
         elif event.button == 4:
             if self.root_processor.is_shift_pressed:
-                self.game_manager.tech_tree.scroll_left()
+                self.game_manager.gui.technology.techtree.scroll_left()
             else:
-                self.game_manager.tech_tree.scroll_up()
+                self.game_manager.gui.technology.techtree.scroll_up()
         elif event.button == 5:
             if self.root_processor.is_shift_pressed:
-                self.game_manager.tech_tree.scroll_right()
+                self.game_manager.gui.technology.techtree.scroll_right()
             else:
-                self.game_manager.tech_tree.scroll_down()
+                self.game_manager.gui.technology.techtree.scroll_down()
         root.update_gui()

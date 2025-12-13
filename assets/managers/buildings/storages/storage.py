@@ -38,13 +38,13 @@ class Storage:
         for cell, _ in cells.values():
             if cell.buildings != {} and cell.coord != self.coord:
                 if cell.buildings["fraction_id"] == self.fraction_id:
-                    building = root.game_manager.buildings_manager.get_building_by_coord(cell.coord)
+                    building = root.game_manager.get_building(coord=cell.coord)
                     self.conection.append(building)
     
     def turn(self):
         if not self.can_work: return
 
-        self_building = root.game_manager.buildings_manager.get_building_by_coord(self.coord)
+        self_building = root.game_manager.get_building(coord=self.coord)
         remainder_bandwidth = self.bandwidth
         for building in self.conection:
             if building.is_producer:

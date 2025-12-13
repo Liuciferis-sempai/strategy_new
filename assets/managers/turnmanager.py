@@ -18,9 +18,10 @@ class TurnManager:
         for event in self.events:
             if event["turn"] == self.turn:
                 logger.info(f"Executing turn event: {event}", f"TurnManager.do_step()")
-                self.game_manager.effect_manager.do(event["event"]["do"], event["event"]["event_data"])
+                self.game_manager.execute_effect(event["event"])
 
-        self.game_manager.buildings_manager.check_conection()
+        self.game_manager.buildings_manager.turn()
+        self.game_manager.fraction_manager.use_science()
 
     def add_event_in_queue(self, time: int, event: dict) -> None|dict:
         '''
@@ -30,14 +31,14 @@ class TurnManager:
         for example: {"do": event_type, "event_data": {"cell": self.game_manager.get_chosen_cell(), "resource": {"resource_0": 10, "resource_1": 5}}}
         '''
         if time == 0:
-            logger.info(f"event {event["do"]} has time {time} (0) and will be executed on this turn {self.turn}", f"TurnManager.add_event_in_queue(...)")
-            self.game_manager.effect_manager.do(event["do"], event["event_data"])
+            logger.info(f"event {event["effect_type"]} has time {time} (0) and will be executed on this turn {self.turn}", f"TurnManager.add_event_in_queue(...)")
+            self.game_manager.execute_effect(event)
         elif time < 0:
             logger.error(f"Time for event must be a positive integer or zero, event {event["do"]}", f"TurnManager.add_event_in_queue(...)")
         else:
             effect = {"turn": self.turn+time, "event": event}
             self.events.append(effect)
-            logger.info(f"event {event["do"]} successfully added in qeue with time: {time} and will be executed on turn {self.turn+time}", f"TurnManager.add_event_in_queue(...)")
+            logger.info(f"event {event["effect_type"]} successfully added in qeue with time: {time} and will be executed on turn {self.turn+time}", f"TurnManager.add_event_in_queue(...)")
             return effect
 
     def remove_event(self, effect: dict) -> bool:

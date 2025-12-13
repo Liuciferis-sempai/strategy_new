@@ -26,6 +26,12 @@ class BasicInputProcessor:
         root.input_field_active = False
         return False
 
+    def process_mousebutton_for_event(self, mouse_pos: tuple[int, int]) -> bool:
+        if self.game_manager.event_manager.events_queue != []:
+            if self.game_manager.event_manager.events_queue[0].click(mouse_pos):
+                return True
+        return False
+
     #@logger
     def process_keydown_base(self, event:py.event.Event) -> bool:
         if event.key == py.K_LCTRL or event.key == py.K_RCTRL:

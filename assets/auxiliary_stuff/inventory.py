@@ -18,7 +18,7 @@ class Inventory:
             self.inv_max_size["main"] = 1
             root.logger.error("false inventory type", f"Inventory.__init__({inv_max_size}, {inv_self}, {default_inv_cat})")
     
-    def add_resouce(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> str:
+    def add_resouce(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> int:
         inv = self._get_inv_type(inv_type)
         
         if resource:
@@ -26,41 +26,41 @@ class Inventory:
                 while len(self.inventory[cat]) < self.inv_max_size[cat]:
                     self.inventory[cat].append(resource)
                     self._optimize_inventory()
-                    return f"added resource {resource.name} to inventory"
-            return f"can not add resource {resource.name}"
+                    return 0
+            return 0
 
         remainder = resource_amount
         for cat in inv:
             for item in self.inventory[cat]:
                 if item.name == resource_name:
                     remainder = item.add(remainder)
-                    if remainder <= 0: return f"added resource {resource_name} to inventory in amount {resource_amount}"
+                    if remainder <= 0: return 0
         
         for cat in inv:
             while len(self.inventory[cat]) < self.inv_max_size[cat]:
                 self.inventory[cat].append(root.game_manager.resource_manager.create(resource_name, remainder))
                 remainder -= self.inventory[cat][-1].get_max_amount()
-                if remainder <= 0: return f"added resource {resource_name} to inventory in amount {resource_amount}"
+                if remainder <= 0: return 0
         
         root.logger.warning("must add more resources as can", f"Inventory.add_resouce({resource_name}, {resource_amount}, {resource})")
         if remainder < resource_amount:
-            return f"added resource {resource_name} to inventory in amount {remainder} and {resource_amount-remainder} lost"
+            return resource_amount-remainder
         else:
-            return f"can not add {resource_name} to invnentory"
+            return resource_amount
 
-    def remove_resource(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> str:
+    def remove_resource(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> int:
         inv = self._get_inv_type(inv_type)
 
         if resource:
             for cat in inv:
                 if resource in self.inventory[cat]:
                     self.inventory[cat].remove(resource)
-                    return f"removed resource {resource.name} to inventory"
+                    return 0
             for cat in inv:
                 for res in self.inventory[cat]:
                     if res.is_equal(resource):
                         self.inventory[cat].remove(res)
-            return f"can not remove resource {resource.name}"
+            return 0
 
         remainder = resource_amount
         for cat in inv:
@@ -69,13 +69,13 @@ class Inventory:
                     remainder -= item.take(remainder)
                     if remainder <= 0:
                         self._optimize_inventory()
-                        return f"removed {resource_amount} {resource_name}"
+                        return 0
         
         root.logger.error("must remove more resources as own", f"Inventory.remove_resource({resource_name}, {resource_amount}, {resource})")
         if remainder == resource_amount:
-            return f"removed {resource_amount-remainder} {resource_name}"
+            return remainder
         else:
-            return f"can not remove {resource_name}"
+            return resource_amount
 
     def get_resource(self, resource_name: str, resource_amount: int|str = "all", category: str = "main", with_remove: bool = False) -> ResourceType|None:
         inv_type = self._get_inv_type(category)
@@ -104,14 +104,30 @@ class Inventory:
     def has_resource(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> bool:
         inv = self._get_inv_type(inv_type)
 
-        remainder = resource_amount
-        for cat in inv:
-            for item in self.inventory[cat]:
-                if item.name == resource_name:
-                    remainder -= item.amount
-                    if remainder <= 0: return True
+        if resource:
+            remainder = resource.amount
+            for cat in inv:
+                for item in self.inventory[cat]:
+                    if item.name == resource.name:
+                        remainder -= item.amount
+                        if remainder <= 0: return True
+        else:
+            remainder = resource_amount
+            for cat in inv:
+                for item in self.inventory[cat]:
+                    if item.name == resource_name:
+                        remainder -= item.amount
+                        if remainder <= 0: return True
         return False
     
+    def transfer_to(self, other_inventory: "Inventory", resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main", other_inv_type: str = "main"):
+        if not resource or resource_name == "unknow": return
+        if not resource:
+            resource = self.get_resource(resource_name=resource_name, resource_amount=resource_amount, inv_type=inv_type)
+        
+        other_inventory.add_resouce(resource=resource, inv_type=other_inv_type)
+        self.remove_resource(resource=resource, inv_type=inv_type)
+
     def content_to_dict(self) -> dict[str, list[ResourceType]]:
         content = {}
         for cat in self.inventory:

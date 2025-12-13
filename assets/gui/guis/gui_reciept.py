@@ -49,11 +49,11 @@ class GUIReciept:
             is_allowed_message = "building_has_not_en_res" if is_allowed else ""
 
             time = Icon(self.item_width, self.item_height, img="time.png")
-            time_cost = TextField(self.item_width,  self.item_height, text=str(reciept["time"]), width_as_text_width=False)
+            time_cost = TextField(self.item_width,  self.item_height, text=str(reciept["time"]), auto_width=False)
             necessary = [Icon(self.item_width, self.item_height, img=resource) for resource in reciept["necessary"]]
-            necessary_count = [TextField(self.item_width, self.item_height, text=str(reciept["necessary"][resource]), width_as_text_width=False) for resource in reciept["necessary"]]
+            necessary_count = [TextField(self.item_width, self.item_height, text=str(reciept["necessary"][resource]), auto_width=False) for resource in reciept["necessary"]]
             production = [Icon(self.item_width, self.item_height, img=production) for production in reciept["production"]]
-            production_count = [TextField(self.item_width, self.item_height, text=str(reciept["production"][resource]), width_as_text_width=False) for resource in reciept["production"]]
+            production_count = [TextField(self.item_width, self.item_height, text=str(reciept["production"][resource]), auto_width=False) for resource in reciept["production"]]
             use_reciept = UseReciept(width=self.item_width, height=self.item_height, img=is_allowed_img, is_allowed=is_allowed, reciept_id=f"{reciept["id"]}", message=is_allowed_message)
             allowed = use_reciept
 

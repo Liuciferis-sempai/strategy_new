@@ -1,4 +1,5 @@
 from .root import logger, loading
+from .auxiliary_stuff import *
 from . import root
 from .gui.gui_manager import GUI
 from .managers.pawns.pawnsmanager import PawnsManager
@@ -10,20 +11,25 @@ from .world.cell import Cell
 from .gui.inputfield import InputField
 from .managers.triggermanager import TriggerManager
 from .managers.fraction.fraction_manager import FractionManager, Fraction
-from .managers.technologies.techtree import Techtree
+from .managers.technologies.technology_manager import TechnologyManager
+from .managers.technologies.tech import Tech
 from .managers.buildings.buildingsmanager import BuildingsManager
 from .managers.buildings.building import Building
 from .managers.policy.policytable import PolicyTable
 from .managers.effectmanager import EffectManager
 from .managers.jobmanager import JobManager
 from .managers.resources.resourcemanager import ResourceManager
+from .managers.eventmanager import EventManager
 from .processing_input.proccessing_input import InputKeyProcessor
-from .helpers.command_line import CommandLine
 from .managers.towns_manager import TownManager
 from .managers.storage_manager import StorageManager
 from .managers.producer_manager import ProducerManager
 from .managers.workbench_manager import WorkbenchManager
+from .managers.scientific_manager import ScientificManager
+from .managers.achievments_manager import AchievmentsManager
 from .helpers.messenger import Messenger
+from .helpers.command_line import CommandLine
+from .helpers.listener import Listener
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -47,6 +53,8 @@ class GameManager:
         self._default_building.is_default = True
         self._default_fraction = Fraction(is_default=False)
         self._default_fraction.is_default = True
+        self._default_technology = Tech(is_default=False)
+        self._default_technology.is_default = True
         self._default_chosen_inputfield = InputField()
 
         self.chosen_cell = self._default_cell
@@ -67,16 +75,16 @@ class GameManager:
         self.command_line = CommandLine()
         self.add_inputfield(self.command_line.inputfield)
 
-        logger.info("gamemanager ended initialization", "GameManager.initialize()")
-    
-    def init_managers(self):
+        logger.info("gamemanager ended primer initialization", "GameManager.__init__()")
+
+    def initialize(self):
         self.fraction_manager = FractionManager(self)
         self.gui = GUI(self)
         self.pawns_manager = PawnsManager(self)
         self.reciept_manager = RecieptsManager(self)
         self.turn_manager = TurnManager(self)
         self.trigger_manager = TriggerManager(self)
-        self.tech_tree = Techtree(self)
+        self.technology_manager = TechnologyManager(self)
         self.buildings_manager = BuildingsManager(self)
         self.policy_table = PolicyTable(self)
         self.effect_manager = EffectManager(self)
@@ -87,11 +95,19 @@ class GameManager:
         self.storage_manager = StorageManager(self)
         self.producer_manager = ProducerManager(self)
         self.workbench_manager = WorkbenchManager(self)
+        self.scientific_manager = ScientificManager(self)
+        self.event_manager = EventManager(self)
+        self.listener = Listener(self)
+        self.achievments_manager = AchievmentsManager(self, root.config["achievments"])
+
+        logger.info("gamemanager ended seconder initialization", "GameManager.initialize()")
 
     def draw(self):
         self.gui.draw()
         if self.command_line.is_active: self.command_line.draw()
         self.messenger.draw()
+        self.event_manager.draw()
+        self.achievments_manager.draw()
     
     def update_positions(self):
         self.gui.change_position_for_new_screen_sizes()
@@ -129,6 +145,117 @@ class GameManager:
     
     def get_default_fraction(self) -> Fraction:
         return self._default_fraction
+    
+    def get_default_technology(self) -> Tech:
+        return self._default_technology
+
+    def get_cell(self, coord: None|tuple[int, int, int]|str = None, mouse_click_pos: None|tuple[int, int] = None, **_) -> Cell:
+        if coord:
+            if isinstance(coord, str): coord = parsing_coord(coord)
+            return self.world_map.get_cell_by_coord(coord=coord)
+        elif mouse_click_pos:
+            return self.world_map.get_cell_by_click_pos(mouse_pos=mouse_click_pos)
+        
+        logger.error("can not find cell with information about it", f"GameManager.get_cell(coord={coord}, mouse_click_pos={mouse_click_pos})")
+        return self._default_cell
+    
+    def get_pawn(self, coord: tuple[int, int, int]|str|None = None, pawn_type: str|None = None, pawn_name: str|None = None, pawn_category: str|None = None, pawn_id: int|None = None, **_) -> Pawn:
+        if coord:
+            if isinstance(coord, str): coord = parsing_coord(coord)
+            if pawn_type:
+                return self.pawns_manager.get_pawn_by_type(pawn_type, coord)
+            elif pawn_category:
+                return self.pawns_manager.get_pawn_by_category(pawn_category, coord)
+            elif pawn_name:
+                return self.pawns_manager.get_pawn_by_name(pawn_name, coord)
+        elif pawn_id != None:
+            return self.pawns_manager.get_pawn_by_id(pawn_id)
+
+        logger.error("can not find cell with information about it", f"GameManager.get_pawn(coord={coord}, pawn_type={pawn_type}, pawn_name={pawn_name}, pawn_category={pawn_category}, pawn_id={pawn_id})")
+        return self._default_pawn
+    
+    def get_pawns(self, coord: tuple[int, int, int]|str|None = None, pawn_type: str|None = None, pawn_category: str|None = None, **_) -> list[Pawn]:
+        if coord:
+            if isinstance(coord, str): coord = parsing_coord(coord)
+            return self.pawns_manager.get_pawns_by_coord(coord)
+        elif pawn_type:
+            return self.pawns_manager.get_pawns_by_type(pawn_type)
+        elif pawn_category:
+            return self.pawns_manager.get_pawns_by_category(pawn_category)
+
+        logger.error("can not find cell with information about it", f"GameManager.get_pawn(coord={coord}, pawn_type={pawn_type}, pawn_category={pawn_category})")
+        return []
+    
+    def get_building(self, coord: tuple[int, int, int]|str|None = None, **_) -> Building:
+        if coord:
+            if isinstance(coord, str): coord = parsing_coord(coord)
+            return self.buildings_manager.get_building_by_coord(coord)
+
+        logger.error("can not find building with information about it", f"GameManager.ger_building(coord={coord})")
+        return self._default_building
+
+    def execute_effect(self, effect: dict[str, Any]|list[dict[str, Any]], is_parsed: bool = True, **kwargs) -> str:
+        '''
+        execute effect from effect_manager
+        effect need key "effect_type" (name of effect)
+        
+        :param effect: single effect (dict) or multiple effects list[single effect]
+        :type effect: dict|list
+        :param is_parsed: was a parsing operation performed beforehand
+        :type is_parsed: bool
+        :param kwargs: passes keys to parsing_json_data if necessary
+        :return: returns a short message about the effect(s) performed (not translated)
+        :rtype: str
+        '''
+        if isinstance(effect, list):
+            executed_effects = 0
+            for subeffect in effect:
+                if subeffect["effect_type"] not in self.effect_manager.effects_names:
+                    logger.error(f"unknow effect name {subeffect["effect_type"]}", f"GameManager.execute_effect({effect})")
+                    continue
+                if not is_parsed: self.parsing_json_data(subeffect, **kwargs)
+                self.effect_manager.do(effect_type=subeffect["effect_type"], effect_data=subeffect)
+            return f"executed {executed_effects} effects out of {len(effect)}"
+        elif isinstance(effect, dict):
+            if effect["effect_type"] not in self.effect_manager.effects_names:
+                logger.error(f"unknow effect name {effect["effect_type"]}", f"GameManager.execute_effect({effect})")
+                return "unknow effect name"
+            if not is_parsed: self.parsing_json_data(effect, **kwargs)
+            return self.effect_manager.do(effect_type=effect["effect_type"], effect_data=effect)
+        return f"unknow effect type {type(effect)}"
+    
+    def trigger(self, trigger: dict[str, Any]|list[dict[str, Any]], is_parsed: bool = True, **kwargs) -> bool:
+        '''
+        checks the trigger
+        trigger need key "type" (name of trigger)
+
+        :param trigger: single trigger (dict) or multiple triggers list[single trigger]
+        :type trigger: dict|list
+        :param is_parsed: was a parsing operation performed beforehand
+        :type is_parsed: bool
+        :param kwargs: passes keys to parsing_json_data if necessary
+        :return:
+        :rtype: bool
+        '''
+        try:
+            if isinstance(trigger, list):
+                for subtrigger in trigger:
+                    if not is_parsed: self.parsing_json_data(subtrigger, **kwargs)
+                    if not self.trigger_manager.check(subtrigger):
+                        return False
+                return True
+            elif isinstance(trigger, dict):
+                if not is_parsed: self.parsing_json_data(trigger, **kwargs)
+                return self.trigger_manager.check(trigger)
+        except Exception as e:
+            logger.error(f"trigger error {repr(e)} by trigger '{trigger}'", f"GameManager(..., kwargs={kwargs})")
+            return False
+    
+    def addListener(self, trigger: dict|list, effect: dict|list) -> tuple:
+        return self.listener.add(trigger, effect)
+    
+    def removeListener(self, listener: tuple) -> bool:
+        return self.listener.remove(listener)
 
     def set_chosen_cell(self, new_chosen_cell: "Cell"):
         logger.info(f"chosen cell changed from {self.chosen_cell} to {new_chosen_cell}", f"Game.set_chosen_cell({new_chosen_cell})")
@@ -181,7 +308,7 @@ class GameManager:
     def set_chosen_pawn(self, new_pawn: Pawn|dict):
         logger.info(f"open pawn {new_pawn}", f"Game.set_chosen_pawn({new_pawn})")
         if isinstance(new_pawn, dict):
-            new_pawn = self.pawns_manager.get_pawn_by_id(new_pawn["id"]) #type: ignore
+            new_pawn = self.get_pawn(pawn_id=new_pawn["id"]) #type: ignore
             logger.info(f"new pawn was dict. now is {new_pawn}", f"Game.set_chosen_pawn({new_pawn})")
             if new_pawn.is_default:
                 logger.error("new pawn is default. Something is wrong", f"Game.set_chosen_pawn({new_pawn})")
@@ -209,7 +336,7 @@ class GameManager:
             logger.error(f"query chosen building before it is defined", "GameManager.get_chosen_building()")
         return self.chosen_building
 
-    def is_chosen_building_defult(self) -> bool:
+    def is_chosen_building_default(self) -> bool:
         return self.chosen_building.is_default
 
     def set_chosen_building(self, building: Building|dict):
@@ -235,6 +362,17 @@ class GameManager:
 
     def is_chosen_building_coord_default(self):
         return self.chosen_building.is_default
+    
+    def get_chosen_coord(self) -> tuple[int, int, int]:
+        if not self.is_chosen_building_default():
+            return self.get_chosen_building_coord()
+        elif not self.is_chosen_cell_default():
+            return self.get_chosen_cell_coord()
+        elif not self.is_chosen_pawn_default():
+            return self.get_chosen_pawn_coord()
+
+        logger.error("chosen coord is default", "GameManager.get_chosen_coord()")
+        return (-1, -1, 0)
 
     def get_target_coord(self):
         if self.is_target_coord_default():
@@ -284,6 +422,83 @@ class GameManager:
     def remove_button(self, button_to_remove: "Button"):
         for state in self.buttons:
             for button in self.buttons[state]:
-                if button == button_to_remove or button.text == button_to_remove:
+                if button == button_to_remove:
                     self.buttons[state].remove(button)
                     return
+    
+    def parsing_json_data(self, json_data: dict[str, Any], target_name: str|None = None, calling_fraction_id: int|None = None, **_):
+        '''
+        prepares a JSON template for processing by code (replaces placeholders in the specified manner)
+        do not return anything, but modifies json_data
+        @ - spec symbol for deep search
+        * - spec symbol for skip this key-value
+
+        :param json_data: data that need prepare
+        :type json_data: dict
+        :param target_name: necessary if the data provides for the existence of a target (not chosen!)
+        :type target_name: str | None = None is default
+        :param calling_fraction_id: specifies the faction ID of the caller (optional)
+        :type calling_fraction_id: int | None = None is default
+        '''
+        target_coord = self.get_target_coord()
+
+        if not target_name:
+            target_name = "unknow"
+            target_building = self._default_building
+            target_cell = self._default_cell
+            target_pawn = self._default_pawn
+        else:
+            target_building = self.buildings_manager.get_building_by_coord(target_coord)
+            target_pawn = self.get_pawn(pawn_type=target_name, coord=target_coord)
+            target_cell = self.get_cell(coord=target_coord)
+
+        to_remove = []
+        to_add = []
+
+        for key in json_data:
+            if not isinstance(json_data[key], str): continue
+            #fraction process
+            if "fraction_id" in key:
+                if "player" in json_data[key]:
+                    json_data[key] = root.player_id
+                elif calling_fraction_id:
+                    json_data[key] = calling_fraction_id
+                elif can_be_int(json_data[key]) and int(json_data[key]) > 0:
+                    json_data[key] = int(json_data[key])
+            
+            elif "coord" in key and "," in json_data[key]:
+                json_data[key] = parsing_coord(json_data[key])
+
+            #@ - spec symbol for deep search
+            elif "@" in json_data[key]:
+                deep_search(json_data, key, target_building, target_pawn, target_cell)
+
+            #process chosen
+            elif "chosen" in json_data[key]:
+                if is_in("pawn", json_data[key]) and not self.is_chosen_pawn_default():
+                    json_data[key] = self.get_chosen_pawn()
+                elif is_in("building", json_data[key]) and not self.is_chosen_building_default():
+                    json_data[key] = self.get_chosen_building()
+                elif is_in("cell", json_data[key]) and not self.is_chosen_cell_default():
+                    json_data[key] = self.get_chosen_cell()
+
+            #process target
+            elif "target" in json_data[key]:
+                if is_in("building", json_data[key]) and not target_building.is_default:
+                    json_data[key] = target_building
+                elif is_in("pawn", json_data[key]) and not target_pawn.is_default:
+                    json_data["target"] = target_pawn
+                elif is_in("cell", json_data[key]) and not target_cell.is_default:
+                    json_data[key] = target_cell
+
+            elif "on_chosen_coord" in json_data[key]:
+                if is_in("building", json_data[key]):
+                    json_data[key] = self.get_building(coord=self.get_chosen_coord())
+                elif is_in("cell", json_data[key]):
+                    json_data[key] = self.get_cell(coord=self.get_chosen_coord())
+
+        for key in to_remove:
+            json_data.pop(key)
+        
+        for key, value in to_add:
+            json_data[key] = value

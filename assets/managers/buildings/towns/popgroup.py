@@ -79,7 +79,7 @@ class PopGroup:
     
     def has_enough_quality(self, necessary_quality: dict[str, float]) -> bool:
         for n_key, n_value in necessary_quality.items():
-            if self.quality.get(n_key, 0) < n_value:
+            if self.quality.get(n_key, 0) <= n_value:
                 return False
         return True
 

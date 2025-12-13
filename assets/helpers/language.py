@@ -1,5 +1,5 @@
 from ..auxiliary_stuff.work_with_files import read_json_file
-from ..auxiliary_stuff.functions import can_be_int
+from ..auxiliary_stuff.functions import *
 from .. import root
 from typing import Any
 
@@ -9,11 +9,11 @@ class Language:
 
     def load_language(self, language:str):
         self.language_name = language
-        self.language = read_json_file(f"data/languages/{language}.json")
+        self.language: dict[str, str] = read_json_file(f"data/languages/{language}.json")
     
     def get(self, translate_code: str, kwargs: dict[str, Any] = {}) -> str:
-        if translate_code == "" or can_be_int(translate_code):
-            return translate_code
+        if is_empty(translate_code) or can_be_int(translate_code):
+            return str(translate_code)
         else:
             answer = ""
             to_translate = translate_code.split(" ")

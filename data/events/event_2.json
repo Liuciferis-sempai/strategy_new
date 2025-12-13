@@ -1,0 +1,23 @@
+{
+    "id": "event2",
+    "desc": "event2desc",
+    "choices": [
+        {
+            "choice_name": "choice1A",
+            "choice_color": [50, 120, 100],
+            "result": {
+                "effect_type": "add_eventListener",
+                    "trigger": {
+                        "effect_type": "build",
+                            "type": "storage",
+                            "coord": "any",
+                            "fraction_id": "any"
+                    },
+                    "effect": {
+                        "effect_type": "call_event",
+                            "event_id": "event2"
+                    }
+            }
+        }
+    ]
+}

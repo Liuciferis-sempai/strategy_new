@@ -6,6 +6,23 @@
     "pawn_category": ["any"],
     "pawn_types": ["any"],
     "work_time": 1,
-    "trigger": [{"type": "stand_on_cell", "args": {"cell_has": "scheme"}}, {"type": "compare_inventory", "args": {"target": "target_building_str", "cost_inv": "cost", "pay_inv": "inventory"}}],
-    "result": {"type": "build_scheme", "args": {"target_building_str": "building", "building_coord": [0, 0], "building_fraction": -1}}
+
+    "trigger": [
+        {
+            "type": "has_cell",
+                "cell": "chosen_cell",
+                "cell_has": "scheme"
+        },
+        {
+            "type": "inventory_has_resources",
+                "inventory": "@ on_chosen_coord building scheme_inventory",
+                "resources": "@ on_chosen_coord building scheme_inventory.inventory.cost"
+        }
+    ],
+    "result": {
+        "effect_type": "build_scheme",
+            "building": "on_chosen_coord_building",
+            "coord": "chosen_coord",
+            "fraction_id": "-1"
+        }
 }

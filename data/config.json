@@ -1,5 +1,8 @@
 {
     "FPS": 60,
     "language": "english",
-    "cell_size_scale": 3
+    "cell_size_scale": 3,
+    "achievments": {
+        "first_try": false
+    }
 }

@@ -78,7 +78,7 @@ class BuildingsManager:
         data["name"] = "scheme of_" + data["name"]
         data["is_scheme"] = True
         data["coord"] = coord
-        cell = self.game_manager.world_map.get_cell_by_coord(coord)
+        cell = self.game_manager.get_cell(coord=coord)
         building = Building(coord, cell, data.copy(), False)
         self.buildings[str(coord)] = building
 
@@ -90,7 +90,7 @@ class BuildingsManager:
 
         data["fraction_id"] = fraction_id
         data["coord"] = coord
-        cell = self.game_manager.world_map.get_cell_by_coord(coord)
+        cell = self.game_manager.get_cell(coord=coord)
         building = Building(coord, cell, data, False)
         self.buildings[str(coord)] = building
 
@@ -108,7 +108,7 @@ class BuildingsManager:
             self.game_manager.town_manager.remove_town(building.town)
 
         self.buildings.pop(str(coord))
-        cell = self.game_manager.world_map.get_cell_by_coord(coord)
+        cell = self.game_manager.get_cell(coord=coord)
         cell.remove_building()
 
     def _add_to_fraction(self, building: "Building", fraction_id: int):
@@ -116,14 +116,14 @@ class BuildingsManager:
         fraction.statistics["building_count"] += 1
         fraction.buildings.append(building)
         if building.is_producer:
-            fraction.production["buildings"].append(building)
+            fraction.production.append(building)
     
     def _remove_from_fraction(self, building: "Building", fraction_id: int):
         fraction = self.game_manager.fraction_manager.get_fraction_by_id(fraction_id)
         fraction.statistics["building_count"] -= 1 #type: ignore
         fraction.buildings.remove(building)
         if building.is_producer:
-            fraction.production["buildings"].remove(building)
+            fraction.production.remove(building)
 
     def get_building_by_coord(self, coord:tuple[int, int, int]) -> Building:
         #print(self.buildings)
@@ -132,7 +132,7 @@ class BuildingsManager:
             return self.buildings[str(coord)]
         except:
             return self._default_building
-        
+
     def get_building_in_area(self, start_coord: tuple[int, int], end_coord: tuple[int, int], center_coord: tuple[int, int] = (-1, -1)) -> list:
         buildings = []
         for nx in range(start_coord[0], end_coord[0]):
@@ -178,22 +178,27 @@ class BuildingsManager:
         if self.buildings.get(str(cell.coord), None) == None:
             self.build_scheme(self.game_manager.gui.game.sticked_object.img.replace(".png", ""), cell.coord, root.player_id) #type: ignore
         
-    def remove_resource(self, target: Cell|Building, resource: str, amount: int, inv_type: str = "input") -> str:
+    def remove_resource(self, target: Cell|Building, resource: str, amount: int, inv_type: str = "main") -> int:
         if isinstance(target, Cell):
             building = self.buildings[str(target.coord)]
         else:
             building = target
         return building.remove_resource(resource, amount, inv_type=inv_type)
 
-    def add_resources(self, target: Cell|Building, resource: str, amount: int, inv_type: str = "output") -> str:
+    def add_resources(self, target: Cell|Building, resource: str, amount: int, inv_type: str = "main") -> int:
         if isinstance(target, Cell):
             building = self.buildings[str(target.coord)]
         else:
             building = target
         return building.add_resource(resource, amount, inv_type=inv_type)
 
-    def check_conection(self):
+    def turn(self):
         self.game_manager.town_manager.turn()
         self.game_manager.storage_manager.turn()
         self.game_manager.producer_manager.turn()
         self.game_manager.workbench_manager.turn()
+        self.game_manager.scientific_manager.turn()
+    
+    def check_conection(self, fraction_id: int):
+        self.game_manager.town_manager.check_conection(fraction_id=fraction_id)
+        self.game_manager.storage_manager.check_conection(fraction_id=fraction_id)

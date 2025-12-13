@@ -1,0 +1,24 @@
+{
+    "id": "event1",
+    "desc": "event1desc",
+    "choices": [
+        {
+            "choice_name": "event1choiceA",
+            "choice_color": [100, 250, 100],
+            "trigger": {
+                "type": "true",
+                "args": {}
+            },
+            "result": {
+                "effect_type": "build",
+                    "coord": "1,1,0",
+                    "type": "storage",
+                    "fraction_id": "player"
+            }
+        },
+        {
+            "choice_name": "choice1B",
+            "choice_color": [140, 100, 250]
+        }
+    ]
+}

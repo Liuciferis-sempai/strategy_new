@@ -4,6 +4,205 @@ import copy
 from typing import Any, TypeGuard
 import time
 from random import randint, choice
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..managers.buildings.building import Building
+    from ..managers.pawns.pawn import Pawn
+    from ..world.cell import Cell
+
+def normalize_cell_coord(x: int|None = None, y: int|None = None, z: int|None = None, coord: tuple[int, int, int]|None = None) -> tuple[int, int, int]:
+        width, height = root.world_map_size
+        width -= 1
+        height -= 1
+        if coord:
+            x = coord[0]
+            y = coord[1]
+            z = coord[2]
+        
+        if x:
+            if x <= 0: x = width + x
+            elif x > width: x -= width
+        if y:
+            if y <= 0: y = height + y
+            elif y > height: y -= height
+        if z:
+            if z not in root.game_manager.world_map.terrain.keys(): z = 0
+
+        return (x if x else 0, y if y else 0, z if z else 0)
+
+def append(obj: dict, key: str, value: Any):
+    '''
+    add 'value' in list in 'obj' under key 'key'
+
+    :param obj: dict[str, list]
+    :param key: str key for obj
+    :param value: value for list in obj under key
+    '''
+    if has(obj, key):
+        obj[key].append(value)
+    else:
+        obj[key] = [value]
+
+def has(obj: object, name: str|int) -> bool:
+    '''
+    checks if an object has attribute 'name' (value of attribute is not important)
+
+    :param obj: some object that can have attribute or value in himself
+    :param name: name of attribute or index (for list)
+    :return: True if 'obj' has atribute 'name'
+    '''
+    if isinstance(obj, dict):
+        if name in obj.keys():
+            return True
+        return False
+    elif isinstance(obj, list):
+        if isinstance(name, int):
+            try:
+                obj[name]
+                return True
+            except: return False
+        for item in obj:
+            if item == name:
+                return True
+        return False
+    elif isinstance(obj, str):
+        if str(name) in obj:
+            return True
+        return False
+    return hasattr(obj, str(name))
+
+def deep_search(json_data: dict[str, str], key: str, target_building: "Building", target_pawn: "Pawn", target_cell: "Cell"):
+        request = json_data[key].split(" ")[1:]
+        if has(request, 3): default_value = request[3]
+        else: default_value = None
+        try:
+            if not has(request, 2): raise Exception("missing way")
+            if "target" in request[0]:
+                if "building" in request[1] and not target_building.is_default: obj = target_building
+                elif "pawn" in request[1] and not target_pawn.is_default: obj = target_pawn
+                elif "cell" in request[1] and not target_cell.is_default: obj = target_cell
+                else: raise Exception("missing target type")
+            elif "chosen" in request[0]:
+                if "building" in request[1]: obj = root.game_manager.get_chosen_building()
+                elif "pawn" in request[1]: obj = root.game_manager.get_chosen_pawn()
+                elif "cell" in request[1]: obj = root.game_manager.get_chosen_cell()
+                else: raise Exception("missing chosen type")
+            elif "on_chosen_coord" in request[0]:
+                if "building" in request[1]: obj = root.game_manager.get_building(coord=root.game_manager.get_chosen_coord())
+                elif "cell" in request[1]: obj = root.game_manager.get_cell(coord=root.game_manager.get_chosen_coord())
+                else: raise Exception("missing (or is false) chosen type")
+            else: raise Exception("missing search type")
+            if obj.is_default: raise Exception("target/chosen is default")
+            json_data[key] = deep_get(obj, request[2], default_value)
+        except Exception as e:
+            root.logger.error(f"fatal error '{repr(e)}' by deep parsing of '{json_data}'", "GameManager.parsing_json_data(...)")
+            json_data[key] = "none"
+
+def double_get(obj: dict[Any, Any], key: Any, second_key: Any, default_value: Any = None) -> Any:
+    '''
+    return value under 'key' in 'obj', if 'key' does not exist, then return value under 'second_key', if 'second_key' does not exist in 'obj' too, then return 'default_value'
+    '''
+    return obj.get(key, obj.get(second_key, default_value))
+
+def get(obj: object, name: str|int, default_value: Any = None) -> Any:
+    '''
+    return value of 'obj' under name 'name' or default value 
+
+    :param obj: some object that can have attribute or value in himself
+    :param name: name of attribute or index (for list)
+    :param default_value: default value, that will return if 'obj' has not attribute 'name'
+    :return: return value of 'obj' under name 'name' or default value
+    '''
+    if isinstance(obj, dict):
+        return obj.get(name, default_value)
+    elif isinstance(obj, list):
+        try:    return obj[int(name)]
+        except: return default_value
+    else:
+        return getattr(obj, str(name), default_value)
+
+def is_empty(obj: object) -> bool:
+    '''
+    checks if an object is empty
+    None is empty
+
+    :param obj: some object that can have attribute or value in himself
+    '''
+    if isinstance(obj, str):
+        return obj.strip() == ""
+    elif isinstance(obj, list):
+        return len(obj) == 0
+    elif isinstance(obj, dict):
+        return len(obj) == 0
+    elif obj == None:
+        return True
+    return False
+
+def is_in(value: str, roster: list|list) -> bool:
+    return value in roster or "any" in roster or "any" in value
+
+def equal(value1: Any, value2: Any) -> bool:
+    '''
+    checks if value1 and value2 are equal
+    if one of two value is "any" or have "any" in himself (list), then it will automatically return True
+    '''
+    if isinstance(value1, str):
+        value1 = value1.strip()
+        if value1 == "any":
+            return True
+    elif isinstance(value1, list):
+        if "any" in value1:
+            return True
+
+    if isinstance(value2, str):
+        value2 = value2.strip()
+        if value2 == "any":
+            return True
+    elif isinstance(value2, list):
+        if "any" in value2:
+            return True
+
+    if value1 == value2:
+        return True
+
+    return False
+
+def parsing_coord(coord_for_parsing: str) -> tuple[int, int, int]:
+    '''
+    transforms a string into coordinates (the separator is ",")
+    '''
+    coord = coord_for_parsing.split(",")
+    try:
+        if len(coord) == 2:
+            return (int(coord[0]), int(coord[1]), 0)
+        elif len(coord) == 3:
+            return (int(coord[0]), int(coord[1]), int(coord[2]))
+    except: pass
+
+    root.logger.error("parsing coord error", f"parsing_coord({coord_for_parsing})")
+    return (0, 0, 0)
+
+def deep_get(obj: object, way: str, default_value: Any|None = None) -> Any:
+    '''
+    get the value of the child object
+
+    :type obj: object
+    :param way: path to a value using a dot -> object_attribute.attribute_of_object_attribute.searched_object
+    :type way: str
+    :param default_value: any value that will be returned if the object was not found
+    :type default_value: Any | None
+    :return:
+    :rtype: Any
+    '''
+    way_to_module = way.split(".")
+
+    for i, mod in enumerate(way_to_module):
+        obj = get(obj, mod, default_value)
+        if i == len(way_to_module)-1: return obj
+        if obj == default_value: return default_value
+
+    return default_value
 
 def get_cell_size() -> tuple[int, int]:
     return root.cell_sizes[root.cell_size_scale]
@@ -45,10 +244,16 @@ def can_be_int(value: Any) -> TypeGuard[int|str|bytes|bytearray]:
         return True
     except:
         return False
+
+def to_int(value: Any, default_value: int = 0) -> int:
+    try:
+        return int(value)
+    except:
+        return default_value
     
-def wrap_text(text: str, max_width: int, font: py.font.Font | None = None) -> list[str]:
-    if font is None:
-        font = py.font.Font(None, 20)
+def wrap_text(text: str, max_width: int, font: py.font.Font|None = None) -> list[str]:
+    if font is None: font = py.font.Font(None, 20)
+
     wrapped_lines = []
     for line in text.splitlines():
         words = line.split(" ")
@@ -227,3 +432,5 @@ def start_the_game(game_name: str="New Game", player_fraction_name: str = "Playe
 
     py.display.set_caption(game_name)
     root.logger.info("game started", f"start_the_game({game_name}, {game_seed})")
+
+    root.game_manager.achievments_manager.do_achievment("first_try")

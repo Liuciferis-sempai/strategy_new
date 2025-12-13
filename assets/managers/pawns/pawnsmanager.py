@@ -19,6 +19,7 @@ class PawnsManager:
         self.pawns: list[Pawn] = []
         self.pawns_types: list[str] = []
         self.types_of_pawns: list[dict] = []
+        self.pawns_unique_names: list[str] = []
         self.available_pawn_id = 0
 
         loading.draw("Loading pawn types...")
@@ -50,7 +51,7 @@ class PawnsManager:
             if type["type"] == pawn_type:
                 return copy.deepcopy(type)
         logger.error(f"{pawn_type} does not exist", f"PawnManager({pawn_type})")
-        return {}
+        return {}.copy()
 
     def get_pawn_by_id(self, id: int) -> Pawn:
         for pawn in self.pawns:
@@ -63,20 +64,47 @@ class PawnsManager:
         for pawn in self.pawns:
             if pawn.type == pawn_type and pawn.coord == coord:
                 return pawn
-        logger.error(f"pawn not found {pawn_type} {coord}", f"PawnsManager.get_pawn_by_name({pawn_type}, {coord})")
+        logger.error(f"pawn not found {pawn_type} {coord}", f"PawnsManager.get_pawn_by_type({pawn_type}, {coord})")
         return self._default_pawn
     
-    def get_pawn_by_coord(self, pawn_type: str, coord: tuple[int, int, int]) -> Pawn:
+    def get_pawn_by_category(self, pawn_category: str, coord: tuple[int, int, int]) -> Pawn:
         for pawn in self.pawns:
-            if pawn.coord == coord and pawn.type == pawn_type:
+            if pawn.type == pawn_category and pawn.coord == coord:
                 return pawn
-        logger.error(f"pawn not found {pawn_type} {coord}", f"PawnsManager.get_pawn_by_name({pawn_type}, {coord})")
+        logger.error(f"pawn not found {pawn_category} {coord}", f"PawnsManager.get_pawn_by_category({pawn_category}, {coord})")
+        return self._default_pawn
+    
+    def get_pawn_by_name(self, pawn_name: str, coord: tuple[int, int, int]|None = None) -> Pawn:
+        if pawn_name in self.pawns_unique_names:
+            for pawn in self.pawns:
+                if pawn.name == pawn_name:
+                    return pawn
+        elif coord:
+            for pawn in self.pawns:
+                if pawn.type == pawn_name and pawn.coord == coord:
+                    return pawn
+
+        logger.error(f"pawn not found {pawn_name} {coord}", f"PawnsManager.get_pawn_by_name({pawn_name}, {coord})")
         return self._default_pawn
     
     def get_pawns_by_coord(self, coord: tuple[int, int, int]) -> list[Pawn]:
         pawns = []
         for pawn in self.pawns:
             if pawn.coord == coord:
+                pawns.append(pawn)
+        return pawns
+    
+    def get_pawns_by_type(self, pawn_type: str) -> list[Pawn]:
+        pawns = []
+        for pawn in self.pawns:
+            if pawn.type == pawn_type:
+                pawns.append(pawn)
+        return pawns
+    
+    def get_pawns_by_category(self, pawn_category: str) -> list[Pawn]:
+        pawns = []
+        for pawn in self.pawns:
+            if pawn.category == pawn_category:
                 pawns.append(pawn)
         return pawns
 
@@ -97,9 +125,10 @@ class PawnsManager:
         return False
     
     def _spawn(self, data: dict, coord: tuple[int, int, int], fraction_id: int):
-        data = data.copy()
+        data = copy.deepcopy(data)
+
         data["fraction_id"] = fraction_id
-        cell = self.game_manager.world_map.get_cell_by_coord(coord)
+        cell = self.game_manager.get_cell(coord=coord)
         pawn_id = self.available_pawn_id
         self.available_pawn_id += 1
         data["id"] = pawn_id
@@ -114,7 +143,7 @@ class PawnsManager:
             if pawn.id == id:
                 self.game_manager.fraction_manager.get_fraction_by_id(pawn.fraction_id).statistics["pawn_count"] -= 1 #type: ignore
                 self.pawns.remove(pawn)
-                cell = self.game_manager.world_map.get_cell_by_coord(pawn.coord)
+                cell = self.game_manager.get_cell(coord=pawn.coord)
                 cell.remove_pawn(id) #type: ignore
                 logger.info(f"Despawned pawn id {id} from {pawn.coord}", f"PawnsManager.despawn({id})")
                 return
@@ -122,7 +151,7 @@ class PawnsManager:
 
     def restore_movement_points(self, pawn: Pawn) -> str:
         pawn.data["movement_points"] = pawn.data["movement_points_max"]
-        cell = self.game_manager.world_map.get_cell_by_coord(pawn.coord)
+        cell = self.game_manager.get_cell(coord=pawn.coord)
         for pawn_ in cell.pawns:
             if pawn_["id"] == pawn.id:
                 pawn_["movement_points"] = pawn.data["movement_points"]
@@ -133,30 +162,30 @@ class PawnsManager:
         if isinstance(pawn_, int):
             for pawn in self.pawns:
                 if pawn_ == pawn.id:
-                    pawn.add_resource(resource, amount)
-                    return f"pawn {pawn.id} received {resource} in quantity {amount}"
+                    remainder = pawn.add_resource(resource, amount)
+                    return f"pawn {pawn.id} received {resource} in quantity {amount-remainder} (remainder={remainder})"
         elif isinstance(pawn_, Pawn):
             for pawn in self.pawns:
                 if pawn_ == pawn:
-                    pawn.add_resource(resource, amount)
-                    return f"pawn {pawn.id} received {resource} in quantity {amount}"
+                    remainder = pawn.add_resource(resource, amount)
+                    return f"pawn {pawn.id} received {resource} in quantity {amount-remainder} (remainder={remainder})"
         return f"pawn {pawn_} not found"
     
     def remove_resource(self, pawn_:int|Pawn, resource:str, amount:int):
         if isinstance(pawn_, int):
             for pawn in self.pawns:
                 if pawn_ == pawn.id:
-                    pawn.remove_resource(resource, amount)
-                    return f"pawn {pawn.id} lost {resource} in quantity {amount}"
+                    remainder = pawn.remove_resource(resource, amount)
+                    return f"pawn {pawn.id} lost {resource} in quantity {amount-remainder} (remainder={remainder})"
         elif isinstance(pawn_, Pawn):
             for pawn in self.pawns:
                 if pawn_ == pawn:
-                    pawn.remove_resource(resource, amount)
-                    return f"pawn {pawn.id} lost {resource} in quantity {amount}"
+                    remainder = pawn.remove_resource(resource, amount)
+                    return f"pawn {pawn.id} lost {resource} in quantity {amount-remainder} (remainder={remainder})"
         return f"pawn {pawn_} not found"
 
     def move_pawn(self, pawn: Pawn, new_cell: Cell):
-        old_cell = self.game_manager.world_map.get_cell_by_coord(pawn.coord)
+        old_cell = self.game_manager.get_cell(coord=pawn.coord)
         old_cell.remove_pawn(pawn.id)
 
         pawn.coord = new_cell.coord
@@ -166,10 +195,10 @@ class PawnsManager:
         pawn.data["movement_points"] = new_cell.data["subdata"]["movement_points"]
         self.game_manager.world_map.unmark_region("for_move")
         if not pawn.has_job_to_res_movment_points:
-            event = self.game_manager.turn_manager.add_event_in_queue(1, {"do": "restore_movement_points", "event_data": {"pawn": pawn}})
+            event = self.game_manager.turn_manager.add_event_in_queue(1, {"effect_type": "restore_movement_points", "pawn": pawn})
             pawn.has_job_to_res_movment_points = event
         self.game_manager.reset_chosen_pawn()
-        
+
         logger.info(f"{pawn} moved from {old_cell} to {new_cell}", f"PawnsManager.move_pawn(...)")
         return f"pawn {pawn.name} ({pawn.id} moved from {old_cell.coord} to {new_cell.coord}) and has rest {pawn.data["movement_points"]} movement_points"
 
@@ -190,12 +219,12 @@ class PawnsManager:
 
             if not self._process_pawn_movement_point_for_job(job, job_id, pawn): return #if pawn has not enought movements points
 
-            self._execute_job(job, job_name)
+            self._execute_job(job, job_name, pawn.fraction_id)
             if pawn.has_job_to_res_movment_points:
                 if pawn.has_job_to_res_movment_points["turn"] < self.game_manager.turn_manager.turn+job["work_time"]:
                     if not self.game_manager.turn_manager.remove_event(pawn.has_job_to_res_movment_points):
                         logger.error("job not found", "PawnManager.do_job(...)")
-                    event = self.game_manager.turn_manager.add_event_in_queue(job["work_time"] if job["work_time"] > 0 else 1, {"do": "restore_movement_points", "event_data": {"pawn": pawn}})
+                    event = self.game_manager.turn_manager.add_event_in_queue(job["work_time"] if job["work_time"] > 0 else 1, {"effect_type": "restore_movement_points", "pawn": pawn})
                     pawn.has_job_to_res_movment_points = event
             self.game_manager.messenger.print("will_be_finished_after_turns", {"job": job["id"], "time": job["work_time"]})
 
@@ -203,16 +232,14 @@ class PawnsManager:
             self.game_manager.gui.close_all_extra_windows()
             logger.info(f"Pawn '{pawn.id}' will do job '{job_id}'", f"PawnsManager.do_job({pawn}, {job_id})")
     
-    def _execute_job(self, job: dict, job_name: str):
+    def _execute_job(self, job: dict, job_name: str, fraction_id: int):
         if isinstance(job["result"], dict):
-            result = self.game_manager.job_manager.procces_result(job, job_name)["result"]
-            self.game_manager.turn_manager.add_event_in_queue(job["work_time"], {"do": result["type"], "event_data": result["args"]})
+            self.game_manager.parsing_json_data(job["result"], job_name, calling_fraction_id=fraction_id)
+            self.game_manager.turn_manager.add_event_in_queue(job["work_time"], job["result"])
         else:
             for result in job["result"]:
-                temp_job_dict = job
-                temp_job_dict["result"] = result
-                result = self.game_manager.job_manager.procces_result(temp_job_dict, job_name)["result"]
-                self.game_manager.turn_manager.add_event_in_queue(job["work_time"], {"do": result["type"], "event_data": result["args"]})
+                self.game_manager.parsing_json_data(result, job_name, calling_fraction_id=fraction_id)
+                self.game_manager.turn_manager.add_event_in_queue(job["work_time"], result)
     
     def _process_pawn_movement_point_for_job(self, job: dict, job_id: str, pawn: Pawn) -> bool:
         if job.get("movement_points_cost", False):

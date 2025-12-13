@@ -56,7 +56,7 @@ class Town:
         for cell, _ in cells.values():
             if cell.buildings != {} and cell.coord != self.coord:
                 if cell.buildings["fraction_id"] == self.fraction_id:
-                    building = root.game_manager.buildings_manager.get_building_by_coord(cell.coord)
+                    building = root.game_manager.get_building(coord=cell.coord)
                     self.conection.append(building)
                     building.conect(self)
 
@@ -140,7 +140,7 @@ class Town:
         plt.show()
 
     def get_food_sufficiency_factor(self) -> float:
-        self_building = root.game_manager.buildings_manager.get_building_by_coord(self.coord)
+        self_building = root.game_manager.get_building(coord=self.coord)
         
         food_value = self_building.get_food_value_in_storage()
         for building in self.conection:
@@ -169,7 +169,7 @@ class Town:
     def consume_food(self, necessary_food_value: float = 0):
         if necessary_food_value == 0:
             necessary_food_value = self.get_necessaty_food_value()
-        self_building = root.game_manager.buildings_manager.get_building_by_coord(self.coord)
+        self_building = root.game_manager.get_building(coord=self.coord)
         necessary_food_value = self_building.remove_food_for_value(necessary_food_value)
         if necessary_food_value > 0:
             for building in self.conection:
@@ -179,7 +179,7 @@ class Town:
                     return
     
     def spawn(self, pawn_type: str):
-        building = root.game_manager.buildings_manager.get_building_by_coord(self.coord)
+        building = root.game_manager.get_building(coord=self.coord)
         pawn_sample = root.game_manager.pawns_manager.get_pawn_sample_by_type(pawn_type)
         if len(self.queue) < self.max_queue:
             time = pawn_sample["cost"]["time"] // building.data["speed_of_work_mod"]

@@ -14,27 +14,29 @@ from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ...gamemanager import GameManager
+from ...managers.technologies.techtree import Techtree
 
 class GUITechnology:
     def __init__(self, game_manager: "GameManager"):
         self.game_manager = game_manager
+        self.techtree: Techtree = Techtree([], -1)
     
     def open(self):
-        pass
+        self.techtree = root.game_manager.fraction_manager.get_player_fraction().techs
 
     def draw(self):
         root.screen.fill((0, 0, 0))
-        self.game_manager.tech_tree.draw()
+        self.techtree.draw()
         root.need_update_gui = False
     
     def move_up(self):
-        self.game_manager.tech_tree.scroll_up()
-
+        self.techtree.scroll_up()
+    
     def move_down(self):
-        self.game_manager.tech_tree.scroll_down()
-
+        self.techtree.scroll_down()
+    
     def move_left(self):
-        self.game_manager.tech_tree.scroll_left()
-
+        self.techtree.scroll_left()
+    
     def move_right(self):
-        self.game_manager.tech_tree.scroll_right()
+        self.techtree.scroll_right()

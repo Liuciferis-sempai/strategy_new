@@ -14,6 +14,7 @@ def main():
     clock = py.time.Clock()
 
     time_withoute_mouse_moving = 0
+    fps = 0
 
     while root.running:
         for event in py.event.get():
@@ -37,7 +38,7 @@ def main():
             elif event.type == py.MOUSEBUTTONUP:
                 root.game_manager.input_processor.process_mousebuttonup(event)
 
-        if time_withoute_mouse_moving >= root.time_for_show_info and not root.game_manager.get_cell_under_mouse().is_default:
+        if time_withoute_mouse_moving >= root.time_for_show_info:
             root.game_manager.gui.show_info_under_mouse()
         else:
             time_withoute_mouse_moving += 1
@@ -47,6 +48,7 @@ def main():
             py.display.update()
 
         root.game_manager.messenger.tick()
+        root.game_manager.achievments_manager.tick()
 
         if root.need_update_gui:
             root.game_manager.draw()
@@ -55,6 +57,11 @@ def main():
             logger.write_down()
 
         clock.tick(root.config["FPS"])
+        #print(f"FPS: {clock.get_fps():.2f}\r", end="")
+        #new_fps = clock.get_fps()
+        #if fps != new_fps:
+            #print(f"FPS: {new_fps:.2f}")
+            #fps = new_fps
         print(f"FPS: {clock.get_fps():.2f}\r", end="")
         #fps = int(clock.get_fps())
         #py.display.set_caption(f"FPS: {fps}")

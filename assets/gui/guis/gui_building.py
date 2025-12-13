@@ -101,7 +101,7 @@ class GUIBuildings:
 
     def close(self):
         self.building_name.hidden = True
-        if self.building_name.value != "":
+        if not is_empty(self.building_name.value):
             self.building.name = self.building_name.value
             self.building_name.value = ""
     

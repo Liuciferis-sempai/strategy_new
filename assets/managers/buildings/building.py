@@ -12,10 +12,17 @@ if TYPE_CHECKING:
     from .storages.storage import Storage
     from .producer.producer import Producer
     from .workbench.workbench import Workbench
+    from .scientific.scientific import Scientific
     from ..resources.resource_type import ResourceType
 
 class Building:
-    def __init__(self, coord: tuple[int, int, int] = (0, 0, 0), cell: Cell = Cell(), data: dict = {"name": "unknow", "type": "unknow", "category": "unknow", "fraction_id": -1, "storage": [], "storage_size": 0, "default_storage": "main"}, is_default: bool = True):
+    def __init__(
+            self,
+            coord: tuple[int, int, int] = (0, 0, 0),
+            cell: Cell = Cell(),
+            data: dict = {"name": "unknow", "type": "unknow", "category": "unknow", "fraction_id": -1, "storage": [], "storage_size": 0, "default_storage": "main"},
+            is_default: bool = True
+            ):
         self.is_default = is_default
         if self.is_default:
             logger.warning("created default building", f"Building.__init__(...)")
@@ -45,7 +52,7 @@ class Building:
         self.can_work: bool = data.get("can_work", False)
 
         self.set_type(self.data)
-        
+
         self.is_scheme = False
         if self.data.get("is_scheme", False):
             self.is_scheme = True
@@ -68,22 +75,27 @@ class Building:
         self.is_storage = False
         self.is_producer = False
         self.is_town = False
+        self.is_scientific = False
 
-        if data.get("is_workbench", False):
+        if has(data, "is_workbench"):
             self.is_workbench = True
             self.workbench: "Workbench" = root.game_manager.workbench_manager.build_workbench(id=self.data.get("workbench_id", -1), workbench_type=None, building_data=self.data, coord=self.coord, fraction_id=self.fraction_id)
 
-        if data.get("is_storage", False):
+        if has(data, "is_storage"):
             self.is_storage = True
             self.storage: "Storage" = root.game_manager.storage_manager.build_storage(id=self.data.get("storage_id", -1), storage_type=None, building_data=self.data, coord=self.coord, fraction_id=self.fraction_id)
 
-        if data.get("is_producer", False):
+        if has(data, "is_producer"):
             self.is_producer = True
             self.producer: "Producer" = root.game_manager.producer_manager.build_producer(id=self.data.get("producer_id", -1), producer_type=None, building_data=self.data, coord=self.coord, fraction_id=self.fraction_id)
 
-        if data.get("is_town", False):
+        if has(data, "is_town"):
             self.is_town = True
             self.town: "Town" = root.game_manager.town_manager.build_town(id = self.data.get("town_id", -1), town_ = self.name, coord = self.coord, fraction_id = self.fraction_id, building_data = self.data)
+        
+        if has(data, "is_scientific"):
+            self.is_scientific = True
+            self.scientific: "Scientific" = root.game_manager.scientific_manager.build_scientific(id = self.data.get("scientific_id", -1), scientific_type=None, building_data=self.data, coord=self.coord, fraction_id=self.fraction_id)
 
     def set_inventory(self, data: dict):
        self.inventory = Inventory(data["storage_size"], data["storage"], data.get("default_storage", "any"))
@@ -97,10 +109,10 @@ class Building:
     def __bool__(self) -> bool:
         return not self.is_default
 
-    def add_resource(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> str:
+    def add_resource(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> int:
         return self.inventory.add_resouce(resource_name, resource_amount, resource, inv_type)
 
-    def remove_resource(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> str:
+    def remove_resource(self, resource_name: str = "unknow", resource_amount: int = 0, resource: ResourceType|None = None, inv_type: str = "main") -> int:
         return self.inventory.remove_resource(resource_name, resource_amount, resource, inv_type)
 
     def get_queue_lenght(self) -> int:
@@ -155,7 +167,7 @@ class Building:
 
     def conect(self, town: "Town"):
         self.conected_with = town
-        if self.necessary_workers == {}:
+        if is_empty(self.necessary_workers):
             self.set_can_work(True)
             return
 
@@ -180,6 +192,8 @@ class Building:
             self.storage.can_work = value
         if self.is_producer:
             self.producer.can_work = value
+        if self.is_scientific:
+            self.scientific.can_work = value
 
     def get_food_value_in_storage(self) -> int:
         food_value = 0
@@ -269,14 +283,15 @@ class Building:
         update_gui()
 
     def build(self):
-        if self.is_scheme:
-            self.name = self.name.replace("scheme of_", "")
-            self.data["name"] = self.name
-            self.data["is_scheme"] = False
-            self.set_inventory(self.data)
-            self.cell.buildings = extract_building_data_for_cell(self.data)
-            self.cell.resize()
-            self.is_scheme = False
-            update_gui()
+        if not self.is_scheme: return
 
-            root.game_manager.buildings_manager.check_conection()
+        self.name = self.name.replace("scheme of_", "")
+        self.data["name"] = self.name
+        self.data["is_scheme"] = False
+        self.set_inventory(self.data)
+        self.cell.buildings = extract_building_data_for_cell(self.data)
+        self.cell.resize()
+        self.is_scheme = False
+        update_gui()
+
+        root.game_manager.buildings_manager.check_conection(self.fraction_id)

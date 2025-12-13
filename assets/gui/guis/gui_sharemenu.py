@@ -43,7 +43,7 @@ class GUIShareMenu:
         if not self.game_manager.is_chosen_pawn_default():
             self.starter = self.game_manager.get_chosen_pawn()
             self.starter_type = "pawn"
-        elif not self.game_manager.is_chosen_building_defult():
+        elif not self.game_manager.is_chosen_building_default():
             self.starter = self.game_manager.get_chosen_building()
             self.starter_type = "building"
         else:
@@ -51,10 +51,10 @@ class GUIShareMenu:
             return
         self.starter_inventory = self.starter.inventory
         
-        self.target = self.game_manager.pawns_manager.get_pawn_by_type(target, self.game_manager.get_target_coord())
+        self.target = self.game_manager.get_pawn(pawn_type=target, coord=self.game_manager.get_target_coord())
         self.target_type = "pawn"
         if not self.target:
-            self.target = self.game_manager.buildings_manager.get_building_by_coord(self.game_manager.get_target_coord())
+            self.target = self.game_manager.get_building(coord=self.game_manager.get_target_coord())
             self.target_type = "building"
             if not self.target:
                 logger.error("unknow share target", f"GUIShareMenu.open({target})")

@@ -1,7 +1,7 @@
 import pygame as py
 from .. import root
 from ..root import logger
-from ..auxiliary_stuff import get_cell_size, get_cell_side_size
+from ..auxiliary_stuff import *
 from copy import deepcopy
 
 class Cell(py.sprite.Sprite):
@@ -41,13 +41,14 @@ class Cell(py.sprite.Sprite):
         if not self:
             return f"<Cell is default>"
         else:
-            return f"<Cell {self.type} on coord {self.coord} has {len(self.pawns)} pawns and {0 if self.buildings == {} else 1} buildings>"
+            return f"<Cell {self.type} on coord {self.coord} has {len(self.pawns)} pawns and {0 if is_empty(self.buildings) else 1} buildings>"
     
     def __bool__(self) -> bool:
         return not self.is_default
 
     def click(self):
         root.game_manager.set_chosen_cell(self)
+        if not self.is_opened: return
         if self.pawns != []:
             self.chosen_pawn_index += 1
             if self.chosen_pawn_index > len(self.pawns)-1:
@@ -79,7 +80,7 @@ class Cell(py.sprite.Sprite):
         root.game_manager.gui.game.open_main_info_window(title)
     
     def _open_pawn(self):
-        pawn = root.game_manager.pawns_manager.get_pawn_by_id(self.pawns[self.chosen_pawn_index]["id"])
+        pawn = root.game_manager.get_pawn(pawn_id=self.pawns[self.chosen_pawn_index]["id"])
         root.game_manager.gui.game.open_main_info_window(f"*{pawn.name}")
         if root.player_id == self.pawns[self.chosen_pawn_index].get("fraction_id"):
             root.game_manager.set_chosen_pawn(self.pawns[self.chosen_pawn_index])
@@ -133,17 +134,18 @@ class Cell(py.sprite.Sprite):
         self.mark_image.fill((0, 0, 0, 0))
         self.mark_image.set_alpha(0)
 
-    def draw(self, position: tuple[int, int], image: py.surface.Surface, display_mode: str = "normal"):
-        image.blit(self.mark_image, (position[0]-5, position[1]-5))
+    def draw(self, display_mode: str = "normal"):
+        root.game_manager.world_map.blit(self.mark_image, (self.rect.left-5, self.rect.top-5))
         if self.is_opened and display_mode == "normal":
-            image.blit(self.bg_image, position)
+            root.game_manager.world_map.blit(self.bg_image, self.rect.topleft)
         else:
             if self.display_mode != display_mode:
                 self.change_display_mode(display_mode)
             if display_mode == "fraction":
                 self._set_fraction_color()
-                image.blit(self.bg_image, position)
-            image.blit(self.surface, position)
+                if self.is_opened:
+                    root.game_manager.world_map.blit(self.bg_image, self.rect.topleft)
+            root.game_manager.world_map.blit(self.surface, self.rect.topleft)
     
     def change_display_mode(self, display_mode: str):
         self.display_mode = display_mode
@@ -201,7 +203,7 @@ class Cell(py.sprite.Sprite):
             self.flora_image = root.image_manager.get_worldcell_image(f"flora/{self.flora.get("img")}", "flora")
             #self.flora_image = py.transform.scale(self.flora_image, get_cell_size())
             self.bg_image.blit(self.flora_image, (0, 0))
-        
+
         if self.buildings != {}:
             self.buildings_image = root.image_manager.get_image(f"data/buildings/img/{self.buildings.get("img")}", "data/buildings/img/none.png")
             self.buildings_image = py.transform.scale(self.buildings_image, get_cell_size())
@@ -220,6 +222,10 @@ class Cell(py.sprite.Sprite):
         
         self.set_icon()
         self.rect = self.bg_image.get_rect(topleft=self.position)
+
+    def change_position(self, new_position: tuple[int, int]):
+        self.position = new_position
+        self.rect.topleft = new_position
     
     def get(self, att: str) -> str|int|float|None:
         match att:

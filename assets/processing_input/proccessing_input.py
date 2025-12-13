@@ -109,6 +109,7 @@ class InputKeyProcessor:
         rel_mouse_pos = (mouse_pos[0]+self.game_manager.get_x_offset(), mouse_pos[1]+self.game_manager.get_y_offset())
 
         if self.basic_input_processor.process_mousebutton_for_inputfield(rel_mouse_pos): return root.update_gui()
+        if self.basic_input_processor.process_mousebutton_for_event(rel_mouse_pos): return root.update_gui()
         
         for button in self.game_manager.buttons.get(root.window_state, []):
             if button.rect.collidepoint(rel_mouse_pos) and button.auto_process:

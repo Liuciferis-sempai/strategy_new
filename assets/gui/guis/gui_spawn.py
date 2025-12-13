@@ -102,7 +102,7 @@ class GUISpawn:
 
     def _town_has_necessary_buildings(self, town: "Town", pawn: dict) -> bool:
         necessary_buildings = pawn.get("necessaty_buildings", [])
-        if necessary_buildings == []:
+        if is_empty(necessary_buildings):
             return True
     
         buildings = [(b.type, b.level) for b in town.conection]

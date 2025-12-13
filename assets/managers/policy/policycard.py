@@ -89,22 +89,13 @@ class PolicyCard(py.sprite.Sprite):
         self.rect.topleft = new_position
     
     def check_available_status(self):
+        is_locked = self.is_locked
         if self.data.get("trigger"):
-            if isinstance(self.data["trigger"], list):
-                for trigger in self.data["trigger"]:
-                    self._is_availble(trigger)
-            else:
-                self._is_availble(self.data["trigger"])
-        elif self.is_locked:
-            self.is_locked = False
+            is_locked = root.game_manager.trigger(self.data["trigger"])
+
+        if self.is_locked != is_locked:
+            self.is_locked = is_locked
             self.blit_fragments()
-    
-    def _is_availble(self, trigger: dict[str, Any]) -> bool:
-        if hasattr(root.game_manager.trigger_manager, trigger["type"]):
-            trigger_func = getattr(root.game_manager.trigger_manager, trigger["type"])
-            is_allowed = trigger_func(**trigger["args"])
-            return is_allowed
-        return False
 
     def blit_fragments(self):
         self.image = root.image_manager.get_image(f"data/icons/{self.icon}")

@@ -6,6 +6,14 @@
     "pawn_category": ["pawn_category_0"],
     "pawn_types": ["any"],
     "work_time": 1,
-    "trigger": {"type": "stand_on_cell", "args": {"cell_has": "fauna:any"}},
-    "result": {"type": "take_loot", "args": {"fauna_loot": "loot"}}
+
+    "trigger": {
+        "type": "stand_on_cell",
+            "cell_has": "fauna:any"
+    },
+    "result": {
+        "effect_type": "take_loot",
+            "pawn": "pawn_chosen",
+            "loot": "chosen cell fauna.loot"
+    }
 }

@@ -22,7 +22,10 @@ class GUIGame:
         self.game_manager = game_manager
 
         self.turn_counter = ContentBox(position=(10, 10), value=0, img="turn_ico.png", allowed_range=[0, 9999])
-        self.header_info_content = [self.turn_counter]
+        self.type_science_0 = ContentBox(position=(10, 10), value=0, allowed_range=[0, 9999])
+        self.type_science_1 = ContentBox(position=(10, 10), value=0, allowed_range=[0, 9999])
+        self.science_contentboxes = [self.type_science_0, self.type_science_1]
+        self.header_info_content = [self.turn_counter, self.type_science_0, self.type_science_1]
 
         self.header_content: list[Button] = [FractionButton(), TechnologyButton(), PolicyButton()]
 
@@ -42,10 +45,11 @@ class GUIGame:
         self.buildings_types_list = None
         self.scheme_list = []
         self.cell_info: list[TextField|Icon] = []
+        self.cell_under_mouse: "Cell" = self.game_manager.get_default_cell()
 
         self.set_standard_footer()
 
-        self.main_info_window_content = TextField(int(root.interface_size*1.5), 60, font_size=60 , positioning="right", width_as_text_width=True)
+        self.main_info_window_content = TextField(int(root.interface_size*1.5), 60, font_size=60 , positioning="right", auto_width=True)
 
         self.sticked_object = None
 
@@ -127,7 +131,7 @@ class GUIGame:
         self.main_info_window_content.set_text("")
         update_gui()
 
-    def choise_scheme(self, scheme: Icon):
+    def choice_scheme(self, scheme: Icon):
         self.sticked_object = Icon(width=scheme.width, height=scheme.height, color=scheme.color, position=(py.mouse.get_pos()[0]-scheme.width//2, py.mouse.get_pos()[1]-scheme.height//2), img=scheme.img, spec_path="data/buildings/img")
         self.hide_scheme_list()
 
@@ -193,10 +197,20 @@ class GUIGame:
             )
         update_gui()
 
+    def show_achievments(self, achievment: dict):
+        pass
+
     def show_info_about_cell_under_mouse(self):
+        if root.game_manager.get_cell_under_mouse() == self.cell_under_mouse: return
+
         cell = self.game_manager.get_cell_under_mouse()
         if cell.is_default: return
+
         mouse_pos = py.mouse.get_pos()
+
+        if self.action_list != None and self.action_list.rect.collidepoint(mouse_pos): return
+        if self.jobs_list != None and self.jobs_list.rect.collidepoint(mouse_pos): return
+        self.cell_under_mouse = cell
 
         cell_info: list[list[TextField]] = [[]]
         self.cell_info = []
@@ -239,9 +253,9 @@ class GUIGame:
             cell_info[-1].append(terrain)
         y_offset += sum([info.text_rect.height for info in cell_info[-1]])+10
 
-        if cell.buildings != {}:
+        if cell.buildings != {} and cell.is_opened:
             cell_info.append([])
-            building = self.game_manager.buildings_manager.get_building_by_coord(cell.coord)
+            building = self.game_manager.get_building(coord=cell.coord)
 
             building_name = TextField(text=f"*{building.name}", 
                                         position=(
@@ -263,13 +277,19 @@ class GUIGame:
                                             mouse_pos[0]+10,
                                             mouse_pos[1]+y_offset+building_name.text_rect.height+building_service.text_rect.height+building_hp.text_rect.height+10
                                         ), font_size=font_size, bg_color=(0, 0, 0, 0))
+            building_can_work = TextField(text="can_work" if building.can_work else "can_not_work",
+                                        position=(
+                                            mouse_pos[0]+10,
+                                            mouse_pos[1]+y_offset+building_name.text_rect.height+building_service.text_rect.height+building_hp.text_rect.height+building_belongs.text_rect.height+10
+                                        ), font_size=font_size, bg_color=(0, 0, 0, 0))
 
             cell_info[-1].append(building_name)
             cell_info[-1].append(building_service)
             cell_info[-1].append(building_hp)
             cell_info[-1].append(building_belongs)
+            cell_info[-1].append(building_can_work)
 
-            y_offset += sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height, building_belongs.text_rect.height])
+            y_offset += sum([building_name.text_rect.height, building_service.text_rect.height, building_hp.text_rect.height, building_belongs.text_rect.height, building_can_work.text_rect.height])
 
             if building.is_town:
                 population = building.town.get_population()
@@ -283,10 +303,10 @@ class GUIGame:
                     y_offset += town_pop.text_rect.height
                 y_offset += 10
 
-        if cell.pawns != []:
+        if cell.pawns != [] and cell.is_opened:
             for pawn_in_cell in cell.pawns:
                 cell_info.append([])
-                pawn = self.game_manager.pawns_manager.get_pawn_by_id(pawn_in_cell["id"])
+                pawn = self.game_manager.get_pawn(pawn_id=pawn_in_cell["id"])
                 pawn_name = TextField(text=f"*{pawn.name}",
                                        position=(
                                            mouse_pos[0]+10,
@@ -336,7 +356,7 @@ class GUIGame:
                 for info_content in info:
                     info_content.change_position((info_content.position[0]-x_offset, info_content.position[1]))
                     self.cell_info.append(info_content)
-        
+
         update_gui()
  
     def hide_info(self):
@@ -372,11 +392,11 @@ class GUIGame:
                     if pawn["type"] != self.game_manager.get_chosen_pawn().type and "stand_here" not in action_list:
                         action_list.append("stand_here")
             if buildings.get("fraction_id") == root.player_id:
-                action_list.append(f"share.with_{buildings["name"]}")
-                if "stand_here" not in action_list and pawns == []:
+                action_list.append(f"share.with_{buildings["type"]}")
+                if "stand_here" not in action_list and is_empty(pawns):
                     action_list.append("stand_here")
             elif buildings != {}:
-                action_list.append(f"attack.{buildings["name"]}")
+                action_list.append(f"attack.{buildings["type"]}")
             self.action_list = ListOf(
                 action_list,
                 position=mouse_pos,
@@ -389,7 +409,6 @@ class GUIGame:
     #@timeit
     def draw(self):
         root.screen.fill((0, 0, 0))
-        self.show_info_about_cell_under_mouse()
 
         # Draw world map
         if self.game_manager.world_map:

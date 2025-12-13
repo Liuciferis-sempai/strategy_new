@@ -2,12 +2,15 @@ import random
 from ... import root
 from ...root import logger
 from typing import Any, TYPE_CHECKING
+from ...auxiliary_stuff import *
+from ...gui.contentbox import ContentBox
 
 if TYPE_CHECKING:
     from ..pawns.pawn import Pawn
     from ..buildings.building import Building
     from ..buildings.towns.town import Town
     from ..policy.policycard import PolicyCard
+from ..technologies.techtree import Techtree
 
 class Fraction:
     def __init__(self, name:str="New Fraction", type_:str="bot", id: int=-1, data:dict={}, is_default: bool=True):
@@ -28,12 +31,16 @@ class Fraction:
                 "pawn_count": 0,
                 "building_count": 0
             }
-        self.production: dict[str, list[Any]] = data.get("production", {"buildings": []})
-        self.technologies: list[str] = data.get("technologies", []) #id only
+        self.production: list[Building] = data.get("production", [])
         self.policies: list[PolicyCard] = [] #full policy
         for policy_name in data.get("policies", []):
             self.policies.append(root.game_manager.policy_table.get_policy_by_id(policy_name))
-        self.research_technology: str = data.get("research_technology", "none_technology")
+
+        self.techs: Techtree = root.game_manager.technology_manager.create_techtree(data.get("tech_tree", []), self.id) if has(root, "game_manager") else Techtree([], self.id)
+        self.research_technology = data.get("research_technology", "none_tech")
+        self.researched_technology: list[str] = data.get("researched_technology", [])
+
+        self.science: dict[str, int] = data.get("science", {})
         self.achievements: list[str] = data.get("achievements", []) #id only
         self.reciepts: list[str] = data.get("reciepts", ["reciept_0", "reciept_1"]) #id only
         self.allowed_buildings: list[str] =  data.get("allowed_buildings", ["manufactory", "storage", "lumberjack"]) #id (name) only
@@ -51,6 +58,44 @@ class Fraction:
     
     def __bool__(self) -> bool:
         return not self.is_default
+    
+    def use_science(self):
+        if self.research_technology == "none_tech":
+            for science in root.game_manager.gui.game.science_contentboxes:
+                science.set_value(0)
+            return
+
+        tech = self.techs.get_tech(self.research_technology)
+        for science, amount in self.science.items():
+            if not has(tech.accumulated, science): continue
+            tech.accumulated[science] += amount
+            if self.id == root.player_id:
+                if has(root.game_manager.gui.game, science):
+                    getattr(root.game_manager.gui.game, science).set_value(amount)
+                else:
+                    science_content_box = ContentBox(position=(10, 10), value=amount, allowed_range=[0, 9999])
+                    setattr(root.game_manager.gui.game, science, science_content_box)
+                    root.game_manager.gui.game.header_info_content.insert(1, science_content_box)
+                    update_gui()
+        for science, amount in tech.cost.items():
+            if tech.accumulated[science] < amount:
+                return
+        root.game_manager.technology_manager.reseach_technology(tech.id, self.id)
+
+    def set_science(self, science_type: str, value: int):
+        self.science[science_type] = value
+
+    def add_science(self, science_type: str, science_amount: int):
+        if not has(self.science, science_type):
+            self.science[science_type] = 0
+        self.science[science_type] += science_amount
+
+    def set_research_technology(self, technology_id: str):
+        self.research_technology = technology_id
+        self.science = {}
+
+    def reset_research_technology(self):
+        self.research_technology = "none_tech"
 
     def get_base_growth_modifier(self) -> float:
         mod = 1

@@ -4,6 +4,7 @@ from ...root import logger
 from typing import Any, TYPE_CHECKING
 from ..policy.policytable import PolicyTable
 from ..policy.policycard import PolicyCard
+from ...auxiliary_stuff import *
 
 if TYPE_CHECKING:
     from ...gamemanager import GameManager
@@ -51,13 +52,17 @@ class FractionManager:
         return self._default_fraction
 
     def edit_fraction(self, name:str="", id:int=0, data:dict={}) -> bool:
-        if name == "" and id == 0:
+        if is_empty(name) and id == 0:
             return False
         for fraction in self.fractions:
             if fraction.name == name or fraction.id == id:
                 fraction.edit(data=data)
                 return True
         return False
+    
+    def use_science(self):
+        for fraction in self.fractions:
+            fraction.use_science()
     
     def add_policy_to_fraction(self, fraction: int|Fraction, policy: str|dict|PolicyCard) -> str:
         if isinstance(fraction, int):

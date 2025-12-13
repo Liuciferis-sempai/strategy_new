@@ -5,7 +5,7 @@ from .cell import Cell
 from .river import River
 from random import randint, seed, choice, uniform, random
 import os
-from ..auxiliary_stuff import read_json_file, timeit, update_gui, get_cell_side_size, get_cell_size
+from ..auxiliary_stuff import *
 from ..root import loading, logger
 import copy
 
@@ -49,11 +49,8 @@ class WorldMap(py.sprite.Sprite):
     
     #@timeit
     def click(self, mouse_pos: tuple[int, int], mouse_button: int):
-        rel_mouse_pos = (mouse_pos[0] - self.rect.x - self.x_offset, mouse_pos[1] - self.rect.y - self.y_offset)
-        for cell in self.cells_on_screen:
-            if cell.rect.collidepoint(rel_mouse_pos):
-                self._process_click(cell, mouse_button)
-                return
+        cell = self.get_cell_by_click_pos(mouse_pos)
+        self._process_click(cell, mouse_button)
     
     def _process_click(self, cell: "Cell", mouse_button: int):
         if mouse_button == 1:
@@ -69,7 +66,8 @@ class WorldMap(py.sprite.Sprite):
                 self._process_rmb_click_usual(cell)
 
     def _process_lmb_click_with_sticked_object(self, cell: "Cell"):
-        root.game_manager.buildings_manager.try_to_build_on_cell(cell)
+        if cell.is_opened:
+            root.game_manager.buildings_manager.try_to_build_on_cell(cell)
 
     def _process_lmb_click_usual(self, cell: "Cell"):
         if not root.game_manager.is_chosen_cell_default():
@@ -118,27 +116,31 @@ class WorldMap(py.sprite.Sprite):
 
     def move_map_up(self):
         self.y_offset += self.move_distance
-        if self.y_offset > 0:
-            self.y_offset = 0
-            return
+        #if self.y_offset > 0:
+        #    self.y_offset = 0
+        #    return
+        self.cal_cell_on_screen()
 
     def move_map_down(self):
         self.y_offset -= self.move_distance
-        if -self.y_offset > self.lower_limit:
-            self.y_offset = -self.lower_limit
-            return
+        #if -self.y_offset > self.lower_limit:
+        #    self.y_offset = -self.lower_limit
+        #    return
+        self.cal_cell_on_screen()
 
     def move_map_left(self):
         self.x_offset += self.move_distance
-        if self.x_offset > 0:
-            self.x_offset = 0
-            return
+        #if self.x_offset > 0:
+        #    self.x_offset = 0
+        #    return
+        self.cal_cell_on_screen()
 
     def move_map_right(self):
         self.x_offset -= self.move_distance
-        if -self.x_offset > self.right_limit:
-            self.x_offset = -self.right_limit
-            return
+        #if -self.x_offset > self.right_limit:
+        #    self.x_offset = -self.right_limit
+        #    return
+        self.cal_cell_on_screen()
 
     def load_types_of_land(self):
         self.types_of_land = []
@@ -164,10 +166,6 @@ class WorldMap(py.sprite.Sprite):
     def change_display_mode(self, display_mode: str):
         self.display_mode = display_mode
 
-    def redraw(self):
-        for cell in self.cells_on_screen:
-            self._draw_cell(cell)
-
     def open_area(self, area: tuple[tuple[int, int, int], tuple[int, int, int]]):
         start_coord = area[0]
         end_coord = area[1]
@@ -180,38 +178,72 @@ class WorldMap(py.sprite.Sprite):
             for ny in range(start_coord[1], end_coord[1]+1):
                     cell = self.get_cell_by_coord((nx, ny, start_coord[2]))
                     cell.is_opened = True
+    
+    def show_cell(self, coord: tuple[int, int, int]):
+        cell = self.get_cell_by_coord(coord)
+        if cell.is_default: return
+        self.unchose_cell()
+        self.unmark_region("all")
+        self._add_mark(cell, "show")
+        cell.mark((255, 0, 255, 200))
+
+        self.display_layer = coord[2]
+        cell_size = list(get_cell_size())
+        cell_size = get_cell_size()
+        cell_size = (cell_size[0]+5, cell_size[1]+5)
+
+        self.x_offset = -(coord[0]*cell_size[0]) + self.rect.width//2
+        self.y_offset = -(coord[1]*cell_size[1]) + self.rect.height//2
+        update_gui()
+    
+    def draw(self):
+        self.image.fill((200, 200, 200))
+        for cell in self.cells_on_screen:
+            self._draw_cell(cell)
+        root.screen.blit(self.image, self.rect)
 
     #@timeit
-    def draw(self):
+    def cal_cell_on_screen(self):
         self.cells_on_screen = []
-        self.image.fill((200, 200, 200))
+        #self.image.fill((200, 200, 200))
 
-        layer = self.display_layer
-        cell_size = list(get_cell_size())
-        cell_size[0] += 5
-        cell_size[1] += 5
+        layer = f"{self.display_layer}"
+        cell_size = get_cell_size()
+        cell_size = (cell_size[0]+5, cell_size[1]+5)
 
-        start_col = max(0, (0 - self.x_offset) // cell_size[0])
-        end_col = min(len(self.terrain[f"{layer}"][0]), (self.rect.width - self.x_offset + cell_size[0] - 1) // cell_size[0])
+        #start_col = max(0, (0 - self.x_offset) // cell_size[0])
+        #end_col = min(len(self.terrain[layer][0]), (self.rect.width - self.x_offset + cell_size[0] - 1) // cell_size[0])
 
-        start_row = max(0, (0 - self.y_offset) // cell_size[1])
-        end_row = min(len(self.terrain[f"{layer}"]), (self.rect.height - self.y_offset + cell_size[1] - 1) // cell_size[1])
-        
-        for row in range(start_row, end_row):
-            for col in range(start_col, end_col):
-                cell = self.terrain[f"{layer}"][row][col]
+        #start_row = max(0, (0 - self.y_offset) // cell_size[1])
+        #end_row = min(len(self.terrain[layer]), (self.rect.height - self.y_offset + cell_size[1] - 1) // cell_size[1])
+
+        start_col = -self.x_offset // cell_size[0]
+        end_col = min(len(self.terrain[layer][0]), (self.rect.width - self.x_offset + cell_size[0] - 1) // cell_size[0])
+
+        start_row = -self.y_offset // cell_size[1]
+        end_row = min(len(self.terrain[layer]), (self.rect.height - self.y_offset + cell_size[1] - 1) // cell_size[1])
+
+        #print(f"row from {start_row} to {end_row}")
+        #print(f"col from {start_col} to {end_col}")
+        for y, row in enumerate(range(start_row, end_row)):
+            for x, col in enumerate(range(start_col, end_col)):
+                cell = self.terrain[layer][row][col]
+                cell.change_position ((x * get_cell_side_size() + 5*x, y * get_cell_side_size() + 5*y))
                 self.cells_on_screen.append(cell)
-                self._draw_cell(cell)
+                #self._draw_cell(cell)
 
-        root.screen.blit(self.image, self.rect)
         if root.game_manager.gui.game.main_info_window_content.text != "":
             root.game_manager.gui.game.main_info_window_content.draw()
         #logger.info(f"drawn {len(self.cells_on_screen)}", "WorldMap.draw()")
+        self.draw()
 
     def _draw_cell(self, cell: "Cell"):
-        cell_position = cell.rect.topleft
-        cell_position = (cell_position[0] + self.x_offset, cell_position[1] + self.y_offset)
-        cell.draw(cell_position, self.image, self.display_mode)
+        #cell_position = cell.rect.topleft
+        #cell_position = (cell_position[0] + self.x_offset, cell_position[1] + self.y_offset)
+        cell.draw(self.display_mode)
+
+    def blit(self, surface: py.surface.Surface, pos: py.rect.Rect|tuple[int, int]):
+        self.image.blit(surface, pos)
 
     #def mark_region(self, coord: tuple[int, int, int], color: tuple[int, int, int, int]=(255, 0, 0, 100), radius:int=1, mark_type:str="for_move"):
     #    for y in range(coord[0]-radius, coord[0]+radius+1):
@@ -234,8 +266,6 @@ class WorldMap(py.sprite.Sprite):
                 self._draw_cell(cell)
     
     def get_travel_region(self, start_coord: tuple[int, int, int], movement_points: int=1, set_open: bool = False) -> dict[tuple[int, int, int], tuple[Cell, float]]:
-        width, height = root.world_map_size
-
         visited: dict[tuple[int, int, int], tuple[Cell, float]] = {}
         queue = []
         
@@ -249,10 +279,14 @@ class WorldMap(py.sprite.Sprite):
         while queue:
             (x, y, z), points_left = queue.pop(0)
 
-            if not (0 <= x < width and 0 <= y < height):
-                continue
+            #if not (0 <= x < width and 0 <= y < height):
+            #    continue
+            (x, y, z) = normalize_cell_coord(x, y, z)
 
             cell = self.get_cell_by_coord((x, y, start_coord[2]))
+            if cell.is_default:
+                print("!DEFOULT CELL!")
+                print(x, y, (z, start_coord[2]))
             difficulty = cell.data["subdata"]["difficulty"]
             remaining = points_left - difficulty
 
@@ -261,6 +295,7 @@ class WorldMap(py.sprite.Sprite):
                     cell.is_opened = True
                     for nx in range(x-1, x+2):
                         for ny in range(y-1, y+2):
+                            (nx, ny, _) = normalize_cell_coord(nx, ny, z)
                             if (nx, ny, start_coord[2]) != (x, y, start_coord[2]):
                                 cell = self.get_cell_by_coord((nx, ny, start_coord[2]))
                                 cell.is_opened = True
@@ -275,6 +310,7 @@ class WorldMap(py.sprite.Sprite):
 
             for nx in range(x-1, x+2):
                 for ny in range(y-1, y+2):
+                    (nx, ny, _) = normalize_cell_coord(nx, ny, start_coord[2])
                     if (nx, ny, start_coord[2]) != (x, y, z):
                         queue.append(((nx, ny, start_coord[2]), remaining))
             
@@ -335,6 +371,14 @@ class WorldMap(py.sprite.Sprite):
 
         self.rect.topleft = (0, y)
 
+    def get_cell_by_click_pos(self, mouse_pos: tuple[int, int]) -> Cell:
+        mouse_pos = (mouse_pos[0] - self.rect.x, mouse_pos[1] - self.rect.y)
+        for cell in self.cells_on_screen:
+            if cell.rect.collidepoint(mouse_pos):
+                return cell
+
+        return root.game_manager.get_default_cell()
+
     def get_cell_by_coord(self, coord: tuple[int, int, int]) -> Cell:
         try:
             return self.terrain[f"{coord[2]}"][coord[1]][coord[0]]
@@ -388,8 +432,8 @@ class WorldMap(py.sprite.Sprite):
                 soil_fertility = uniform(0.4, 0.7)
 
                 land = self._define_land({"temperature": temperature, "humidity": humidity, "height": height, "soil_fertility": soil_fertility})
-                land = self._define_flora(land)
-                land = self._define_fauna(land)
+                self._define_flora(land)
+                self._define_fauna(land)
 
                 cell = Cell(position=(x*cell_side_size+5*x, y*cell_side_size+5*y), coord=(x, y, 0), data=land, is_default=False)
                 self.terrain["0"][-1].append(cell)
@@ -404,6 +448,7 @@ class WorldMap(py.sprite.Sprite):
             else:
                 self.rivers.append(River((randint(0, root.world_map_size[0]), randint(0, root.world_map_size[1]), 0), self))
         seed(None)
+        self.cal_cell_on_screen()
         update_gui()
 
     def _check_for_frame_conditions(self, frame: list[dict], data: dict) -> list:
@@ -435,14 +480,13 @@ class WorldMap(py.sprite.Sprite):
     def _define_land(self, data: dict) -> dict:
         possible_types = self._check_for_frame_conditions(self.types_of_land, data)
 
-        if len(possible_types) > 1:
-            for type in possible_types:
-                if type["priority"] == 0:
-                    possible_types.remove(type)
-        elif len(possible_types) == 0:
-            logger.warning("No possible land types found for cell with given conditions. Choosing random land type.", f"WorldMap._define_land({data})")
-            #print("impossible cell conditions")
+        if is_empty(possible_types):
+            logger.error("No possible land types found for cell with given conditions. Choosing random land type.", f"WorldMap._define_land({data})")
             possible_types.append(choice(self.types_of_land))
+        else:
+            for possible_type in possible_types:
+                if possible_type["priority"] == 0:
+                    possible_types.remove(possible_type)
 
         cell_type = choice(possible_types)
         if cell_type.get("frame_modification", False):
@@ -483,7 +527,7 @@ class WorldMap(py.sprite.Sprite):
             for type in possible_types:
                 if type["priority"] == 0:
                     possible_types.remove(type)
-        elif len(possible_types) == 0:
+        elif is_empty(possible_types):
             return land
 
         fauna_type = choice(possible_types)

@@ -1,0 +1,36 @@
+{
+    "name": "scientific_stations",
+    "type": "scientific_stations",
+    "desc": "scientific_stations_desc",
+    "img": "scientific_stations.png",
+    "category": "scientific",
+    "is_scientific": true,
+    "can_be_builded": true,
+    "level": 0,
+    "max_hp": 150,
+    "max_service": 100,
+    "repair_cost": {
+        "resource_0": 1
+    },
+    "service_cost": {
+        "resource_0": 1
+    },
+    "speed_of_work": 1,
+    "prodaction": {
+        "type_science_0": 5,
+        "type_science_1": 2
+    },
+    "necessary_workers": {
+        "amount": 1,
+        "quality": {
+            "education": 0.02
+        }
+    },
+    "storage_type": "list",
+    "storage": [],
+    "storage_size": 1,
+    "default_storage": "main",
+    "cost": {
+        "resource_0": 4
+    }
+}

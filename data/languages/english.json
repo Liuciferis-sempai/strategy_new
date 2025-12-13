@@ -1,3 +1,4 @@
 {
-    "language": "English"
+    "language": "English",
+    "event1desc": "Description of the text description for the event {event_name} and verification of the correctness of the text display on the screen"
 }

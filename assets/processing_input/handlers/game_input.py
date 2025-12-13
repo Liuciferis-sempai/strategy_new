@@ -104,7 +104,7 @@ class GameInputProcessor(BasicInputProcessor):
                 
                 for scheme in self.game_manager.gui.game.scheme_list:
                     if scheme.bg_rect.collidepoint(rel_mouse_pos):
-                        self.game_manager.gui.game.choise_scheme(scheme)
+                        self.game_manager.gui.game.choice_scheme(scheme)
                         return
 
             if self.game_manager.world_map:
@@ -166,12 +166,11 @@ class GameInputProcessor(BasicInputProcessor):
             self.game_manager.gui.game.sticked_object.change_position(mouse_pos)
             root.update_gui()
             return
-        
-        rel_mouse_pos = (mouse_pos[0] - self.game_manager.world_map.rect.x - self.game_manager.world_map.x_offset, mouse_pos[1] - self.game_manager.world_map.rect.y - self.game_manager.world_map.y_offset)
-        for cell in self.game_manager.world_map.cells_on_screen:
-            if cell.rect.collidepoint(rel_mouse_pos):
-                self.cell_under_mouse = cell
-                return
+
+        cell = self.game_manager.get_cell(mouse_click_pos=mouse_pos)
+        if cell:
+            self.cell_under_mouse = cell
+            return
 
         self.cell_under_mouse = self._default_cell
         self.game_manager.gui.game.hide_info()

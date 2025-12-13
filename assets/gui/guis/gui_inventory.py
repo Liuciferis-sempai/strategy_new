@@ -36,7 +36,7 @@ class GUIInventory:
         if not self.game_manager.is_chosen_pawn_default():
             self.owner = self.game_manager.get_chosen_pawn()
             self.owner_type = "pawn"
-        elif not self.game_manager.is_chosen_building_defult():
+        elif not self.game_manager.is_chosen_building_default():
             self.owner = self.game_manager.get_chosen_building()
             self.owner_type = "building"
         else:
